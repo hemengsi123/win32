@@ -20,7 +20,7 @@ CC      = cl.exe
 # /RTC1 or /GZ 使用   __stdcall 调用约定, /Gd:指定使用__cdecl的函数调用规则, /Zi 生成完整的调试信息 , /FD:生成文件的相互依赖信息
 # /GX:允许同步异常处理 /Yu"stdafx.h"  /errorReport:prompt /Fo 目标文件路径, /Fd 调试数据库文件 /Fa"$*.asm"
 CFLAGS    = /c /nologo /Zi /W3 /Od /FD /Gm /EHsc /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /RTC1
-
+# CFLAGS    = $(CFLAGS) /Fa"$*.asm"
 # 生成 asm 文件
 # AFLAGS    = /Fa"$*.asm"
 CDBGFLAGS = /D _DEBUG /Fd"$(OUTDIR)\\vc100.pdb"
@@ -39,7 +39,9 @@ LD        = link.exe
 LDFLAGS   = /nologo /Machine:x86 
 LDFLAGS   = $(LDFLAGS) /OUT:"$(OUTDIR)\\$@.exe"
 # LDFLAGS   = $(LDFLAGS) /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
+!IF "$(DEBUG)" == "debug"
 LDBGFLAGS = /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
+!ENDIF
 
 # DLLFLAGS  = /BASE:"0x11000000" /DYNAMICBASE /NXCOMPAT /DLL /OUT:"$(OUTDIR)\\$@.dll" /IMPLIB:"$(OUTDIR)\\$@.lib"
 
