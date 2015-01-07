@@ -1,3 +1,4 @@
+# 有些特例需要添加的可以用：git add -f Dbgview.exe
 # Compiled Object files
 *.obj
 
@@ -7,9 +8,9 @@
 *.ilk
 *.idb
 *.manifest
+*.asm
 
 # directory
-# bin
 
 # Precompiled Headers
 *.gch
