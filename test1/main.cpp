@@ -5,15 +5,59 @@
 #include <tchar.h>
 
 #include "../common/wcommon.h"
+#include "main.h"
+#include "resource.h"
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
-	wchar_t * file = _T("E:\\Simon\\projects\\flair61\\zipsig.exe");
+	
+	// handle_file(_T("E:\\Simon\\projects\\flair61\\zipsig.exe"));
+	
+	TCHAR clsName[] = _T("test1");
+	WNDCLASS wndClss = {};
+	wndClss.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	wndClss.lpfnWndProc   = WindowProc;
+	wndClss.lpszClassName = clsName;
+	wndClss.hInstance     = hInstance;
+	
+	::RegisterClass(&wndClss);
+	HWND hWnd = ::CreateWindow(
+		clsName,
+		_T("Hello, win32"),
+		WS_OVERLAPPEDWINDOW,
+		258,
+		258,
+		480,
+		250,
+		NULL,
+		::LoadMenu(hInstance, MAKEINTRESOURCE(IDR_M10_MENU)),  // 加载菜单
+		hInstance,
+		NULL);
+	if( hWnd == NULL)
+	{
+		dbg_log(_T("CreateWindow failed: %x"), GetLastError());
+		return -1;
+	}
+	::ShowWindow(hWnd, SW_SHOW);
+	::UpdateWindow(hWnd);
+	
+	MSG msg;
+	while(::GetMessage(&msg, NULL, 0, 0))
+	{
+		::TranslateMessage(&msg);
+		::DispatchMessage(&msg);
+	}
+	return 0;
+}
+
+int handle_file(LPCTSTR lpFilePath)
+{
+	TCHAR * file = const_cast<TCHAR*>(lpFilePath);
 	if( IsExits(file) )
 	{
 		if( IsDirectory(file) )
 		{
-			DbgPrintf(L"%s is a directory\n", file);
+			dbg_log(_T("%s is a directory"), file);
 		}
 		else
 		{
@@ -35,7 +79,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 					
 				}
 				TCHAR szOutFile[MAX_PATH] = {0};
-				TCHAR * pName = _tcsrchr(file, L'\\');
+				TCHAR * pName = _tcsrchr(file, _T('\\'));
 				if( pName != NULL)
 				{
 					// 得到临时文件名字
@@ -92,9 +136,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 	}
 	else
 	{
-		DbgPrintf(L"the file isn't exist");
+		dbg_log(_T("the file isn't exist"));
 	}
-	
 	return 0;
 }
+// WindowProc
+LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
+{
 
+	return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+}

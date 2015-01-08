@@ -33,7 +33,7 @@ LOGFILE   = >> $(OUTDIR)\make.log 2>&1
 # 编译资源 0x804 中国,0x409 美国
 RC   = rc.exe
 RCFLAGS = /l /v 0x804
-RESRCS  = 
+RESRCS  = $(OUTDIR)\test1.res
 # 连接
 LD        = link.exe
 # LDFLAGS = /nologo /Machine:x86 /OUT:"$(OUTDIR)\\$@.exe"
@@ -49,7 +49,7 @@ LDBGFLAGS = /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
 
 # !INCLUDE "msrcfile.lst"
 # ALL: clean pre_handle $(TARGET)
-ALL: pre_handle $(TARGET)
+ALL: pre_handle $(TARGET) $(RESRCS)
 	@echo Build Successs...$(DEBUG)
 
 .PHONY: ALL
@@ -73,9 +73,8 @@ $(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 
 # "$(OUTDIR)\\$(RESRCS).res" $(RESRCS).rc
-$(OUTDIR)\$(RESRCS).res: $(RESRCS).rc
+$(OUTDIR)\test1.res: test1.rc
 	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo$@ $**
-.PHONY: $(OUTDIR)\$(RESRCS).res
 
 # @echo $(CSRCS)
 pre_handle:

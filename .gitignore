@@ -9,6 +9,7 @@
 *.idb
 *.manifest
 *.asm
+*.res
 
 # directory
 

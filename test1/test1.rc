@@ -1,0 +1,27 @@
+
+#include "resource.h"
+
+// =============== Icon ===================
+
+// =============== Menu ==================
+
+IDR_M10_MENU MENU
+BEGIN
+	POPUP "&FILE"
+	BEGIN
+		MENUITEM "&New\tCtr+N",          IDM_FILE_NEW
+		MENUITEM "&Open...\tCtr+O",      IDM_FILE_OPEN
+	END
+	
+	POPUP "&EDIT"
+	BEGIN
+		MENUITEM "Cu&t\tCtr+X",          IDM_EDIT_CUT
+		MENUITEM "&Copy\tCtr+C",         IDM_EDIT_COPY
+	END
+END
+
+
+// ============== Dialog ================
+
+
+// ============== Accelerator ===========
