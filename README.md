@@ -2,8 +2,8 @@
 # win32 学习
 
 readme.md 文件 [编写规则](https://help.github.com/articles/markdown-basics/)
-# char wchar_t TCHAR 介绍
-#### add 2015.01.08
+# 1. char wchar_t TCHAR 介绍
+#### // add 2015.01.08
 
 由于字符编码的不同，在C++中有三种对于字符类型：char, wchar_t , TCHAR；
 TCHAR不能算作一种类型，他紧紧是一个宏, 在使用多字节编码时被定义成char，在Unicode编码时定义成wchar_t
