@@ -1,23 +1,16 @@
 
-# win32 test 
+# win32 学习
 
-<<<<<<< HEAD
 readme.md 文件 [编译规则](https://help.github.com/articles/markdown-basics/)
 # ================== 字符类型介绍 ===========================
 ### add 2015.01.08
-=======
-
-####================== 字符类型介绍 ===========================
-# add 2015.01.08
->>>>>>> 4c34888be6c54b907aa9049451b8c90ad00a92b1
 
 由于字符编码的不同，在C++中有三种对于字符类型：char, wchar_t , TCHAR.
 TCHAR不能算作一种类型，他紧紧是一个宏, 在使用多字节编码时被定义成char，在Unicode编码时定义成wchar_t
-
-1. type                Meaning in MBCS builds          Meaning in Unicode builds
-2. WCHAR                 wchar_t                             wchar_t
-3. LPSTR                 char*                                char*
 ```
+type                Meaning in MBCS builds          Meaning in Unicode builds
+WCHAR                 wchar_t                             wchar_t
+LPSTR                 char*                                char*
 LPCSTR                const char*                        const char*
 LPWSTR                wchar_t*                           wchar_t*
 LPCWSTR               const wchar_t*                    const wchar_t* 
