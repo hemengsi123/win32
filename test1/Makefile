@@ -6,7 +6,8 @@
 TARGET  = test1
 OUTDIR  = .\bin
 OBJS    = $(OUTDIR)\main.obj
-LIBS    = user32.lib kernel32.lib
+HSRCS   = ..\common\wcommon.h
+LIBS    = user32.lib kernel32.lib Shlwapi.lib
 DEBUG   = debug
 INCDIRS = /I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include" /I"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include" \
 			/I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\atlmfc\include" /I.
@@ -23,7 +24,7 @@ CFLAGS    = /c /nologo /Zi /W3 /Od /FD /Gm /EHsc /MTd /GS /fp:precise /Zc:wchar_
 # CFLAGS    = $(CFLAGS) /Fa"$*.asm"
 # 生成 asm 文件
 # AFLAGS    = /Fa"$*.asm"
-CDBGFLAGS = /D _DEBUG /Fd"$(OUTDIR)\\vc100.pdb"
+
 DEFINE    = /D WIN32
 # ENCODE    = /D UNICODE /D _UNICODE
 DEFINE    = $(DEFINE) /D UNICODE /D _UNICODE
@@ -40,6 +41,7 @@ LDFLAGS   = /nologo /Machine:x86
 LDFLAGS   = $(LDFLAGS) /OUT:"$(OUTDIR)\\$@.exe"
 # LDFLAGS   = $(LDFLAGS) /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
 !IF "$(DEBUG)" == "debug"
+CDBGFLAGS = /D _DEBUG /Fd"$(OUTDIR)\\vc100.pdb"
 LDBGFLAGS = /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
 !ENDIF
 
@@ -49,14 +51,19 @@ LDBGFLAGS = /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
 # ALL: clean pre_handle $(TARGET)
 ALL: pre_handle $(TARGET)
 	@echo Build Successs...$(DEBUG)
+
 .PHONY: ALL
 # $@ 目标名(包括扩展名), $* 目标名(不包括扩展名), $** 所有依赖文件(包括扩展名)
+# $? 时间戳大于目标文件的依赖文件, $< 同样( $< 只能用在隐式推导中)
 # target: objs res $(OUTDIR)\
-$(TARGET): $(OBJS) $(HSRCS)
+$(TARGET): $(OBJS)
 	$(LD) $(LDFLAGS) $(LDBGFLAGS) $(LIBDIRS) $(LIBS) $(DLLFLAGS) $(OBJS)
 
-.cpp{$(OUTDIR)}.obj:
-	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
+# .cpp{$(OUTDIR)}.obj:
+# $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
+
+$(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
+	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $(@B).cpp
 
 # {Control}.cpp{$(OUTDIR)}.obj:
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
@@ -91,7 +98,22 @@ clean:
 #error:
 #	@type $(OUTDIR)\\make.log
 #.PHONY: error
+# !INCLUDE "mdepfile.lst"
+# ----------------------------------- Makefile ---------------------
 # #pragma warning(disable:4005) 忽略4005警告
 # #pragma warning(default:4005) 打开4005警告
-
-# !INCLUDE "mdepfile.lst"
+# --------------------
+# $@   // 表示所有目标全名（路径+文件名称+扩展名）的挨个值
+# $$@  // 与$@用法含义一致，但仅在作为依赖项中的依赖项时有效
+# $<   // 表示所有依赖目标的挨个值，仅在推理规则的命令中有效
+# $^   // 表示所有依赖目标的集合，以空格分隔，若有重复，会被去重；
+# $+   // 与$^含义一致，只是不进行去重处理。
+# $?    // 表示所有比目标心的依赖目标的集合，以空格分隔
+# $*    // 当前目标的路径和文件名称，没有文件扩展名
+# $**  // 当前目标的所有依赖项
+# ----------------------------
+# 修饰符     说明  $(@B)
+# D         驱动器和目录  
+# B         文件名称  
+# F         文件名称和扩展名  
+# R         驱动器、目录和文件名称
