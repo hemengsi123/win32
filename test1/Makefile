@@ -57,14 +57,9 @@ ALL: pre_handle $(RESRCS) $(TARGET)
 # $? 时间戳大于目标文件的依赖文件, $< 同样( $< 只能用在隐式推导中)
 # target: objs res $(OUTDIR)\
 $(TARGET): $(OBJS)
-<<<<<<< HEAD
-	$(LD) $(LDFLAGS) $(LDBGFLAGS) $(LIBDIRS) $(LIBS) $(DLLFLAGS) $(OBJS)
-
-=======
 	$(LD) $(LDFLAGS) $(LDBGFLAGS) $(LIBDIRS) $(LIBS) $(DLLFLAGS) $(OBJS) $(RESRCS)
 
 # ========== 编译 *.obj ===========
->>>>>>> tmp
 # .cpp{$(OUTDIR)}.obj:
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 

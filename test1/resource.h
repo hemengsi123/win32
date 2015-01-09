@@ -14,4 +14,3 @@
 	#define IDM_EDIT_CUT         IDM_EDIT + 1
 	#define IDM_EDIT_COPY        IDM_EDIT + 2
 	
-//================================

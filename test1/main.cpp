@@ -3,14 +3,6 @@
 #include <stdio.h>
 // #incldue <wchar.h>
 #include <tchar.h>
-<<<<<<< HEAD
-
-#include "../common/wcommon.h"
-
-int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
-{
-	wchar_t * file = L"E:\\Simon\\projects\\flair61\\zipsig.exe";
-=======
 
 #include "../common/wcommon.h"
 #include "main.h"
@@ -61,39 +53,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 int handle_file(LPCTSTR lpFilePath)
 {
 	TCHAR * file = const_cast<TCHAR*>(lpFilePath);
->>>>>>> tmp
 	if( IsExits(file) )
 	{
 		if( IsDirectory(file) )
 		{
-<<<<<<< HEAD
-			DbgPrintf(L"%s is a directory\n", file);
-		}
-		else
-		{
-			DbgPrintf(L"isn't a directory");
-			HANDLE hInFile = ::CreateFile(file, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-			if( hInFile != INVALID_HANDLE_VALUE)
-			{
-				// HANDLE hOutFile = ::CreateFile(
-				TCHAR szOutFile[MAX_PATH] = {0};
-				TCHAR * pName = _tcsrchr(file, L'\\');
-				if( pName != NULL)
-				{
-					DbgPrintf(++pName);
-				}
-				DWORD fileSizeHigh = 0;
-				DWORD fileSizeLow  = ::GetFileSize(hInFile, &fileSizeHigh);
-				if(  fileSizeLow ==  INVALID_FILE_SIZE)
-				{
-					DbgPrintf(L"error: GetFileSize failed\n");
-				}
-				else
-				{
-					DbgPrintf(L"high:%d\tlow:%d", fileSizeHigh, fileSizeLow);
-				}
-				::CloseHandle(hInFile);
-=======
 			dbg_log(_T("%s is a directory"), file);
 		}
 		else
@@ -167,18 +130,13 @@ int handle_file(LPCTSTR lpFilePath)
 				// ::DeleteFile(tmpPath);
 				::CloseHandle(hInFile);
 				::CloseHandle(hTmpFile);
->>>>>>> tmp
 			}
 			
 		}
 	}
 	else
 	{
-<<<<<<< HEAD
-		DbgPrintf(L"the file isn't exist");
-=======
 		dbg_log(_T("the file isn't exist"));
->>>>>>> tmp
 	}
 	return 0;
 }
