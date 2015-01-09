@@ -143,6 +143,13 @@ int handle_file(LPCTSTR lpFilePath)
 // WindowProc
 LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-
-	return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+	switch(uMsg)
+	{
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	default:
+		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+	return 0;
 }

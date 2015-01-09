@@ -1,10 +1,17 @@
 
 #include "resource.h"
 
-// =============== Icon ===================
+/////////////////////////////////////////////
+//
+// Icon
+// 
 
-// =============== Menu ==================
 
+
+/////////////////////////////////////////////
+//
+// Menu
+// 
 IDR_M10_MENU MENU
 BEGIN
 	POPUP "&FILE"
@@ -20,8 +27,20 @@ BEGIN
 	END
 END
 
+/////////////////////////////////////////////
+//
+// Dialog
+//
 
-// ============== Dialog ================
 
-
-// ============== Accelerator ===========
+/////////////////////////////////////////////
+//
+// Accelerator
+//
+IDR_M10_ACCELERATORS ACCELERATORS
+BEGIN
+	"N",		IDM_FILE_NEW, 		VIRTKEY, CONTROL
+	"O",		IDM_FILE_OPEN,		VIRTKEY, CONTROL
+	"X",		IDM_EDIT_CUT,		VIRTKEY, CONTROL
+	"C",		IDM_EDIT_COPY,		VIRTKEY, CONTROL
+END

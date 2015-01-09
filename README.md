@@ -40,3 +40,21 @@ _T 根据是否定义了_UNICODE，选择ANCI或UNICODE字符集(_TEXT同其一�
 INT 代表int，int会随着机器位数的不同而发生变化，比如在16位机上为16为，在32位机上为32位，在64位机上为64位。
 DWORD 代表 unsigned long
 ```
+#### add 2015.01.09
+###### [代码签名](http://blog.itnmg.net/free-code-signing-certificates/)[创建pfx数字证书](http://stackoverflow.com/questions/16082333/why-i-get-the-specified-pfx-password-is-not-correct-when-trying-to-sign-applic)
+```
+第一步，生成一个自签名的根证书(issuer,签发者)(在弹出的的对话框中填入密码123456，第二个弹出框填入相同密码123456)
+	makecert.exe -n "CN=Simon test" -sv ..\simonTestKey.pvk ..\simonTestKey.cer -r 
+第二步 创建发行者证书 （.spc 意思是 软件发布者证书（Software Pulisher Cerificate））
+	Cert2Spc.exe ..\simonTestKey.cer ..\simonTestKey.spc
+第三步，将公钥证书和私钥合并成一个PFX格式的证书文件。pvk2pfx.exe （在弹出框中输入上面设置的密码123456）
+	pvk2pfx.exe -pvk ..\simonTestKey.pvk -spc ..\simonTestKey.spc -pfx ..\simonTestKey.pfx -po "123456"
+也可以跳过第二步，直接操作第三步，生成pfx文件
+	pvk2pfx.exe -pvk ..\simonTestKey.pvk -spc ..\simonTestKey.cer -pfx ..\simonTestKey.pfx -po "123456"
+第四步，给二进制文件数字签名。signtool.exe
+	signtool.exe sign /d "code sign test" /f "..\simonTestKey.pfx" /p "123456" /t "http://timestamp.verisign.com/scripts/timstamp.dll" /ph "E:\Simon\projects\win32\test1\bin\test1.exe"
+signtool.exe sign /d "本次签名的描述" /du "为已签名文档的详细说明指定统一资源定位器 (URL)" /f 证书全名 /p 证书密码 /t 时间戳服务器 /ph 要签名的文件全名
+例子：
+signtool.exe sign /d "ExtLibrary by www.itnmg.net" /du "http://www.itmg.net/extlibrary" /f ..\simonTestKey.pfx /p ****** /t http://timestamp.verisign.com/scripts/timstamp.dll /ph extlibrary.dll
+	
+```
