@@ -41,7 +41,7 @@ INT 代表int，int会随着机器位数的不同而发生变化，比如在16�
 DWORD 代表 unsigned long
 ```
 #### add 2015.01.09
-###### [代码签名](http://blog.itnmg.net/free-code-signing-certificates/)[创建pfx数字证书](http://stackoverflow.com/questions/16082333/why-i-get-the-specified-pfx-password-is-not-correct-when-trying-to-sign-applic)
+###### [代码签名](http://blog.itnmg.net/free-code-signing-certificates/) | [创建pfx数字证书](http://stackoverflow.com/questions/16082333/why-i-get-the-specified-pfx-password-is-not-correct-when-trying-to-sign-applic)
 ```
 第一步，生成一个自签名的根证书(issuer,签发者)(在弹出的的对话框中填入密码123456，第二个弹出框填入相同密码123456)
 	makecert.exe -n "CN=Simon test" -sv ..\simonTestKey.pvk ..\simonTestKey.cer -r 
