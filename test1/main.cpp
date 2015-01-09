@@ -165,6 +165,23 @@ LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, 
 		}
 		return 0;
 	}
+	case WM_CREATE:
+	{
+		HWND hBtn = ::CreateWindow(
+			L"BUTTON",
+			L"OK",
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+			100,
+			100,
+			80,
+			50,
+			hWnd,
+			NULL,
+			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+			NULL);
+		::ShowWindow(hBtn, SW_SHOW);
+		return 0;
+	}			
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
