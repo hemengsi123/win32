@@ -7,6 +7,11 @@
 // ======== macro ===========
 #define lengthof(x) (sizeof((x))/sizeof(*(x)))
 
+<<<<<<< HEAD
+=======
+#define dbg_log(strFmt, ...) DbgPrintf(_T("%s[%d]: ")##strFmt, _T(__FUNCTION__), __LINE__, __VA_ARGS__);
+
+>>>>>>> tmp
 // ========= function =========
 bool WINAPI IsDirectory(LPCTSTR lpPath)
 {

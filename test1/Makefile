@@ -32,8 +32,8 @@ LOGFILE   = >> $(OUTDIR)\make.log 2>&1
 
 # 编译资源 0x804 中国,0x409 美国
 RC   = rc.exe
-RCFLAGS = /l /v 0x804
-RESRCS  = 
+RCFLAGS = /nologo /v /l 0x804
+RESRCS  = $(OUTDIR)\test1.res
 # 连接
 LD        = link.exe
 # LDFLAGS = /nologo /Machine:x86 /OUT:"$(OUTDIR)\\$@.exe"
@@ -49,7 +49,7 @@ LDBGFLAGS = /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
 
 # !INCLUDE "msrcfile.lst"
 # ALL: clean pre_handle $(TARGET)
-ALL: pre_handle $(TARGET)
+ALL: pre_handle $(RESRCS) $(TARGET)
 	@echo Build Successs...$(DEBUG)
 
 .PHONY: ALL
@@ -57,8 +57,14 @@ ALL: pre_handle $(TARGET)
 # $? 时间戳大于目标文件的依赖文件, $< 同样( $< 只能用在隐式推导中)
 # target: objs res $(OUTDIR)\
 $(TARGET): $(OBJS)
+<<<<<<< HEAD
 	$(LD) $(LDFLAGS) $(LDBGFLAGS) $(LIBDIRS) $(LIBS) $(DLLFLAGS) $(OBJS)
 
+=======
+	$(LD) $(LDFLAGS) $(LDBGFLAGS) $(LIBDIRS) $(LIBS) $(DLLFLAGS) $(OBJS) $(RESRCS)
+
+# ========== 编译 *.obj ===========
+>>>>>>> tmp
 # .cpp{$(OUTDIR)}.obj:
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 
@@ -72,19 +78,25 @@ $(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 
+# ============= 编译 *.rc 资源文件 ============
 # "$(OUTDIR)\\$(RESRCS).res" $(RESRCS).rc
-$(OUTDIR)\$(RESRCS).res: $(RESRCS).rc
-	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo$@ $**
-.PHONY: $(OUTDIR)\$(RESRCS).res
+# $(OUTDIR)\test1.res: test1.rc
+#	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $(@B).rc
 
+.rc{$(OUTDIR)}.res:
+	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $<
+
+# ============ 预处理 ==========
 # @echo $(CSRCS)
 pre_handle:
 	@if not exist $(OUTDIR) md $(OUTDIR)
 	@echo beging compile...
 .PHONY: pre_handle
+# ============ 打包成 *.lib 静态文件 =========
 lib:
 	lib.exe $(OBJS) /OUT:$(OUTDIR)\\$(TARGET).lib
 .PHONY: lib
+# ============ 清理 ==============
 clean:
 	@if exist "$(OUTDIR)\\*.obj" del /f $(OUTDIR)\\*.obj
 	@if exist "$(OUTDIR)\\*.exe" del /f $(OUTDIR)\\*.exe
