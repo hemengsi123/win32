@@ -56,5 +56,7 @@ DWORD 代表 unsigned long
 signtool.exe sign /d "本次签名的描述" /du "为已签名文档的详细说明指定统一资源定位器 (URL)" /f 证书全名 /p 证书密码 /t 时间戳服务器 /ph 要签名的文件全名
 例子：
 signtool.exe sign /d "ExtLibrary by www.itnmg.net" /du "http://www.itmg.net/extlibrary" /f ..\simonTestKey.pfx /p ****** /t http://timestamp.verisign.com/scripts/timstamp.dll /ph extlibrary.dll
-	
+
+# 添加工具：ResEd.exe  资源文件编辑器 *.rc
+
 ```

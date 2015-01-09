@@ -1,46 +1,37 @@
+#define IDD_DLG1 1000
+#define IDC_EDT1 1001
 
 #include "resource.h"
 
-/////////////////////////////////////////////
-//
-// Icon
-// 
+IDI_MAIN_ICON ICON DISCARDABLE "bin/skin/icon.ico"
 
-
-
-/////////////////////////////////////////////
-//
-// Menu
-// 
 IDR_M10_MENU MENU
 BEGIN
-	POPUP "&FILE"
-	BEGIN
-		MENUITEM "&New\tCtr+N",          IDM_FILE_NEW
-		MENUITEM "&Open...\tCtr+O",      IDM_FILE_OPEN
-	END
-	
-	POPUP "&EDIT"
-	BEGIN
-		MENUITEM "Cu&t\tCtr+X",          IDM_EDIT_CUT
-		MENUITEM "&Copy\tCtr+C",         IDM_EDIT_COPY
-	END
+  POPUP "&FILE"
+  BEGIN
+    MENUITEM "&New\tCtr+N",IDM_FILE_NEW
+    MENUITEM "&Open...\tCtr+O",IDM_FILE_OPEN
+  END
+  POPUP "&EDIT"
+  BEGIN
+    MENUITEM "Cu&t\tCtr+X",IDM_EDIT_CUT
+    MENUITEM "&Copy\tCtr+C",IDM_EDIT_COPY
+  END
 END
 
-/////////////////////////////////////////////
-//
-// Dialog
-//
-
-
-/////////////////////////////////////////////
-//
-// Accelerator
-//
 IDR_M10_ACCELERATORS ACCELERATORS
 BEGIN
-	"N",		IDM_FILE_NEW, 		VIRTKEY, CONTROL
-	"O",		IDM_FILE_OPEN,		VIRTKEY, CONTROL
-	"X",		IDM_EDIT_CUT,		VIRTKEY, CONTROL
-	"C",		IDM_EDIT_COPY,		VIRTKEY, CONTROL
+  78,IDM_FILE_NEW,VIRTKEY,CONTROL,NOINVERT
+  79,IDM_FILE_OPEN,VIRTKEY,CONTROL,NOINVERT
+  88,IDM_EDIT_CUT,VIRTKEY,CONTROL,NOINVERT
+  67,IDM_EDIT_COPY,VIRTKEY,CONTROL,NOINVERT
 END
+
+IDD_DLG1 DIALOGEX 10,10,218,98
+CAPTION "IDD_DLG"
+FONT 8,"MS Sans Serif",0,0,0
+STYLE WS_VISIBLE|WS_OVERLAPPEDWINDOW
+BEGIN
+  CONTROL "",IDC_EDT1,"Edit",WS_CHILD|WS_VISIBLE|WS_TABSTOP,15,12,75,15,WS_EX_CLIENTEDGE
+END
+

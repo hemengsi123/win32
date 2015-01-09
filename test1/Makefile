@@ -75,11 +75,11 @@ $(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
 
 # ============= 编译 *.rc 资源文件 ============
 # "$(OUTDIR)\\$(RESRCS).res" $(RESRCS).rc
-# $(OUTDIR)\test1.res: test1.rc
-#	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $(@B).rc
+$(OUTDIR)\test1.res: test1.rc resource.h
+	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $(@B).rc
 
-.rc{$(OUTDIR)}.res:
-	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $<
+# .rc{$(OUTDIR)}.res:
+#	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $<
 
 # ============ 预处理 ==========
 # @echo $(CSRCS)

@@ -19,6 +19,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 	wndClss.lpfnWndProc   = WindowProc;
 	wndClss.lpszClassName = clsName;
 	wndClss.hInstance     = hInstance;
+	wndClss.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
 	
 	::RegisterClass(&wndClss);
 	HWND hWnd = ::CreateWindow(
@@ -143,8 +144,27 @@ int handle_file(LPCTSTR lpFilePath)
 // WindowProc
 LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
+	HMENU hmn = ::GetMenu(hWnd);
+	HMENU hsmn = ::GetSubMenu(hmn, 0);
 	switch(uMsg)
 	{
+	case WM_COMMAND:
+	{
+		switch(LOWORD(wParam))
+		{
+		case IDM_FILE_NEW:
+			CheckMenuRadioItem(hsmn, IDM_FILE_NEW, IDM_FILE_OPEN, IDM_FILE_NEW, MF_BYCOMMAND);
+			MessageBox(hWnd, _T("new file"), _T("提示"), MB_OK);
+			break;
+		case IDM_FILE_OPEN:
+			CheckMenuRadioItem(hsmn, IDM_FILE_NEW, IDM_FILE_OPEN, IDM_FILE_OPEN, MF_BYCOMMAND);
+			MessageBox(hWnd, _T("open file"), _T("提示"), MB_OK);
+			break;
+		default:
+			break;
+		}
+		return 0;
+	}
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
