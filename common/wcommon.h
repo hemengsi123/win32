@@ -7,7 +7,8 @@
 // ======== macro ===========
 #define lengthof(x) (sizeof((x))/sizeof(*(x)))
 
-#define dbg_log(strFmt, ...) DbgPrintf(_T("%s[%d]: ")##strFmt, _T(__FUNCTION__), __LINE__, __VA_ARGS__);
+#define dbg_log(strFmt, ...) DbgPrintf(_T("%s[%d]: ")##strFmt, _T(__FILE__), __LINE__, __VA_ARGS__);
+
 
 // ========= function =========
 bool WINAPI IsDirectory(LPCTSTR lpPath)
@@ -17,6 +18,36 @@ bool WINAPI IsDirectory(LPCTSTR lpPath)
 bool IsExits(LPCTSTR lpPath)
 {
 	return _waccess(lpPath, 0) != -1;
+}
+bool IsValidFolder(const WIN32_FIND_DATA& Find)
+{
+	if ((Find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
+		(!(Find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) /*|| exProp.bShowHidden*/) &&
+		 (strcmp(Find.cFileName, ".") != 0) && 
+		 (strcmp(Find.cFileName, "..") != 0) &&
+		 (Find.cFileName[0] != '?'))
+		return true;
+
+	return false;
+}
+bool IsValidParentFolder(WIN32_FIND_DATA Find)
+{
+	if ((Find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
+		(!(Find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) /*|| exProp.bShowHidden)*/) &&
+		 (strcmp(Find.cFileName, ".") != 0) &&
+		 (Find.cFileName[0] != '?'))
+		return true;
+
+	return false;
+}
+
+bool IsValidFile(WIN32_FIND_DATA Find)
+{
+	if (!(Find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
+		(!(Find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) /*|| exProp.bShowHidden)*/)
+		return true;
+
+	return false;
 }
 void DbgPrintf(LPCTSTR lpStrFormt, ...)
 {

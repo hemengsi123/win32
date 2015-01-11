@@ -12,9 +12,19 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 {
 	
 	// handle_file(_T("E:\\Simon\\projects\\flair61\\zipsig.exe"));
-	
 	TCHAR clsName[] = _T("test1");
+	TCHAR wndName[] = _T("Hello, win32");
+	HWND hWnd = NULL;
+	// 只允许运行一个实例
+	hWnd = ::FindWindow(NULL, wndName);
+	if( hWnd != NULL)
+	{
+		ShowWindow(hWnd,SW_RESTORE | SW_SHOWNORMAL);  
+		SetForegroundWindow(hWnd);  
+		return 0;
+	}
 	WNDCLASS wndClss = {};
+	wndClss.style         = CS_HREDRAW | CS_VREDRAW;
 	wndClss.hbrBackground = (HBRUSH)COLOR_WINDOW;
 	wndClss.lpfnWndProc   = WindowProc;
 	wndClss.lpszClassName = clsName;
@@ -22,14 +32,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 	wndClss.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
 	
 	::RegisterClass(&wndClss);
-	HWND hWnd = ::CreateWindow(
+	hWnd = ::CreateWindow(
 		clsName,
-		_T("Hello, win32"),
-		WS_OVERLAPPEDWINDOW,
+		wndName,
+		WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION ,// | WS_SIZEBOX ,
 		258,
 		258,
-		480,
-		250,
+		520,
+		100,
 		NULL,
 		::LoadMenu(hInstance, MAKEINTRESOURCE(IDR_M10_MENU)),  // 加载菜单
 		hInstance,
@@ -41,12 +51,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 	}
 	::ShowWindow(hWnd, SW_SHOW);
 	::UpdateWindow(hWnd);
-	
+	HACCEL hAccel = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_M10_ACCELERATORS));
 	MSG msg;
 	while(::GetMessage(&msg, NULL, 0, 0))
 	{
-		::TranslateMessage(&msg);
-		::DispatchMessage(&msg);
+		if( ::TranslateAccelerator(hWnd, hAccel, &msg) == 0)
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
 	}
 	return 0;
 }
@@ -141,6 +154,9 @@ int handle_file(LPCTSTR lpFilePath)
 	}
 	return 0;
 }
+HWND g_hEdt      = NULL;
+HWND g_hCombo    = NULL;
+HWND g_hCrytoBtn = NULL;
 // WindowProc
 LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
@@ -150,36 +166,110 @@ LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, 
 	{
 	case WM_COMMAND:
 	{
-		switch(LOWORD(wParam))
+		DWORD wmID   = LOWORD(wParam);
+		DWORD wmEvnt = HIWORD(wParam); 
+		switch(wmID)
 		{
 		case IDM_FILE_NEW:
+			dbg_log(_T("evnt: %04X\tlParam: %ld"), wmEvnt, lParam);
 			CheckMenuRadioItem(hsmn, IDM_FILE_NEW, IDM_FILE_OPEN, IDM_FILE_NEW, MF_BYCOMMAND);
 			MessageBox(hWnd, _T("new file"), _T("提示"), MB_OK);
 			break;
 		case IDM_FILE_OPEN:
+		{
 			CheckMenuRadioItem(hsmn, IDM_FILE_NEW, IDM_FILE_OPEN, IDM_FILE_OPEN, MF_BYCOMMAND);
 			MessageBox(hWnd, _T("open file"), _T("提示"), MB_OK);
 			break;
+		}
+		case IDC_BTN_CRYTO:
+		{
+			if(wmEvnt == BN_CLICKED)
+			{
+				dbg_log(_T("cryto tick"));
+				::SetWindowText(g_hEdt, _T("GOOD"));
+				// 方法二
+				//HWND hEdt = ::GetDlgItem(hWnd, IDC_EDT_SHOW);
+				//::SetWindowText(hEdt, _T("GOOD"));
+			}
+			break;
+		}
+		case IDC_CBO_BROWSE:
+		{
+			dbg_log(_T("evnt: %04X\tlParam: %ld"), wmEvnt, lParam);
+			if( wmEvnt == CBN_DROPDOWN)
+			{
+				dbg_log(_T("evnt: %04X\tlParam: %ld"), wmEvnt, lParam);
+			}
+			break;
+		}
 		default:
 			break;
 		}
 		return 0;
 	}
+	// case WM_LBUTTONDOWN:
+	// {
+		// dbg_log(_T("左击"));
+		// return 0;
+	// }
 	case WM_CREATE:
 	{
-		HWND hBtn = ::CreateWindow(
-			L"BUTTON",
-			L"OK",
-			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-			100,
-			100,
-			80,
-			50,
+		// 得到当前目录路径
+		TCHAR szCurDir[MAX_PATH] = {0};
+		GetCurrentDirectory(MAX_PATH, szCurDir);
+		// dbg_log(_T("curdir: %s"), szCurDir);
+		// 得到客户区
+		RECT lpClntRect;
+		if(!::GetClientRect(hWnd, &lpClntRect) )
+		{
+			dbg_log(_T("GetClientRect failed") );
+			return 0;
+		}
+		// dbg_log(_T("left: %d\tright: %d"), lpClntRect.left, lpClntRect.right);
+		int textSize = 24;
+		int textLen  = 380;
+		g_hEdt = ::CreateWindow(
+			_T("Edit"), // ComboBox
+			szCurDir,
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | WS_BORDER , // | BS_DEFPUSHBUTTON
+			22,
+			(lpClntRect.bottom-lpClntRect.top -textSize )/2,
+			textLen,
+			textSize,
 			hWnd,
-			NULL,
+			(HMENU)IDC_EDT_SHOW,
 			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
 			NULL);
-		::ShowWindow(hBtn, SW_SHOW);
+		// ::ShowWindow(hEdt, SW_SHOW);
+		::EnableWindow(g_hEdt, true);
+		//
+		g_hCombo = ::CreateWindow(
+			_T("ComboBox"),
+			NULL,
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST, // | WS_BORDER
+			22 + textLen,
+			(lpClntRect.bottom-lpClntRect.top -textSize )/2,
+			20,
+			textSize,
+			hWnd,
+			(HMENU)IDC_CBO_BROWSE,
+			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+			NULL);
+		//
+		g_hCrytoBtn = ::CreateWindow(
+			_T("BUTTON"),
+			_T("浏览"),
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, // |  WS_BORDER
+			22 + textLen +40,
+			(lpClntRect.bottom-lpClntRect.top -textSize )/2,
+			50,
+			textSize,
+			hWnd,
+			(HMENU)IDC_BTN_CRYTO,
+			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+			NULL);
+		// ::ShowWindow(g_hCrytoBtn, SW_SHOW);
+		// ::EnableWindow(g_hCrytoBtn, false);
 		return 0;
 	}			
 	case WM_DESTROY:

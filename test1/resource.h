@@ -7,7 +7,11 @@
 ////////////////////////////////////////////
 // Icon
 #define IDI_MAIN_ICON            200
-
+///////////////////////////////////////////
+// Control
+#define IDC_BTN_CRYTO            300
+#define IDC_EDT_SHOW             301
+#define IDC_CBO_BROWSE           302
 ////////////////////////////////////////////
 // Menu
 #define IDM 1000

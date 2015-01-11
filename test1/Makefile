@@ -5,10 +5,12 @@
 
 TARGET  = test1
 OUTDIR  = .\bin
+SRCDIRS = .
+DEBUG   = Debug
+# MAKEDEP = true
 OBJS    = $(OUTDIR)\main.obj
-HSRCS   = ..\common\wcommon.h
 LIBS    = user32.lib kernel32.lib Shlwapi.lib
-DEBUG   = debug
+
 INCDIRS = /I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include" /I"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include" \
 			/I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\atlmfc\include" /I.
 
@@ -40,31 +42,56 @@ LD        = link.exe
 LDFLAGS   = /nologo /Machine:x86 
 LDFLAGS   = $(LDFLAGS) /OUT:"$(OUTDIR)\\$@.exe"
 # LDFLAGS   = $(LDFLAGS) /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
-!IF "$(DEBUG)" == "debug"
-CDBGFLAGS = /D _DEBUG /Fd"$(OUTDIR)\\vc100.pdb"
+!IF "$(DEBUG)" == "Debug"
+CDBGFLAGS = /D _DEBUG /Fd"$(OUTDIR)\\vc100.pdb" /FD
 LDBGFLAGS = /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
+!ELSE
+DEBUG     = Release
 !ENDIF
 
 # DLLFLAGS  = /BASE:"0x11000000" /DYNAMICBASE /NXCOMPAT /DLL /OUT:"$(OUTDIR)\\$@.dll" /IMPLIB:"$(OUTDIR)\\$@.lib"
 
-# !INCLUDE "msrcfile.lst"
+# 通过 makedep.bat 生成依赖文件
+!IF "$(MAKEDEP)" == "true"
+!IF [dir /b | findstr /x "msrcfile.lst" >nul:] || [dir /b | findstr /x "mdepfile.lst" >nul:]
+!MESSAGE to make depend list...
+!IF [..\makedep.bat "" "." "$(SRCDIRS)"]
+!MESSAGE makedep.bat is not available
+!ENDIF
+!ENDIF
+!INCLUDE "msrcfile.lst"
+!ENDIF
 # ALL: clean pre_handle $(TARGET)
-ALL: pre_handle $(RESRCS) $(TARGET)
+ALL: pre_handle $(TARGET)
 	@echo Build Successs...$(DEBUG)
 
 .PHONY: ALL
 # $@ 目标名(包括扩展名), $* 目标名(不包括扩展名), $** 所有依赖文件(包括扩展名)
 # $? 时间戳大于目标文件的依赖文件, $< 同样( $< 只能用在隐式推导中)
 # target: objs res $(OUTDIR)\
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJS) $(RESRCS)
 	$(LD) $(LDFLAGS) $(LDBGFLAGS) $(LIBDIRS) $(LIBS) $(DLLFLAGS) $(OBJS) $(RESRCS)
 
+!IF "$(MAKEDEP)" == "true"
+!INCLUDE "mdepfile.lst"
+!ENDIF
+# ============= 编译 *.rc 资源文件 ============
+# "$(OUTDIR)\\$(RESRCS).res" $(RESRCS).rc
+$(OUTDIR)\test1.res: test1.rc resource.h
+	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $(@B).rc
 # ========== 编译 *.obj ===========
-# .cpp{$(OUTDIR)}.obj:
-# $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
+# 方法一
+# .cpp{$(OUTDIR)}.obj::
+#	$(CC) @<<
+#	$(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
+# <<
 
+.cpp{$(OUTDIR)}.obj::
+	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
+
+# 
 $(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
-	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $(@B).cpp
+
 
 # {Control}.cpp{$(OUTDIR)}.obj:
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
@@ -73,10 +100,7 @@ $(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 
-# ============= 编译 *.rc 资源文件 ============
-# "$(OUTDIR)\\$(RESRCS).res" $(RESRCS).rc
-$(OUTDIR)\test1.res: test1.rc resource.h
-	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $(@B).rc
+
 
 # .rc{$(OUTDIR)}.res:
 #	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $<
@@ -93,6 +117,8 @@ lib:
 .PHONY: lib
 # ============ 清理 ==============
 clean:
+	@if exist ".\\mdepfile.lst"  del /f .\\mdepfile.lst
+	@if exist ".\\msrcfile.lst"  del /f .\\msrcfile.lst
 	@if exist "$(OUTDIR)\\*.obj" del /f $(OUTDIR)\\*.obj
 	@if exist "$(OUTDIR)\\*.exe" del /f $(OUTDIR)\\*.exe
 	@if exist "$(OUTDIR)\\*.pdb" del /f $(OUTDIR)\\*.pdb
@@ -105,7 +131,9 @@ clean:
 #error:
 #	@type $(OUTDIR)\\make.log
 #.PHONY: error
+
 # !INCLUDE "mdepfile.lst"
+
 # ----------------------------------- Makefile ---------------------
 # #pragma warning(disable:4005) 忽略4005警告
 # #pragma warning(default:4005) 打开4005警告

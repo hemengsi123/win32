@@ -58,5 +58,18 @@ signtool.exe sign /d "本次签名的描述" /du "为已签名文档的详细说
 signtool.exe sign /d "ExtLibrary by www.itnmg.net" /du "http://www.itmg.net/extlibrary" /f ..\simonTestKey.pfx /p ****** /t http://timestamp.verisign.com/scripts/timstamp.dll /ph extlibrary.dll
 
 # 添加工具：ResEd.exe  资源文件编辑器 *.rc
-
+```
+#### 介绍
+- 要得到某一窗口的WNDCLASS数据，可以用GetClassLong();
+- 子控件向父窗口发送的消息是 WM_COMMAND，并在传递的参数wPara的底位中包括控件的ID号，
+消息号在wParam的高位，lParam中则包括了子控件的窗口的句柄。各类控件有不同的消息代码集。
+父窗口也可以通过调用函数SendMessage向子控件发送消息，其中第一个参数是子控件的窗口句柄，
+第二个参数是要发送的消息号，附加的参数可以在wParam和lParam中传递，其实只要知道了某个窗
+口的句柄就可以用该函数向其发送相关消息。所以产生了子窗口后必须处理 WM_COMMAND消息以便
+可以接收到子控件的消息。
+```
+_T("BUTTON")窗口类 HIWORD(wParam) 通知码(Notification Codes) 以 BN_* 开头(BN_CLICKED) 
+父窗口也可以向按钮发送消息.如 BM_SETCHECK 
+要得到控件ID用 GetDlgCtrlId(hwndChild); 要得到控件的子窗口句柄用 GetDlgItem(hwndParent, id);
+EDIT -> EN_* ; LISTBOX -> LBN_* ; ....在 WinUser.h 中定义
 ```
