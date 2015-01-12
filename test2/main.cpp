@@ -1,10 +1,12 @@
-
+#include <windows.h>
+#include <tchar.h>
+#include "../common/wcommon.h"
 #include "main.h"
 #include "resource.h"
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
-	HWND hWndDlg = ::CreateDialogParam(hInstance, MAKEINTRESOURCE(IDD_EXPLORER_DLG), NULL, (DLGPROC)DialogProc, NULL)
+	HWND hWndDlg = ::CreateDialogParam(hInstance, MAKEINTRESOURCE(IDD_EXPLORER_DLG), NULL, (DLGPROC)DialogProc, NULL);
 	if( hWndDlg == NULL)
 	{
 		dbg_log(_T("creat dialog failed"));
@@ -25,6 +27,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
                 0,  
                 SWP_NOSIZE | SWP_SHOWWINDOW); //SWP_NOSIZE)  
   
+	MSG msg;
     while(GetMessage(&msg, NULL, NULL, NULL))  
     {  
         if(msg.message == WM_KEYDOWN)  
@@ -49,8 +52,15 @@ BOOL CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		return true;
 	}
+	case WM_CLOSE:  
+        DestroyWindow(hWnd);  
+        return TRUE;  
+   
+    case WM_DESTROY:  
+        PostQuitMessage(0);  
+        return TRUE;
 	default:
 		break;
 	}
-	return false;
+	return FALSE;
 }
