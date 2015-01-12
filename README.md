@@ -73,3 +73,20 @@ _T("BUTTON")窗口类 HIWORD(wParam) 通知码(Notification Codes) 以 BN_* 开�
 要得到控件ID用 GetDlgCtrlId(hwndChild); 要得到控件的子窗口句柄用 GetDlgItem(hwndParent, id);
 EDIT -> EN_* ; LISTBOX -> LBN_* ; ....在 WinUser.h 中定义
 ```
+#### window shell 编程 #include <Shlobj.h>  Shell32.lib
+```
+IDL => item identifier list
+PIDL => pointer
+
+读配置文件 GetPrivateProfileString 和 GetPrivateProfileInt
+	WritePrivateProfileString 和 WritePrivateProfileInt , WritePrivateProfileSection
+配置文件格式
+[sectionName]
+key1=string
+key2=int
+如：
+TCHAR valStr[MAX_PATH] = {0};
+TCHAR const configFilePath = _T(".\\config.ini");
+GetPrivateProfileString(_T("sectionName"), _T("key1"), _T("defKey"), valStr, sizeof(valStr), configFilePath);
+
+```

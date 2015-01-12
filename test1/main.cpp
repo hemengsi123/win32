@@ -3,18 +3,145 @@
 #include <stdio.h>
 // #incldue <wchar.h>
 #include <tchar.h>
+#include <Shlobj.h>
 
 #include "../common/wcommon.h"
 #include "main.h"
 #include "resource.h"
 
+// window shell 
+void test_SHellFunc()
+{
+	//
+	 IShellFolder   *psfDesktop = NULL;
+	 
+	 // Get the desktop folder.
+     SHGetDesktopFolder(&psfDesktop);  
+     LPENUMIDLIST   pEnum;//其实就是EnumList *  
+     if(SUCCEEDED(psfDesktop->EnumObjects(NULL,SHCONTF_FOLDERS | SHCONTF_NONFOLDERS,&pEnum)))  
+     {  
+         LPITEMIDLIST   pidlTemp;  
+         DWORD          dwFetched = 1; 
+		 int i = 0;
+         while(S_OK == (pEnum->Next(1, &pidlTemp, &dwFetched)) && dwFetched)  
+         {  
+             TCHAR szPath[255];  
+             SHGetPathFromIDList(pidlTemp, szPath);                             
+            // MessageBox(NULL,(LPWSTR)szPath,TEXT("Message"),MB_OK);  
+			dbg_log(_T("%02d  %s"), ++i, szPath);
+			//
+			// PWSTR lpszName  = NULL;
+			// SHGetNameFromIDList(pidlTemp, SIGDN_NORMALDISPLAY, &lpszName);
+			// dbg_log(_T("%03d  %x"), i, lpszName);
+			// char tmpstr[255] = {0};
+			// ::WideCharToMultiByte(CP_UTF8, 0, lpszName, lengthof(lpszName), tmpstr, 255, NULL, NULL);
+			
+         }  
+     }
+	 TCHAR szTmpDir[MAX_PATH] = _T("D:\\Program Files (x86)\\Notepad++\\");
+	 LPITEMIDLIST    pidlTempDir = NULL;
+	 DWORD             dwEaten;
+	 DWORD             dwAttributes;
+	 IShellFolder      *psfTempDir = NULL;
+	 IMalloc           *pMalloc = NULL;
+	 HRESULT           hr;
+	 hr = SHGetMalloc(&pMalloc);
+	if(FAILED(hr))
+	{
+		return;
+	}
+	  // Get the PIDL for the directory
+#ifdef UNICODE
+	psfDesktop->ParseDisplayName(NULL, NULL, szTmpDir, &dwEaten, &pidlTempDir, &dwAttributes);
+#else
+	OLECHAR           szOle[MAX_PATH];
+	::MultiByteToWideChar(CP_UTF8, 0, szTmpDir, -1, szOle, MAX_PATH);
+	psfDesktop->ParseDisplayName(NULL, NULL, szOle, &dwEaten, &pidlTempDir, &dwAttributes);
+#endif
+	// Get the IShellFolder for the TEMP directory.
+	psfDesktop->BindToObject(pidlTempDir, NULL, IID_IShellFolder, (LPVOID*)&psfTempDir);
+	if(SUCCEEDED(psfTempDir->EnumObjects(NULL,SHCONTF_FOLDERS | SHCONTF_NONFOLDERS,&pEnum)))  
+     {  
+         LPITEMIDLIST   pidlTemp;  
+         DWORD          dwFetched = 1; 
+		 int i = 0;
+         while(S_OK == (pEnum->Next(1, &pidlTemp, &dwFetched)) && dwFetched)  
+         {  
+             TCHAR szPath[255];  
+             SHGetPathFromIDList(pidlTemp, szPath);                               
+            // MessageBox(NULL,(LPWSTR)szPath,TEXT("Message"),MB_OK);  
+			dbg_log(_T("%04d  %s"), ++i, szPath);
+         }  
+     }
+	 //
+	ITEMIDLIST *pidl;
+	TCHAR		configPath[MAX_PATH];
+	SHGetSpecialFolderLocation(NULL, CSIDL_APPDATA, &pidl);
+	SHGetPathFromIDList(pidl, configPath);
+	dbg_log(_T("CSIDL_APPDATA = %s"), configPath);
+	 // LPITEMIDLIST lpItemIDList = NULL;
+	 // PWSTR lpszName  = NULL;
+	 // for(int i = 0; i < 0x0800; i++)
+	 // {
+		 // SHGetSpecialFolderLocation(NULL, i, &lpItemIDList);
+		 // SHGetNameFromIDList(lpItemIDList, SIGDN_NORMALDISPLAY, &lpszName);
+		 // dbg_log(_T("\n0x%0x\t%s"), i, lpszName);
+		 // if (i > 10)
+			// break;
+	 // }
+	 //
+	 if(pidlTempDir)  
+		 pMalloc->Free(pidlTempDir);
+	if(psfDesktop) 
+		psfDesktop->Release();
+	pMalloc->Release();
+}
+// 列出 本机所有逻辑盘符
+void test_LogicDrivers()
+{
+	TCHAR			drivePathName[]	= _T(" :\\\0\0");
+	DWORD			serialNr		= 0;
+	DWORD			space			= 0;
+	DWORD			flags			= 0;
+	LPTSTR			volumeName		= (LPTSTR)new TCHAR[MAX_PATH];
+	LPTSTR			TEMP			= (LPTSTR)new TCHAR[MAX_PATH];
+	BOOL			isValidDrive	= FALSE;
+	
+	DWORD driveList = ::GetLogicalDrives();
+	for (int i = 1; i < 32; i++)
+	{
+		drivePathName[0] = 'A' + i;
+		if (0x01 & (driveList >> i))
+		{
+			isValidDrive = GetVolumeInformation(drivePathName, TEMP, MAX_PATH, &serialNr, &space, &flags, NULL, 0);
+			if (isValidDrive == TRUE)
+			{
+				wsprintf(volumeName, _T("%c: [%s]"), 'A' + i, TEMP);
+			}
+			else
+			{
+				wsprintf(volumeName, _T("%c:"), 'A' + i);
+			}
+			dbg_log(_T("%s"), volumeName);
+		}
+	}
+}
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
+	
+	
+	//test_SHellFunc();
+	test_LogicDrivers();
+	
+	return 0;
+	
+	
 	
 	// handle_file(_T("E:\\Simon\\projects\\flair61\\zipsig.exe"));
 	TCHAR clsName[] = _T("test1");
 	TCHAR wndName[] = _T("Hello, win32");
 	HWND hWnd = NULL;
+	
 	// 只允许运行一个实例
 	hWnd = ::FindWindow(NULL, wndName);
 	if( hWnd != NULL)
@@ -92,6 +219,7 @@ int handle_file(LPCTSTR lpFilePath)
 					}
 					
 				}
+				
 				TCHAR szOutFile[MAX_PATH] = {0};
 				TCHAR * pName = _tcsrchr(file, _T('\\'));
 				if( pName != NULL)
@@ -164,6 +292,12 @@ LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, 
 	HMENU hsmn = ::GetSubMenu(hmn, 0);
 	switch(uMsg)
 	{
+	// 用sendmessage或postmessage发送这个消息给它
+	case WM_NOTIFY:
+	{
+		dbg_log(_T("WM_NOTIFY capture"));
+		break;
+	}
 	case WM_COMMAND:
 	{
 		DWORD wmID   = LOWORD(wParam);
@@ -190,6 +324,8 @@ LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, 
 				// 方法二
 				//HWND hEdt = ::GetDlgItem(hWnd, IDC_EDT_SHOW);
 				//::SetWindowText(hEdt, _T("GOOD"));
+				// test
+				//
 			}
 			break;
 		}
