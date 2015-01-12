@@ -108,7 +108,7 @@ void test_LogicDrivers()
 	BOOL			isValidDrive	= FALSE;
 	
 	DWORD driveList = ::GetLogicalDrives();
-	for (int i = 1; i < 32; i++)
+	for (int i = 0; i < 32; i++)
 	{
 		drivePathName[0] = 'A' + i;
 		if (0x01 & (driveList >> i))

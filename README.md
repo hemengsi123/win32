@@ -73,7 +73,7 @@ _T("BUTTON")窗口类 HIWORD(wParam) 通知码(Notification Codes) 以 BN_* 开�
 要得到控件ID用 GetDlgCtrlId(hwndChild); 要得到控件的子窗口句柄用 GetDlgItem(hwndParent, id);
 EDIT -> EN_* ; LISTBOX -> LBN_* ; ....在 WinUser.h 中定义
 ```
-#### window shell 编程 #include <Shlobj.h>  Shell32.lib
+#### window shell 编程 Shlobj.h  Shell32.lib
 ```
 IDL => item identifier list
 PIDL => pointer
