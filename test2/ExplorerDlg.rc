@@ -1,5 +1,16 @@
 #include "resource.h"
 
+///////////////////////////////////////////
+// 
+// ICON
+// 
+IDI_FOLDER			ICON		"res\\parent.ico"
+IDI_FILE			ICON		"res\\file.ico"
+IDI_PARENTFOLDER	ICON		"res\\parent.ico"
+//////////////////////////////////////////
+//
+// Dialog 
+// 
 IDD_EXPLORER_DLG DIALOGEX 10,10,483,291
 CAPTION "Explorer"
 FONT 8,"MS Sans Serif",0,0,0

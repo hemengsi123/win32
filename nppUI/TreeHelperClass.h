@@ -76,8 +76,9 @@ public:
 	};
 
 	void UpdateOverlayIcon(void);
-
-protected:
+	void ExtractIcons(LPCSTR currentPath, LPCSTR volumeName, bool isDir, LPINT iIconNormal, LPINT iIconSelected, LPINT iIconOverlayed);
+	BOOL HaveChildren(LPTSTR parentFolderPathName);
+public:
 
 	void UseOverlayThreading(void);
 

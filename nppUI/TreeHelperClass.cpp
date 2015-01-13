@@ -19,11 +19,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 #include "TreeHelperClass.h"
-#include "Explorer.h"
+// #include "Explorer.h"
+#include "StdAfx.h"
 
+// extern winVer	gWinVersion;
 
-extern winVer	gWinVersion;
-
+typedef enum {
+	DEVT_DRIVE,
+	DEVT_DIRECTORY,
+	DEVT_FILE
+} eDevType;
 
 DWORD WINAPI TreeOverlayThread(LPVOID lpParam)
 {
@@ -626,11 +631,92 @@ void TreeHelper::GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName)
 	{
 		/* remove drive name */
 		strcpy(TEMP, folderPathName);
-		for (int i = 3; TEMP[i] != '\\'; i++);
-
-		sprintf(folderPathName, "%c:%s", TEMP[0], &TEMP[i]);
+		for (int i = 3; TEMP[i] != '\\'; i++)
+			sprintf(folderPathName, "%c:%s", TEMP[0], &TEMP[i]);
 	}
 
 	delete [] TEMP;
 	delete [] szName;
+}
+
+void TreeHelper::ExtractIcons(LPCSTR currentPath, LPCSTR volumeName, bool isDir, LPINT iIconNormal, LPINT iIconSelected, LPINT iIconOverlayed)
+{
+	SHFILEINFO		sfi	= {0};
+	TCHAR			TEMP[MAX_PATH];
+
+	strcpy(TEMP, currentPath);
+	if (TEMP[strlen(TEMP) - 1] == '*')
+	{
+		TEMP[strlen(TEMP) - 1] = '\0';
+	}
+	else if (TEMP[strlen(TEMP) - 1] != '\\')
+	{
+		strcat(TEMP, "\\");
+	}
+
+	if (volumeName != NULL)
+	{
+		strcat(TEMP, volumeName);
+	}
+
+
+	/* get normal and overlayed icon */
+	if (isDir)
+	{
+		SHGetFileInfo(TEMP, 0, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX);
+		if (TEMP[4] == '\0')
+		{
+			::DestroyIcon(sfi.hIcon);
+			SHGetFileInfo(TEMP, FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX | SHGFI_USEFILEATTRIBUTES);
+		}
+	}
+	else
+	{
+		SHGetFileInfo(TEMP, FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX | SHGFI_USEFILEATTRIBUTES);
+	}
+
+	*iIconNormal	= sfi.iIcon & 0x000000ff;
+	*iIconOverlayed = sfi.iIcon >> 24;
+	::DestroyIcon(sfi.hIcon);
+
+	/* get selected icon */
+	if (isDir)
+	{
+		SHGetFileInfo(TEMP, 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
+		*iIconSelected = sfi.iIcon;
+	}
+	else
+	{
+		*iIconSelected = 0;
+	}
+}
+
+BOOL TreeHelper::HaveChildren(LPTSTR parentFolderPathName)
+{
+	WIN32_FIND_DATA		Find		= {0};
+	HANDLE				hFind		= NULL;
+	BOOL				bFound		= TRUE;
+	BOOL				bRet		= FALSE;
+
+	if (parentFolderPathName[_tcslen(parentFolderPathName) - 1] != '\\')
+		_tcscat(parentFolderPathName, _T("\\"));
+
+	/* add wildcard */
+	_tcscat(parentFolderPathName, _T("*"));
+
+	if ((hFind = ::FindFirstFile(parentFolderPathName, &Find)) == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+	do
+	{
+		if (IsValidFolder(Find) == TRUE)
+		{
+			bFound = FALSE;
+			bRet = TRUE;
+		}
+	} while ((FindNextFile(hFind, &Find)) && (bFound == TRUE));
+
+	::FindClose(hFind);
+
+	return bRet;
 }

@@ -8,6 +8,8 @@ set SRCDIRS=
 set DepDir=
 set EXTS=.H .CPP .C
 set OBJS=
+REM 排除项
+set EXCLUDE=%~4
 REM 如果你要使用引号括起命令，必须要在前面再加一对空括号，否则会把路径当标题的 makedep.bat "" . ". Control Utils CORE Layout"
 REM %~1 - 删除任何引号("); 打印当前路径 chdir
 if "%~3" neq "" (
@@ -17,7 +19,7 @@ if "%~3" neq "" (
 		echo %~2 isn't exist
 		echo Usage[1]: makedep.bat dir
 		echo Usage[2]: makedep.bat
-		goto:eof
+		exit /b 1
 	) else ( set DepDir=%~2)
 	REM 设置依赖文件生成在当前目录
 	) else ( if "%DepDir%" equ "" set DepDir=.)
@@ -35,7 +37,7 @@ REM ======= 使用默认设置 ========
 			echo %~1 isn't exist
 			echo Usage[1]: makedep.bat dir
 			echo Usage[2]: makedep.bat
-			goto:eof
+			exit /b 1
 		) else ( set DepDir=%~1)
 		REM 设置依赖文件生成在当前目录
 	) else ( if "%DepDir%" equ "" set DepDir=.)
@@ -55,6 +57,7 @@ if "%SRCDIRS%" neq "" (
 	echo srcDirs = %SRCDIRS%
 )
 REM echo %~dp0
+if "%EXCLUDE%" neq "" echo exlude = %EXCLUDE%
 REM goto:eof
 REM set OUTDIR=.\bin
 set curdate=%date:~0,4%-%date:~5,2%-%date:~8,2%[%time:~0,2%:%time:~3,2%]
@@ -113,45 +116,52 @@ for %%x in (%EXTS%) do (
 				set /a oneTime=1
 				rem 列举 /s 子目录
 				for /f "delims=" %%j in ('dir /b %%i\*%%x') do (
-					if "!oneTime!" == "1" (
-						rem =============== make srcfile =============
-						rem 去掉'.'
-						set ddot=%%x
-						REM echo !ddot:~1!
-						echo.>>%srcfile%
-						echo !ddot:~1!%SUFFIX% = ^$^(!ddot:~1!%SUFFIX%^) \>>%srcfile%
-					)
-					REM echo %%i\%%j \
-					echo.			%%i\%%j \>>%srcfile%
-					rem *.obj 排除 *.h 文件
-					if "%%x" neq ".H" (
-						set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
-						rem == make depfile ==
-						if "!oneTime!" == "1" (
-							echo.>>%depfile%
-							echo {%%i}%%x{^$^(OUTDIR^)}.obj::>>%depfile%
-							echo.	^$^(CC^) ^$^(CFLAGS^) ^$^(DEFINE^) ^$^(ENCODE^) ^$^(INCDIRS^) /Fo"$(OUTDIR)\\" ^$^(CDBGFLAGS^) ^$^< >>%depfile%
+					for %%e in (%EXCLUDE%) do (
+						if "%%~ne" neq "%%~nj" (
+							if "!oneTime!" == "1" (
+								rem =============== make srcfile =============
+								rem 去掉'.'
+								set ddot=%%x
+								REM echo !ddot:~1!
+								echo.>>%srcfile%
+								echo !ddot:~1!%SUFFIX% = ^$^(!ddot:~1!%SUFFIX%^) \>>%srcfile%
+							)
+							REM echo %%i\%%j \
+							echo.			%%i\%%j \>>%srcfile%
+							rem *.obj 排除 *.h 文件
+							if "%%x" neq ".H" (
+								set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
+								rem == make depfile ==
+								if "!oneTime!" == "1" (
+									echo.>>%depfile%
+									echo {%%i}%%x{^$^(OUTDIR^)}.obj::>>%depfile%
+									echo.	^$^(CC^) ^$^(CFLAGS^) ^$^(DEFINE^) ^$^(ENCODE^) ^$^(INCDIRS^) /Fo"$(OUTDIR)\\" ^$^(CDBGFLAGS^) ^$^< >>%depfile%
+								)
+							)
+							rem *.h
+							if "%%x" equ ".H" (
+								set HSRCS=!HSRCS! %%i\%%j
+							)
+							rem *.c *.obj
+							if "%%x" equ ".C" (
+								set CSRCS=!CSRCS! %%i\%%j
+								rem *.obj
+								REM set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
+							)
+							rem *.cpp *.obj
+							if "%%x" equ ".CPP" (
+								set CPPSRCS=!CPPSRCS! %%i\%%j
+								rem *.obj
+								REM set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
+							)
+							if "!oneTime!" == "1" (
+								set /a oneTime=0
+							)
 						)
 					)
-					rem *.h
-					if "%%x" equ ".H" (
-						set HSRCS=!HSRCS! %%i\%%j
-					)
-					rem *.c *.obj
-					if "%%x" equ ".C" (
-						set CSRCS=!CSRCS! %%i\%%j
-						rem *.obj
-						REM set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
-					)
-					rem *.cpp *.obj
-					if "%%x" equ ".CPP" (
-						set CPPSRCS=!CPPSRCS! %%i\%%j
-						rem *.obj
-						REM set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
-					)
-					if "!oneTime!" == "1" (
-						set /a oneTime=0
-					)
+					REM echo %%~nj
+					
+					
 				)
 			)
 		)

@@ -5,13 +5,15 @@
 
 TARGET  = test2
 OUTDIR  = .\bin
-SRCDIRS = . ..\nppUI
+SRCDIRS = . ..\nppUI ..\utils
+# 排除
+EXCLUDE = TreeView.cpp
 DEBUG   = Debug
 MAKEDEP = true
 # OBJS    = $(OUTDIR)\main.obj
 RESRCS  = $(OUTDIR)\ExplorerDlg.res
 
-LIBS    = user32.lib kernel32.lib Shlwapi.lib Shell32.lib
+LIBS    = user32.lib kernel32.lib Shlwapi.lib Shell32.lib comctl32.lib
 
 INCDIRS = /I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include" /I"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include" \
 			/I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\atlmfc\include" /I.
@@ -58,7 +60,7 @@ DEBUG     = Release
 !IF "$(MAKEDEP)" == "true"
 !IF [dir /b | findstr /x "msrcfile.lst" >nul:] || [dir /b | findstr /x "mdepfile.lst" >nul:]
 !MESSAGE to make depend list...
-!IF [..\makedep.bat "" "." "$(SRCDIRS)"]
+!IF [..\makedep.bat "" "." "$(SRCDIRS)" "$(EXCLUDE)"]
 !MESSAGE makedep.bat failed
 !ENDIF
 !ENDIF

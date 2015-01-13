@@ -9,6 +9,7 @@
 #include <Shlwapi.h>
 #include <tchar.h>
 #include <string>
+#include <shlobj.h>
 // ======== macro ===========
 #define lengthof(x) (sizeof((x))/sizeof(*(x)))
 
@@ -79,5 +80,26 @@ void DbgPrintf(LPCTSTR lpStrFormt, ...)
 #endif
 }
 
+/**************************************************************************
+ *	Get system images
+ */
+HIMAGELIST GetSmallImageList(BOOL bSystem = true)
+{
+	static
+	HIMAGELIST		himlSys	= NULL;
+	HIMAGELIST		himl	= NULL;
+	SHFILEINFO		sfi		= {0};
+
+	if (bSystem) {
+		if (himlSys == NULL) {
+			himlSys = (HIMAGELIST)SHGetFileInfo(_T("C:\\"), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
+		}
+		himl = himlSys;
+	} else {
+		// himl = ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);;
+	}
+
+	return himl;
+}
 
 #endif

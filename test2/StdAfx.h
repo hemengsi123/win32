@@ -2,6 +2,7 @@
 #define _MAIN_ONE_
 
 #include "../common/wcommon.h"
+#include "../utils/winVersion.h"
 
 #include <windows.h>
 #include "resource.h"

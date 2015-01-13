@@ -1,6 +1,13 @@
 
 #include <windows.h>
 
+//////////////////////////
+//
+// Icon
+//
+#define IDI_FOLDER       100
+#define IDI_FILE         101
+#define IDI_PARENTFOLDER 102
 
 #define IDD_EXPLORER_DLG 1000
 #define IDC_TREE_FOLDER     IDD_EXPLORER_DLG + 1
