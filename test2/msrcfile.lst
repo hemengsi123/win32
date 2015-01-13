@@ -1,0 +1,27 @@
+# 
+# By Simon 2015-01-13[15:48] 
+# 
+
+HSRCS = $(HSRCS) \
+			.\ExplorerDlg.h \
+			.\resource.h \
+			.\StdAfx.h \
+
+HSRCS = $(HSRCS) \
+			..\nppUI\ComboOrgi.h \
+			..\nppUI\StaticDialog.h \
+			..\nppUI\SysMsg.h \
+			..\nppUI\Window.h \
+
+CPPSRCS = $(CPPSRCS) \
+			.\ExplolerDlg.cpp \
+			.\main.cpp \
+
+CPPSRCS = $(CPPSRCS) \
+			..\nppUI\ComboOrgi.cpp \
+			..\nppUI\StaticDialog.cpp \
+			..\nppUI\SysMsg.cpp \
+
+OBJS = $(OBJS) \
+			 $(OUTDIR)\ExplolerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\ComboOrgi.obj $(OUTDIR)\StaticDialog.obj $(OUTDIR)\SysMsg.obj
+

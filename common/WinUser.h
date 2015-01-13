@@ -298,7 +298,7 @@ wsprintfW(
 
 #ifndef NOSHOWWINDOW
 
-
+void _SW(){}
 /*
  * ShowWindow() Commands
  */
@@ -1715,7 +1715,7 @@ typedef struct tagMSG {
 
 #ifndef NOWINMESSAGES
 
-
+void _WM(){}
 /*
  * Window Messages
  */
@@ -8821,6 +8821,7 @@ CopyCursor(
     __in HCURSOR hCursor);
 #endif
 
+void _Cursor(){}
 /*
  * Standard Cursor IDs
  */
@@ -9321,7 +9322,7 @@ LoadStringW(
 
 #ifndef NOWINSTYLES
 
-
+void _Edit(){}
 /*
  * Edit Control Styles
  */
@@ -9441,6 +9442,8 @@ LoadStringW(
 #define WB_ISDELIMITER     2
 
 
+void _Button(){}
+
 /*
  * Button Control Styles
  */
@@ -9517,6 +9520,8 @@ LoadStringW(
 #define BST_FOCUS          0x0008
 #endif /* WINVER >= 0x0400 */
 
+
+void _Static(){}
 /*
  * Static Control Constants
  */
@@ -9742,7 +9747,7 @@ DlgDirSelectComboBoxExW(
 #endif // !UNICODE
 
 
-
+void _Dialog(){}
 /*
  * Dialog Styles
  */
@@ -9814,7 +9819,7 @@ DlgDirSelectComboBoxExW(
 */
                                   /* all other details also will be returned */
 
-
+void _Listbox(){};
 /*
  * Listbox Notification Codes
  */
@@ -9925,7 +9930,7 @@ DlgDirSelectComboBoxExW(
 
 #endif /* !NOWINSTYLES */
 
-
+void _Combox(){}
 /*
  * Combo Box return Values
  */
@@ -10036,6 +10041,7 @@ DlgDirSelectComboBoxExW(
 
 #ifndef NOWINSTYLES
 
+void _Scroll(){}
 
 /*
  * Scroll Bar Styles

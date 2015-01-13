@@ -1,0 +1,9 @@
+# 
+# By Simon 2015-01-13[15:48] 
+# 
+
+{.}.CPP{$(OUTDIR)}.obj::
+	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $< 
+
+{..\nppUI}.CPP{$(OUTDIR)}.obj::
+	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $< 

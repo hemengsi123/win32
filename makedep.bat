@@ -65,14 +65,17 @@ set srcfile=%DepDir%\msrcfile.lst
 set depfile=%DepDir%\mdepfile.lst
 
 call:makeDeplist
-if "%OBJS%" neq "" (
+
+REM if "%OBJS%" neq "" (
 	if exist "%srcfile%" echo %srcfile% was generated
 	if exist "%depfile%" echo %depfile% was generated	
-) else ( 
-	if exist "%srcfile%" del /f %srcfile%
-	if exist "%depfile%" del /f %depfile%
-	echo OBJS is null
-)
+REM ) else ( 
+	REM if exist "%srcfile%" del /f %srcfile%
+	REM if exist "%depfile%" del /f %depfile%
+	REM echo OBJS is null
+	REM 出错返回
+	REM exit /b 1
+REM )
 REM 编译
 REM set TAG=%1
 

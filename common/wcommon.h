@@ -1,14 +1,20 @@
+
 #ifndef _WIN32_COMMON_ONE_
 #define _WIN32_COMMON_ONE_
+
+#pragma once
+
 // 2015.01.08
 #include <io.h>
 #include <Shlwapi.h>
-
+#include <tchar.h>
+#include <string>
 // ======== macro ===========
 #define lengthof(x) (sizeof((x))/sizeof(*(x)))
 
 #define dbg_log(strFmt, ...) DbgPrintf(_T("%s[%d]: ")##strFmt, _T(__FILE__), __LINE__, __VA_ARGS__);
 
+typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > tstring;
 
 // ========= function =========
 bool WINAPI IsDirectory(LPCTSTR lpPath)

@@ -5,10 +5,10 @@
 
 TARGET  = test2
 OUTDIR  = .\bin
-SRCDIRS = .
+SRCDIRS = . ..\nppUI
 DEBUG   = Debug
-# MAKEDEP = true
-OBJS    = $(OUTDIR)\main.obj
+MAKEDEP = true
+# OBJS    = $(OUTDIR)\main.obj
 RESRCS  = $(OUTDIR)\ExplorerDlg.res
 
 LIBS    = user32.lib kernel32.lib Shlwapi.lib Shell32.lib
@@ -31,7 +31,7 @@ CFLAGS    = /c /nologo /Zi /W3 /Od /FD /Gm /EHsc /MTd /GS /fp:precise /Zc:wchar_
 
 DEFINE    = /D WIN32
 # ENCODE    = /D UNICODE /D _UNICODE
-DEFINE    = $(DEFINE) /D UNICODE /D _UNICODE
+# DEFINE    = $(DEFINE) /D UNICODE /D _UNICODE
 LOGFILE   = >> $(OUTDIR)\make.log 2>&1
 
 # 编译资源 0x804 中国,0x409 美国
@@ -41,7 +41,8 @@ RCFLAGS = /nologo /v /l 0x804
 # 连接
 LD        = link.exe
 # LDFLAGS = /nologo /Machine:x86 /OUT:"$(OUTDIR)\\$@.exe"
-LDFLAGS   = /nologo /Machine:x86 
+# /FORCE:MULTIPLE 避免：fatal error LNK1169: one or more multiply defined symbols found
+LDFLAGS   = /nologo /Machine:x86 /FORCE:MULTIPLE
 LDFLAGS   = $(LDFLAGS) /OUT:"$(OUTDIR)\\$@.exe"
 # LDFLAGS   = $(LDFLAGS) /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
 !IF "$(DEBUG)" == "Debug"
@@ -58,7 +59,7 @@ DEBUG     = Release
 !IF [dir /b | findstr /x "msrcfile.lst" >nul:] || [dir /b | findstr /x "mdepfile.lst" >nul:]
 !MESSAGE to make depend list...
 !IF [..\makedep.bat "" "." "$(SRCDIRS)"]
-!MESSAGE makedep.bat is not available
+!MESSAGE makedep.bat failed
 !ENDIF
 !ENDIF
 !INCLUDE "msrcfile.lst"
