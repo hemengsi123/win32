@@ -63,15 +63,38 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
 	
-	m_treeView.init(m_hTreeCtrl);
-	//
-	HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
-	::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_PARENTFOLDER)));
-	::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_FOLDER)));
-	::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_FILE)));
+	// m_treeView.init(m_hTreeCtrl);
+	m_treeView2.init(_hInst, _hSelf, m_hTreeCtrl);
+	m_treeView2.setImageList(true);
+	m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST);
+	m_treeView2.addFolderItem(_T("D:\\"), TVI_ROOT, TVI_LAST);
 	
-	m_hImageListSmall = GetSmallImageList(true);
-	::SendMessage(m_hTreeCtrl, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)himlTmp/*m_hImageListSmall*/);
+	TCHAR szTmp[MAX_PATH] = {0};
+	HTREEITEM hItem = m_treeView2.getRootItem();
+	if(hItem == NULL)
+	{
+		HTREEITEM		hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, TVI_ROOT, TVGN_CHILD);
+		dbg_log(_T("hItem == NULL\t%x\tCurr: %x"), m_treeView2.getHSelf(), hCurrentItem);
+	}
+	else
+	{
+		m_treeView2.getItemText(hItem, szTmp, MAX_PATH);
+		dbg_log(_T("%s"), szTmp);
+	}
+	// m_treeView2.display();
+	//
+	// HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
+	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_PARENTFOLDER)));
+	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_FOLDER)));
+	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_FILE)));
+	
+	// m_hImageListSmall = GetSmallImageList(true);
+	// ::SendMessage(m_hTreeCtrl, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)m_hImageListSmall/*m_hImageListSmall*/);
+	
+}
+void CExplorerDlg::upDateFolder()
+{
+	
 }
 BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -82,24 +105,33 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 			dbg_log(_T("dialog init"));
 			initCtrl();
 			DWORD			dwThreadId		= 0;
-			for (int i = 0; i < EID_MAX; i++)
-				g_hEvent[i] = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+			// for (int i = 0; i < EID_MAX; i++)
+				// g_hEvent[i] = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 
 			/* create thread */
-			g_hThread = ::CreateThread(NULL, 0, UpdateThread, this, 0, &dwThreadId);
+			// g_hThread = ::CreateThread(NULL, 0, UpdateThread, this, 0, &dwThreadId);
 			return TRUE;
 		}
 		case WM_COMMAND:
 		{
 			if(LOWORD(wParam) == IDC_CBO_FILTER)
 			{
-				// dbg_log(_T("H: %04x"), HIWORD(wParam));
+				// dbg_log(_T("H: %04x"), HIWORD(wParam))
+				if(HIWORD(wParam) == CBN_EDITUPDATE)
+				{
+					dbg_log(_T("CBN_EDITUPDATE"));
+				}
+				else if(HIWORD(wParam) == CBN_EDITCHANGE)
+				{
+					dbg_log(_T("CBN_EDITCHANGE."));
+				}
 			}
 			return TRUE;
 		}
 		case WM_NOTIFY:
 		{
 			LPNMHDR		nmhdr = (LPNMHDR)lParam;
+			
 			if (nmhdr->hwndFrom == m_hTreeCtrl)
 			{
 				switch (nmhdr->code)
@@ -132,6 +164,10 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 						break;
 				}
 			}
+			else if(nmhdr->hwndFrom == m_filterCtrl)
+			{
+				dbg_log(_T("m_filterCtrl NM_RCLICK"));
+			}
 			
 			return TRUE;
 		}
@@ -146,7 +182,7 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 		case WM_CLOSE:
 		{
 			destroy();
-			dbg_log(_T("wm_close"));
+			// dbg_log(_T("wm_close"));
 			return TRUE;
 		}
 		// 关闭应用程序
@@ -169,6 +205,7 @@ void CExplorerDlg::UpdateDevices(void)
 	BOOL			haveChildren	= FALSE;
 
 	HTREEITEM		hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, TVI_ROOT, TVGN_CHILD);
+	dbg_log(_T("hCurr = 0x%X"), hCurrentItem);
 
 	TCHAR			drivePathName[]	= _T(" :\\\0\0");	// it is longer for function 'HaveChildren()'
 	TCHAR			TEMP[MAX_PATH]	= {0};

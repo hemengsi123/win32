@@ -7,7 +7,7 @@ TARGET  = test2
 OUTDIR  = .\bin
 SRCDIRS = . ..\nppUI ..\utils
 # 排除
-EXCLUDE = TreeView.cpp
+# EXCLUDE = TreeView.cpp
 DEBUG   = Debug
 MAKEDEP = true
 # OBJS    = $(OUTDIR)\main.obj

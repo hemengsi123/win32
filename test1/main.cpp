@@ -228,8 +228,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 	//test_SHellFunc();
 	//test_LogicDrivers();
 	//
-	//test_creatWndExample(hInstance);
-	test_creatDlgExample(hInstance);
+	test_creatWndExample(hInstance);
+	// test_creatDlgExample(hInstance);
 	return 0;
 	
 }

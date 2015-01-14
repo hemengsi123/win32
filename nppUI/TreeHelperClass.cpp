@@ -19,16 +19,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 #include "TreeHelperClass.h"
-// #include "Explorer.h"
 #include "StdAfx.h"
 
 // extern winVer	gWinVersion;
 
-typedef enum {
-	DEVT_DRIVE,
-	DEVT_DIRECTORY,
-	DEVT_FILE
-} eDevType;
 
 DWORD WINAPI TreeOverlayThread(LPVOID lpParam)
 {

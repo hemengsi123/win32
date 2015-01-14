@@ -10,6 +10,7 @@ set EXTS=.H .CPP .C
 set OBJS=
 REM 排除项
 set EXCLUDE=%~4
+
 REM 如果你要使用引号括起命令，必须要在前面再加一对空括号，否则会把路径当标题的 makedep.bat "" . ". Control Utils CORE Layout"
 REM %~1 - 删除任何引号("); 打印当前路径 chdir
 if "%~3" neq "" (
@@ -57,7 +58,9 @@ if "%SRCDIRS%" neq "" (
 	echo srcDirs = %SRCDIRS%
 )
 REM echo %~dp0
-if "%EXCLUDE%" neq "" echo exlude = %EXCLUDE%
+if "%EXCLUDE%" neq "" (
+	echo exclude = %EXCLUDE%
+) else ( set EXCLUDE=.empty)
 REM goto:eof
 REM set OUTDIR=.\bin
 set curdate=%date:~0,4%-%date:~5,2%-%date:~8,2%[%time:~0,2%:%time:~3,2%]

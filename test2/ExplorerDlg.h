@@ -4,6 +4,8 @@
 #include "../nppUI/StaticDialog.h"
 #include "../nppUI/ComboOrgi.h"
 #include "../nppUI/TreeHelperClass.h"
+#include "../nppUI/TreeView.h"
+
 
 typedef enum {
 	EID_INIT = 0,
@@ -30,10 +32,10 @@ typedef struct {
 	// DEVT_DIRECTORY,
 	// DEVT_FILE
 // } eDevType;
-typedef struct tItemList {
+typedef struct{
 		string	strName;
 		DWORD	dwAttributes;
-	};
+	}tItemList;
 	
 class CExplorerDlg: public StaticDialog
 {
@@ -47,6 +49,7 @@ public:
 	BOOL ExploreVolumeInformation(LPCTSTR pszDrivePathName, LPTSTR pszVolumeName, UINT maxSize);
 	void NotifyEvent(DWORD event);
 	BOOL FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem);
+	void upDateFolder();
 protected:
 	HWND m_hTreeCtrl;
 	HWND m_listCtrlAll;
@@ -56,6 +59,7 @@ protected:
 	//
 	ComboOrgi m_comBoFilter;
 	TreeHelper m_treeView;
+	TreeView  m_treeView2;
 	//
 	HIMAGELIST	m_hImageListSmall;
 	//

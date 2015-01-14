@@ -3,6 +3,7 @@
 
 #include "../common/wcommon.h"
 #include "../utils/winVersion.h"
+#include "../nppUI/nppBase.h"
 
 #include <windows.h>
 #include "resource.h"
@@ -19,6 +20,11 @@
 #define EXM_TOOLTIP						(EXX_MESSAGES + 5)
 #define EXM_UPDATE_PATH					(EXX_MESSAGES + 6)
 
+typedef enum {
+	DEVT_DRIVE,
+	DEVT_DIRECTORY,
+	DEVT_FILE
+} eDevType;
 
 
 #endif
