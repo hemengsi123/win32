@@ -39,6 +39,9 @@ void test_SHellFunc()
          }  
      }
 	 TCHAR szTmpDir[MAX_PATH] = _T("D:\\Program Files (x86)\\Notepad++\\");
+	TCHAR szShortName[MAX_PATH] = {0};
+	::GetShortPathName(szTmpDir, szShortName, MAX_PATH);
+	 dbg_log(_T("shortName = %s"), szShortName);
 	 LPITEMIDLIST    pidlTempDir = NULL;
 	 DWORD             dwEaten;
 	 DWORD             dwAttributes;
@@ -225,10 +228,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 {
 	
 	
-	//test_SHellFunc();
+	test_SHellFunc();
 	//test_LogicDrivers();
 	//
-	test_creatWndExample(hInstance);
+	// test_creatWndExample(hInstance);
 	// test_creatDlgExample(hInstance);
 	return 0;
 	

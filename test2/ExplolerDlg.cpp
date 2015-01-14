@@ -66,7 +66,16 @@ void CExplorerDlg::initCtrl()
 	// m_treeView.init(m_hTreeCtrl);
 	m_treeView2.init(_hInst, _hSelf, m_hTreeCtrl);
 	m_treeView2.setImageList(true);
-	m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST);
+	HTREEITEM himl2 = NULL;
+	HTREEITEM himl3 = NULL;
+	himl2 = m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST);
+	dbg_log(_T("%x"), himl2);
+	TreeView_SelectItem(m_treeView2.getHSelf(), himl2);
+	dbg_log(_T(" %x"), himl2);
+	// himl2 = m_treeView2.getSpecItem(himl2, TVGN_CHILD);
+	// dbg_log(_T("%x"), himl2);
+	m_treeView2.addFolderItem(_T("window"), himl2, TVI_LAST);
+	// m_treeView2.insertTo(himl2, _T("window"), 0);
 	m_treeView2.addFolderItem(_T("D:\\"), TVI_ROOT, TVI_LAST);
 	
 	TCHAR szTmp[MAX_PATH] = {0};
@@ -147,6 +156,7 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 					}
 					case TVN_ITEMEXPANDING:
 					{
+						dbg_log(_T("TVN_ITEMEXPANDING"));
 						break;
 					}
 					case TVN_KEYDOWN:

@@ -177,6 +177,7 @@ HTREEITEM TreeView::insertItem(LPTSTR lpszItem, int nImage, int nSelectedImage, 
 	tvis.hInsertAfter		 = hInsertAfter;
 	tvis.item.mask			 = TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT | TVIF_CHILDREN;
 	tvis.item.pszText		 = lpszItem;
+	tvis.item.cchTextMax	 = sizeof(tvis.item.pszText)/sizeof(TCHAR); //sizeof(tvis.item.pszText[0]); 
 	tvis.item.iImage		 = nImage;
 	tvis.item.iSelectedImage = nSelectedImage;
 	tvis.item.cChildren		 = haveChildren;
