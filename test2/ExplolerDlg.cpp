@@ -70,16 +70,19 @@ void CExplorerDlg::initCtrl()
 	HTREEITEM himl3 = NULL;
 	himl2 = m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST);
 	dbg_log(_T("%x"), himl2);
-	TreeView_SelectItem(m_treeView2.getHSelf(), himl2);
+	
 	dbg_log(_T(" %x"), himl2);
 	// himl2 = m_treeView2.getSpecItem(himl2, TVGN_CHILD);
 	// dbg_log(_T("%x"), himl2);
-	m_treeView2.addFolderItem(_T("window"), himl2, TVI_LAST);
 	// m_treeView2.insertTo(himl2, _T("window"), 0);
 	m_treeView2.addFolderItem(_T("D:\\"), TVI_ROOT, TVI_LAST);
-	
+	// TreeView_EnsureVisible(m_treeView2.getHSelf(), himl2);
 	TCHAR szTmp[MAX_PATH] = {0};
 	HTREEITEM hItem = m_treeView2.getRootItem();
+	m_treeView2.getSpecItem(hItem, TVGN_CHILD);
+	TreeView_SelectItem(m_treeView2.getHSelf(), himl2);
+	himl3 = m_treeView2.addFolderItem(_T("windows"), himl2, TVI_LAST);
+	TreeView_EnsureVisible(m_treeView2.getHSelf(), himl3);
 	if(hItem == NULL)
 	{
 		HTREEITEM		hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, TVI_ROOT, TVGN_CHILD);
