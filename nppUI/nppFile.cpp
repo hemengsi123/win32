@@ -244,3 +244,11 @@ DWORD CNppFile::getLogicalDrives() const
 {
 	return ::GetLogicalDrives();
 }
+bool CNppFile::findIsDir() const
+{
+	return (m_findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+bool CNppFile::findIsFile() const
+{
+	return !(m_findData..dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY); 
+}

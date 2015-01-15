@@ -27,6 +27,8 @@ public:
 	LPWIN32_FIND_DATA findNextFile(/*LPWIN32_FIND_DATA lpFindFileData*/);
 	void findClose();
 	bool findIsHidden() const;
+	bool findIsDir() const;
+	bool findIsFile() const;
 	LPCTSTR findGetName() const;
 	DWORD findGetAttri() const;
 	DWORD getLogicalDrives() const;
