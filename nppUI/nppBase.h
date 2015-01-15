@@ -13,6 +13,15 @@
 #define lengthof(x) (sizeof((x))/sizeof(*(x)))
 #define DbgLog(strFmt, ...) DbgPrintf(_T("%s[%d]: ")##strFmt, _T(__FILE__), __LINE__, __VA_ARGS__);
 
+//根据指针值删除内存
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(x)	if( (x)!=NULL ) { delete (x); (x)=NULL; }
+#endif
+//根据指针值删除数组类型内存
+#ifndef SAFE_DELETE_ARRAY
+#define SAFE_DELETE_ARRAY(x)	if( (x)!=NULL ) { delete[] (x); (x)=NULL; }
+#endif
+
 #ifndef dbg_log
 void DbgPrintf(LPCTSTR lpStrFormt, ...)
 {

@@ -63,26 +63,26 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
 	
+	// CNppFile tmpFile(_T("C:\\windows\\"));
+	// dbg_log(_T("%s"), tmpFile.getFullPath());
+	// tmpFile.addBackslash();
+	// tmpFile.append(_T("*"));
+	// dbg_log(_T("%s"), tmpFile.getFullPath());
 	// m_treeView.init(m_hTreeCtrl);
 	m_treeView2.init(_hInst, _hSelf, m_hTreeCtrl);
 	m_treeView2.setImageList(true);
 	HTREEITEM himl2 = NULL;
 	HTREEITEM himl3 = NULL;
-	himl2 = m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST);
+	himl2 = m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST, true);
 	dbg_log(_T("%x"), himl2);
-	
-	dbg_log(_T(" %x"), himl2);
-	// himl2 = m_treeView2.getSpecItem(himl2, TVGN_CHILD);
-	// dbg_log(_T("%x"), himl2);
-	// m_treeView2.insertTo(himl2, _T("window"), 0);
-	m_treeView2.addFolderItem(_T("D:\\"), TVI_ROOT, TVI_LAST);
+	m_treeView2.addFolderItem(_T("E:\\Simon\\projects\\win32\\common\\"), himl2, TVI_LAST, false);
+	m_treeView2.addFolderItem(_T("D:\\"), TVI_ROOT, TVI_LAST, true);
+	// TreeView_Expand(m_treeView2.getHSelf(), himl2, TVE_EXPAND);
 	// TreeView_EnsureVisible(m_treeView2.getHSelf(), himl2);
 	TCHAR szTmp[MAX_PATH] = {0};
 	HTREEITEM hItem = m_treeView2.getRootItem();
 	m_treeView2.getSpecItem(hItem, TVGN_CHILD);
 	TreeView_SelectItem(m_treeView2.getHSelf(), himl2);
-	himl3 = m_treeView2.addFolderItem(_T("windows"), himl2, TVI_LAST);
-	TreeView_EnsureVisible(m_treeView2.getHSelf(), himl3);
 	if(hItem == NULL)
 	{
 		HTREEITEM		hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, TVI_ROOT, TVGN_CHILD);

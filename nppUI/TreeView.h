@@ -32,14 +32,13 @@ public :
 	HTREEITEM getNextItem(HTREEITEM hitem);
 	HTREEITEM getSpecItem(HTREEITEM hitem, UINT flag);
 	HTREEITEM addFolderItem(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter, bool bChildrenTest = TRUE);
+	BOOL getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, LPINT piOverlay);
+	void getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelected = NULL, LPINT iIconOverlayed = NULL);
 // protected:
-		HTREEITEM insertTo(HTREEITEM parent, TCHAR *itemStr, int imgIndex);
-		HTREEITEM insertItem(LPTSTR lpszItem, int nImage, int nSelectedImage, int nOverlayedImage, bool bHidden, 
-							HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, bool haveChildren = FALSE, LPARAM lParam = NULL);
-		void extractIcons(LPCTSTR currentPath, LPCTSTR volumeName, bool isDir, LPINT iIconNormal, LPINT iIconSelected, LPINT iIconOverlayed);
+		HTREEITEM insertItem(LPTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, int haveChildren = true, bool bHidden = false, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL);
 private :
 	HIMAGELIST _hImglst;
-	bool _bIsCreate;
+	BOOL _bIsCreate;
 	
 };
 	

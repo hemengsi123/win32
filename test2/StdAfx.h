@@ -4,6 +4,7 @@
 #include "../common/wcommon.h"
 #include "../utils/winVersion.h"
 #include "../nppUI/nppBase.h"
+#include "../nppUI/nppFile.h"
 
 #include <windows.h>
 #include "resource.h"

@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-01-14[23:37] 
+# By Simon 2015-01-15[17:43] 
 # 
 
 HSRCS = $(HSRCS) \
@@ -10,6 +10,8 @@ HSRCS = $(HSRCS) \
 HSRCS = $(HSRCS) \
 			..\nppUI\ComboOrgi.h \
 			..\nppUI\nppBase.h \
+			..\nppUI\nppFile.h \
+			..\nppUI\nppLib.h \
 			..\nppUI\StaticDialog.h \
 			..\nppUI\SysMsg.h \
 			..\nppUI\TreeHelperClass.h \
@@ -25,6 +27,7 @@ CPPSRCS = $(CPPSRCS) \
 
 CPPSRCS = $(CPPSRCS) \
 			..\nppUI\ComboOrgi.cpp \
+			..\nppUI\nppFile.cpp \
 			..\nppUI\StaticDialog.cpp \
 			..\nppUI\SysMsg.cpp \
 			..\nppUI\TreeHelperClass.cpp \
@@ -34,5 +37,5 @@ CPPSRCS = $(CPPSRCS) \
 			..\utils\winVersion.cpp \
 
 OBJS = $(OBJS) \
-			 $(OUTDIR)\ExplolerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\ComboOrgi.obj $(OUTDIR)\StaticDialog.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\TreeHelperClass.obj $(OUTDIR)\TreeView.obj $(OUTDIR)\winVersion.obj
+			 $(OUTDIR)\ExplolerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\ComboOrgi.obj $(OUTDIR)\nppFile.obj $(OUTDIR)\StaticDialog.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\TreeHelperClass.obj $(OUTDIR)\TreeView.obj $(OUTDIR)\winVersion.obj
 

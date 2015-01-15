@@ -27,19 +27,8 @@
 
 
 #include "TreeView.h"
+// #include "nppLib.h"
 #include "StdAfx.h"
-
-HTREEITEM TreeView::insertTo(HTREEITEM parent, TCHAR *itemStr, int imgIndex)
-{
-	TV_INSERTSTRUCT tvinsert;
-	tvinsert.hParent=parent;
-	tvinsert.hInsertAfter=parent?TVI_LAST:TVI_ROOT;
-	tvinsert.item.mask=TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE;
-	tvinsert.item.pszText=itemStr;
-	tvinsert.item.iImage=imgIndex;
-	tvinsert.item.iSelectedImage=0;
-	return (HTREEITEM)::SendMessage(_hSelf, TVM_INSERTITEM, 0, (LPARAM)&tvinsert);
-}
 
 void TreeView::init(HINSTANCE hInst, HWND hPare, HWND hSelf)
 {
@@ -162,13 +151,12 @@ HTREEITEM TreeView::addFolderItem(LPTSTR childFolderName, HTREEITEM parentItem, 
 	int					iIconNormal		= 0;
 	int					iIconSelected	= 0;
 	int					iIconOverlayed	= 0;
-
-	extractIcons(childFolderName, NULL, FALSE, &iIconNormal, &iIconSelected, &iIconOverlayed);
-	return insertItem(childFolderName, iIconNormal, iIconSelected, iIconOverlayed, bHidden, parentItem, insertAfter, false);
+	getFileIcon(childFolderName, &iIconNormal);
+	return insertItem(childFolderName, parentItem, insertAfter, bChildrenTest, false, iIconNormal, iIconNormal, iIconOverlayed);
 }
 
-HTREEITEM TreeView::insertItem(LPTSTR lpszItem, int nImage, int nSelectedImage, int nOverlayedImage, bool bHidden,	 HTREEITEM hParent, 
-								 HTREEITEM hInsertAfter, bool haveChildren, LPARAM lParam)
+HTREEITEM TreeView::insertItem(LPTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter, int haveChildren,
+								bool bHidden, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam)
 {
 	TV_INSERTSTRUCT tvis;
 
@@ -201,55 +189,55 @@ HTREEITEM TreeView::insertItem(LPTSTR lpszItem, int nImage, int nSelectedImage, 
 	return (HTREEITEM)::SendMessage(_hSelf, TVM_INSERTITEM, 0, (LPARAM)(LPTV_INSERTSTRUCT)(&tvis));
 }
 
-void TreeView::extractIcons(LPCTSTR currentPath, LPCTSTR volumeName, bool isDir, LPINT iIconNormal, LPINT iIconSelected, LPINT iIconOverlayed)
+BOOL TreeView::getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, LPINT piOverlay)
 {
+	if ((piIcon == NULL) || (piSelected == NULL) || (piOverlay == NULL))
+		return FALSE;
+
+	TVITEM			tvi;
+	tvi.mask		= TVIF_STATE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
+	tvi.hItem		= hItem;
+	tvi.stateMask	= TVIS_OVERLAYMASK;
+
+	BOOL bRet = TreeView_GetItem(_hSelf, &tvi);
+
+	if (bRet) {
+		*piIcon			= tvi.iImage;
+		*piSelected		= tvi.iSelectedImage;
+		*piOverlay		= (tvi.state >> 8) & 0xFF;
+	}
+
+	return bRet;
+}
+void TreeView::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelected, LPINT iIconOverlayed)
+{
+	if( iIconNormal == NULL)
+		return;
 	SHFILEINFO		sfi	= {0};
-	TCHAR			TEMP[MAX_PATH];
-
-	_tcscpy(TEMP, currentPath);
-	if (TEMP[_tcslen(TEMP) - 1] == _T('*'))
+	bool isDir = false;
+	// TCHAR			TEMP[MAX_PATH];
+	CNppFile tmpFile(lpszFile);
+	if(tmpFile.isDir())
 	{
-		TEMP[_tcslen(TEMP) - 1] = _T('\0');
-	}
-	else if (TEMP[_tcslen(TEMP) - 1] != _T('\\'))
-	{
-		_tcscat(TEMP, _T("\\"));
-	}
-
-	if (volumeName != NULL)
-	{
-		_tcscat(TEMP, volumeName);
-	}
-
-
-	/* get normal and overlayed icon */
-	if (isDir)
-	{
-		SHGetFileInfo(TEMP, 0, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX);
-		if (TEMP[4] == '\0')
-		{
-			::DestroyIcon(sfi.hIcon);
-			SHGetFileInfo(TEMP, FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX | SHGFI_USEFILEATTRIBUTES);
-		}
+		tmpFile.addBackslash();
+		isDir = true;
+		SHGetFileInfo(tmpFile.getFullPath(), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
 	}
 	else
 	{
-		SHGetFileInfo(TEMP, FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX | SHGFI_USEFILEATTRIBUTES);
+		::SHGetFileInfo(tmpFile.getFullPath(), FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX | SHGFI_USEFILEATTRIBUTES);
 	}
-
 	*iIconNormal	= sfi.iIcon & 0x000000ff;
-	*iIconOverlayed = sfi.iIcon >> 24;
-	::DestroyIcon(sfi.hIcon);
-
-	/* get selected icon */
-	if (isDir)
+	if( isDir && iIconSelected)
 	{
-		SHGetFileInfo(TEMP, 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
 		*iIconSelected = sfi.iIcon;
 	}
-	else
+	else if(iIconSelected)
 	{
-		*iIconSelected = 0;
+		*iIconSelected = *iIconNormal;
 	}
+	if( iIconOverlayed )
+		*iIconOverlayed = sfi.iIcon >> 24;
+	::DestroyIcon(sfi.hIcon);
 }
 
