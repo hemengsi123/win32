@@ -241,3 +241,16 @@ void TreeView::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelec
 	::DestroyIcon(sfi.hIcon);
 }
 
+HTREEITEM TreeView::addRootItem(LPTSTR lpszName, int nImage, int haveChildren)
+{
+	return insertItem(lpszName, TVI_ROOT, TVI_LAST, haveChildren, false, nImage, nImage);
+}
+HTREEITEM TreeView::addItem(HTREEITEM hParentItem, LPTSTR lpszName, int nImage, int haveChildren)
+{
+	return insertItem(lpszName, hParentItem, TVI_LAST, haveChildren, false, nImage, nImage);
+}
+
+BOOL TreeView::delItem(HTREEITEM hItem)
+{
+	return TreeView_DeleteItem(_hSelf, hItem);
+}

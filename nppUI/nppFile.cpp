@@ -3,7 +3,7 @@
 // #include "nppFile.h"
 #include "nppLib.h"
 
-CNppFile::CNppFile(LPCTSTR lpszFilePath): m_lpszPath(NULL), m_lpszName(NULL), m_lpszExtension(NULL)
+CNppFile::CNppFile(LPCTSTR lpszFilePath): m_lpszPath(NULL), m_lpszName(NULL), m_lpszExtension(NULL), m_hFind(NULL)
 {
 	setFullPath(lpszFilePath);
 }
@@ -47,9 +47,23 @@ BOOL CNppFile::isDir(LPCTSTR lpszFilePath) const
 BOOL CNppFile::isEmptyDir(LPCTSTR lpszFilePath) const
 {
 	if( lpszFilePath )
-		return ::PathIsDirectoryEmpty(lpszFilePath);
+	{
+		if( isDir(lpszFilePath) )
+		{
+			return ::PathIsDirectoryEmpty(lpszFilePath);
+		}
+		else
+			return TRUE;
+	}
 	else
-		return ::PathIsDirectoryEmpty(m_szFilePath);
+	{
+		if( isDir(m_szFilePath) )
+		{
+			return ::PathIsDirectoryEmpty(m_szFilePath);
+		}
+		else
+			return TRUE;
+	}
 }
 LPCTSTR CNppFile::getName(LPCTSTR lpszFilePath)
 {
@@ -151,14 +165,82 @@ LPCTSTR CNppFile::append(LPCTSTR pszMore, LPTSTR  pszPath)
 			return  NULL;
 	}
 }
-bool CNppFile::isValidFolder(const WIN32_FIND_DATA & Find)
+bool CNppFile::isValidFolder(const LPWIN32_FIND_DATA lpfindData) const
 {
-	if ((Find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
-		(!(Find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ) &&
-		 (_tcscmp(Find.cFileName, _T(".")) != 0) && 
-		 (_tcscmp(Find.cFileName, _T("..")) != 0) &&
-		 (Find.cFileName[0] != '?'))
+	if ((lpfindData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
+		(!(lpfindData->dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ) &&
+		 (_tcscmp(lpfindData->cFileName, _T(".")) != 0) && 
+		 (_tcscmp(lpfindData->cFileName, _T("..")) != 0) &&
+		 (lpfindData->cFileName[0] != '?'))
 		return true;
 
 	return false;
+}
+LPWIN32_FIND_DATA CNppFile::findFirstFile()
+{
+	::ZeroMemory(&m_findData, sizeof(WIN32_FIND_DATA));
+	findClose();
+	m_hFind = ::FindFirstFile(m_szFilePath, &m_findData);
+	if ( m_hFind== INVALID_HANDLE_VALUE)
+	{
+		m_hFind = NULL;
+		return NULL;
+	}
+	else
+	{
+		return &m_findData;
+	}
+}
+LPWIN32_FIND_DATA CNppFile::findNextFile()
+{
+	if(m_hFind == NULL)
+		return NULL;
+	if( !::FindNextFile(m_hFind, &m_findData) )
+	{
+		findClose();
+		return NULL;
+	}
+	else
+		return &m_findData;
+}
+void CNppFile::findClose()
+{
+	if(m_hFind)
+	{
+		::FindClose(m_hFind);
+		m_hFind = NULL;
+		::ZeroMemory(&m_findData, sizeof(WIN32_FIND_DATA));
+	}
+}
+bool CNppFile::findIsHidden() const
+{
+	if(m_hFind)
+	{
+		return (m_findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN);
+	}
+	else
+		return false;
+}
+
+LPCTSTR CNppFile::findGetName() const
+{
+	if(m_hFind)
+	{
+		return m_findData.cFileName;
+	}
+	else
+		return NULL;
+}
+DWORD CNppFile::findGetAttri() const
+{
+	if(m_hFind)
+	{
+		return m_findData.dwFileAttributes;
+	}
+	else
+		return 0;
+}
+DWORD CNppFile::getLogicalDrives() const
+{
+	return ::GetLogicalDrives();
 }

@@ -22,14 +22,21 @@ public:
 	void rmExtension(LPTSTR lpszFilePath = NULL);
 	LPCTSTR append(LPCTSTR  pszMore=NULL, LPTSTR pszPath =NULL);
 	//
-	bool isValidFolder(const WIN32_FIND_DATA & Find);
-	bool findFirstFile(LPWIN32_FIND_DATA lpFindFileData);
-	bool findNextFile(LPWIN32_FIND_DATA lpFindFileData);
+	bool isValidFolder(const LPWIN32_FIND_DATA lpfindData)const;
+	LPWIN32_FIND_DATA findFirstFile(/*LPWIN32_FIND_DATA lpFindFileData*/);
+	LPWIN32_FIND_DATA findNextFile(/*LPWIN32_FIND_DATA lpFindFileData*/);
+	void findClose();
+	bool findIsHidden() const;
+	LPCTSTR findGetName() const;
+	DWORD findGetAttri() const;
+	DWORD getLogicalDrives() const;
 private:
 	TCHAR m_szFilePath[MAX_PATH];
 	//TCHAR m_szPath[MAX_PATH];
 	LPSTR m_lpszPath;
 	LPSTR m_lpszName;
 	LPSTR m_lpszExtension;
+	HANDLE m_hFind;
+	WIN32_FIND_DATA m_findData;
 };
 #endif

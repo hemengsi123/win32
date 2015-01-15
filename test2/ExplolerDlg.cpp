@@ -63,7 +63,8 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
 	
-	// CNppFile tmpFile(_T("C:\\windows\\"));
+	CNppFile tmpFile(_T("G:\\"));
+	dbg_log(_T("dir = %d"), tmpFile.isEmptyDir());
 	// dbg_log(_T("%s"), tmpFile.getFullPath());
 	// tmpFile.addBackslash();
 	// tmpFile.append(_T("*"));
@@ -71,6 +72,9 @@ void CExplorerDlg::initCtrl()
 	// m_treeView.init(m_hTreeCtrl);
 	m_treeView2.init(_hInst, _hSelf, m_hTreeCtrl);
 	m_treeView2.setImageList(true);
+	
+	UpdateDevices();
+	/*
 	HTREEITEM himl2 = NULL;
 	HTREEITEM himl3 = NULL;
 	himl2 = m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST, true);
@@ -93,6 +97,7 @@ void CExplorerDlg::initCtrl()
 		m_treeView2.getItemText(hItem, szTmp, MAX_PATH);
 		dbg_log(_T("%s"), szTmp);
 	}
+	*/
 	// m_treeView2.display();
 	//
 	// HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
@@ -216,14 +221,17 @@ void CExplorerDlg::UpdateDevices(void)
 	DWORD			driveList		= ::GetLogicalDrives();
 	BOOL			isValidDrive	= FALSE;
 	BOOL			haveChildren	= FALSE;
-
-	HTREEITEM		hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, TVI_ROOT, TVGN_CHILD);
-	dbg_log(_T("hCurr = 0x%X"), hCurrentItem);
-
+	
+	DWORD			serialNr		= 0;
+	DWORD			space			= 0;
+	DWORD			flags			= 0;
+	
+	HTREEITEM		hCurrentItem	= m_treeView2.getRootItem();
+	dbg_log(_T("rootItem = %x"), hCurrentItem);
 	TCHAR			drivePathName[]	= _T(" :\\\0\0");	// it is longer for function 'HaveChildren()'
 	TCHAR			TEMP[MAX_PATH]	= {0};
 	TCHAR			volumeName[MAX_PATH];
-
+	CNppFile        tmpFile;
 	for (int i = 1; i < 32; i++)
 	{
 		drivePathName[0] = 'A' + i;
@@ -231,19 +239,19 @@ void CExplorerDlg::UpdateDevices(void)
 		if (0x01 & (driveList >> i))
 		{
 			/* create volume name */
-			isValidDrive = ExploreVolumeInformation(drivePathName, TEMP, MAX_PATH);
-			_stprintf(volumeName, _T("%c:"), 'A' + i);
-
+			isValidDrive =  ::GetVolumeInformation(drivePathName, TEMP, MAX_PATH, &serialNr, &space, &flags, NULL, 0);
+			_stprintf(volumeName, _T("%c: []"), 'A' + i);
+			
 			if (isValidDrive == TRUE)
 			{
 				_stprintf(volumeName, _T("%c: [%s]"), 'A' + i, TEMP);
-
-				/* have children */
-				haveChildren = m_treeView.HaveChildren(drivePathName);
 				/* correct modified drivePathName */
 				drivePathName[3]			= '\0';
 			}
-
+			tmpFile.setFullPath(drivePathName);
+			/* have children */
+			haveChildren = (!tmpFile.isEmptyDir());
+			// dbg_log(_T("%s chidren = %d"), drivePathName, haveChildren);
 			if (hCurrentItem != NULL)
 			{
 				int			iIconNormal		= 0;
@@ -251,14 +259,15 @@ void CExplorerDlg::UpdateDevices(void)
 				int			iIconOverlayed	= 0;
 
 				/* get current volume name in list and test if name is changed */
-				m_treeView.GetItemText(hCurrentItem, TEMP, MAX_PATH);
+				m_treeView2.getItemText(hCurrentItem, TEMP, MAX_PATH);
 
 				if (_tcscmp(volumeName, TEMP) == 0)
 				{
 					/* if names are equal, go to next item in tree */
-					m_treeView.ExtractIcons(drivePathName, NULL, DEVT_DRIVE, &iIconNormal, &iIconSelected, &iIconOverlayed);
+					//m_treeView.ExtractIcons(drivePathName, NULL, DEVT_DRIVE, &iIconNormal, &iIconSelected, &iIconOverlayed);
+					m_treeView2.getFileIcon(drivePathName, &iIconNormal, &iIconSelected, &iIconOverlayed);
 					m_treeView.UpdateItem(hCurrentItem, volumeName, iIconNormal, iIconSelected, iIconOverlayed, 0, haveChildren);
-					hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
+					hCurrentItem = m_treeView2.getNextItem(hCurrentItem);
 				}
 				else if (volumeName[0] == TEMP[0])
 				{
@@ -279,7 +288,12 @@ void CExplorerDlg::UpdateDevices(void)
 			}
 			else
 			{
-				m_treeView.InsertChildFolder(volumeName, TVI_ROOT, TVI_LAST, isValidDrive);
+				int nIconNormal = 0;
+				m_treeView2.getFileIcon(drivePathName, &nIconNormal);
+				// dbg_log(_T("%s\t nIcon = %d\t volume = %s"), drivePathName, nIconNormal, volumeName);
+				m_treeView2.addRootItem(volumeName, nIconNormal, haveChildren);
+				// m_treeView2.insertItem(volumeName, TVI_ROOT, TVI_LAST, true, false, nIconNormal, nIconNormal);
+				//m_treeView.InsertChildFolder(volumeName, TVI_ROOT, TVI_LAST, isValidDrive);
 			}
 		}
 		else
@@ -287,13 +301,14 @@ void CExplorerDlg::UpdateDevices(void)
 			if (hCurrentItem != NULL)
 			{
 				/* get current volume name in list and test if name is changed */
-				m_treeView.GetItemText(hCurrentItem, TEMP, MAX_PATH);
-
+				m_treeView2.getItemText(hCurrentItem, TEMP, MAX_PATH);
 				if (drivePathName[0] == TEMP[0])
 				{
 					HTREEITEM	pPrevItem	= hCurrentItem;
-					hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
-					TreeView_DeleteItem(m_hTreeCtrl, pPrevItem);
+					// hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
+					hCurrentItem = m_treeView2.getNextItem(hCurrentItem);
+					// TreeView_DeleteItem(m_hTreeCtrl, pPrevItem);
+					m_treeView2.delItem(pPrevItem);
 				}
 			}
 		}
