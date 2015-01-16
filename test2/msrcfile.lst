@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-01-15[23:29] 
+# By Simon 2015-01-16[23:42] 
 # 
 
 HSRCS = $(HSRCS) \
@@ -14,7 +14,6 @@ HSRCS = $(HSRCS) \
 			..\nppUI\nppLib.h \
 			..\nppUI\StaticDialog.h \
 			..\nppUI\SysMsg.h \
-			..\nppUI\TreeHelperClass.h \
 			..\nppUI\TreeView.h \
 			..\nppUI\Window.h \
 
@@ -30,12 +29,11 @@ CPPSRCS = $(CPPSRCS) \
 			..\nppUI\nppFile.cpp \
 			..\nppUI\StaticDialog.cpp \
 			..\nppUI\SysMsg.cpp \
-			..\nppUI\TreeHelperClass.cpp \
 			..\nppUI\TreeView.cpp \
 
 CPPSRCS = $(CPPSRCS) \
 			..\utils\winVersion.cpp \
 
 OBJS = $(OBJS) \
-			 $(OUTDIR)\ExplolerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\ComboOrgi.obj $(OUTDIR)\nppFile.obj $(OUTDIR)\StaticDialog.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\TreeHelperClass.obj $(OUTDIR)\TreeView.obj $(OUTDIR)\winVersion.obj
+			 $(OUTDIR)\ExplolerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\ComboOrgi.obj $(OUTDIR)\nppFile.obj $(OUTDIR)\StaticDialog.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\TreeView.obj $(OUTDIR)\winVersion.obj
 

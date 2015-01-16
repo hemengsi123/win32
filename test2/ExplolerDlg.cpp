@@ -63,17 +63,18 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
 	
-	CNppFile tmpFile(_T("G:\\"));
-	dbg_log(_T("dir = %d"), tmpFile.isEmptyDir());
+//	CNppFile tmpFile(_T("G:\\"));
+//	dbg_log(_T("dir = %d"), tmpFile.isEmptyDir());
 	// dbg_log(_T("%s"), tmpFile.getFullPath());
 	// tmpFile.addBackslash();
 	// tmpFile.append(_T("*"));
 	// dbg_log(_T("%s"), tmpFile.getFullPath());
-	// m_treeView.init(m_hTreeCtrl);
 	m_treeView2.init(_hInst, _hSelf, m_hTreeCtrl);
 	m_treeView2.setImageList(true);
 	
-	// UpdateDevices();
+    UpdateDevices();
+    UpdateFolders();
+    /*
 	TCHAR szItemPath[MAX_PATH] = {0};
 	HTREEITEM himl2 = NULL;
 	HTREEITEM himl3 = NULL;
@@ -82,7 +83,7 @@ void CExplorerDlg::initCtrl()
 	himl2 = m_treeView2.addFolderItem(_T("Simon"), himl2, TVI_LAST, false);
 	m_treeView2.getItemPath(himl2, szItemPath);
 	dbg_log(_T("itemPath = %s"), szItemPath);
-	himl2 = m_treeView2.getNextItem(himl2);
+	himl2 = m_treeView2.getNext(himl2);
 	m_treeView2.getItemPath(himl2, szItemPath);
 	dbg_log(_T("itemPath = %s\tp= %x"), szItemPath, himl2);
 	m_treeView2.addFolderItem(_T("D:\\"), TVI_ROOT, TVI_LAST, true);
@@ -100,9 +101,10 @@ void CExplorerDlg::initCtrl()
 	}
 	else
 	{
-		m_treeView2.getItemText(hItem, szTmp, MAX_PATH);
+		m_treeView2.getText(hItem, szTmp, MAX_PATH);
 		dbg_log(_T("%s"), szTmp);
 	}
+	*/
 
 	// m_treeView2.display();
 	//
@@ -167,7 +169,23 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 					}
 					case TVN_ITEMEXPANDING:
 					{
-						dbg_log(_T("TVN_ITEMEXPANDING"));
+						
+						TVITEM	tvi	= (TVITEM)((LPNMTREEVIEW)lParam)->itemNew;
+						if (!(tvi.state & TVIS_EXPANDED))
+						{
+							dbg_log(_T("TVN_ITEMEXPANDING not "));
+							TCHAR szItemPath[MAX_PATH] = {0};
+							m_treeView2.getItemPath(tvi.hItem, szItemPath);
+//							dbg_log("ItemPath = %s", szItemPath);				
+							GetFolderFullPath(tvi.hItem, szItemPath, _T(""));
+//							dbg_log("ItemPath = %s", szItemPath);
+							UpDateChildren(szItemPath, tvi.hItem, true);
+						}
+						else
+						{
+							dbg_log(_T("TVN_ITEMEXPANDING"));
+						}
+						//UpdateFolders();
 						break;
 					}
 					case TVN_KEYDOWN:
@@ -253,7 +271,9 @@ void CExplorerDlg::UpdateDevices(void)
 			}
 			tmpFile.setFullPath(drivePathName);
 			/* have children */
-			haveChildren = (!tmpFile.isEmptyDir());
+			dbg_log(_T("path = %s"), drivePathName);
+			haveChildren = HaveChildDir(drivePathName);
+			dbg_log(_T("haveChildren = %d"), haveChildren);
 			// dbg_log(_T("%s chidren = %d"), drivePathName, haveChildren);
 			if (hCurrentItem != NULL)
 			{
@@ -262,36 +282,30 @@ void CExplorerDlg::UpdateDevices(void)
 				int			iIconOverlayed	= 0;
 
 				/* get current volume name in list and test if name is changed */
-				m_treeView2.getItemText(hCurrentItem, TEMP, MAX_PATH);
+				m_treeView2.getText(hCurrentItem, TEMP, MAX_PATH);
 
 				if (_tcscmp(volumeName, TEMP) == 0)
 				{
 					/* if names are equal, go to next item in tree */
-					//m_treeView.ExtractIcons(drivePathName, NULL, DEVT_DRIVE, &iIconNormal, &iIconSelected, &iIconOverlayed);
 					m_treeView2.getFileIcon(drivePathName, &iIconNormal, &iIconSelected, &iIconOverlayed);
-					// m_treeView.UpdateItem(hCurrentItem, volumeName, iIconNormal, iIconSelected, iIconOverlayed, 0, haveChildren);
 					m_treeView2.setItem(hCurrentItem, volumeName, iIconNormal, haveChildren);
-					hCurrentItem = m_treeView2.getNextItem(hCurrentItem);
+					hCurrentItem = m_treeView2.getNext(hCurrentItem);
 				}
 				else if (volumeName[0] == TEMP[0])
 				{
 					/* if names are not the same but the drive letter are equal, rename item */
 
 					/* get icons */
-					// m_treeView.ExtractIcons(drivePathName, NULL, DEVT_DRIVE, &iIconNormal, &iIconSelected, &iIconOverlayed);
 					m_treeView2.getFileIcon(drivePathName, &iIconNormal, &iIconSelected, &iIconOverlayed);
-					// m_treeView.UpdateItem(hCurrentItem, volumeName, iIconNormal, iIconSelected, iIconOverlayed, 0, haveChildren);
-					// m_treeView.DeleteChildren(hCurrentItem);
 					m_treeView2.setItem(hCurrentItem, volumeName, iIconNormal, haveChildren);
 					// hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
-					hCurrentItem = m_treeView2.getNextItem(hCurrentItem);
+					hCurrentItem = m_treeView2.getNext(hCurrentItem);
 				}
 				else
 				{
 					/* insert the device when new and not present before */
 					// HTREEITEM	hItem	= TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_PREVIOUS);
 					HTREEITEM	hItem	= m_treeView2.getPrevious(hCurrentItem);
-					// m_treeView.InsertChildFolder(volumeName, TVI_ROOT, hItem, isValidDrive);
 					m_treeView2.insertItem(volumeName, TVI_ROOT, hItem, haveChildren, iIconNormal, iIconNormal);
 				}
 			}
@@ -300,9 +314,8 @@ void CExplorerDlg::UpdateDevices(void)
 				int nIconNormal = 0;
 				m_treeView2.getFileIcon(drivePathName, &nIconNormal);
 				// dbg_log(_T("%s\t nIcon = %d\t volume = %s"), drivePathName, nIconNormal, volumeName);
-				m_treeView2.addRootItem(volumeName, nIconNormal, haveChildren);
+				m_treeView2.addRoot(volumeName, nIconNormal, haveChildren);
 				// m_treeView2.insertItem(volumeName, TVI_ROOT, TVI_LAST, true, false, nIconNormal, nIconNormal);
-				//m_treeView.InsertChildFolder(volumeName, TVI_ROOT, TVI_LAST, isValidDrive);
 			}
 		}
 		else
@@ -310,19 +323,19 @@ void CExplorerDlg::UpdateDevices(void)
 			if (hCurrentItem != NULL)
 			{
 				/* get current volume name in list and test if name is changed */
-				m_treeView2.getItemText(hCurrentItem, TEMP, MAX_PATH);
+				m_treeView2.getText(hCurrentItem, TEMP, MAX_PATH);
 				if (drivePathName[0] == TEMP[0])
 				{
 					HTREEITEM	pPrevItem	= hCurrentItem;
 					// hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
-					hCurrentItem = m_treeView2.getNextItem(hCurrentItem);
+					hCurrentItem = m_treeView2.getNext(hCurrentItem);
 					// TreeView_DeleteItem(m_hTreeCtrl, pPrevItem);
 					m_treeView2.delItem(pPrevItem);
 				}
 			}
 		}
 	}
-
+	dbg_log(_T("init ctrl finish"));
 }
 
 BOOL CExplorerDlg::ExploreVolumeInformation(LPCTSTR pszDrivePathName, LPTSTR pszVolumeName, UINT maxSize)
@@ -423,18 +436,19 @@ void CExplorerDlg::UpdateFolders(void)
 
 	while (hCurrentItem != NULL)
 	{
-//		m_treeView.GetItemText(hCurrentItem, pszPath, MAX_PATH);
+		m_treeView2.getText(hCurrentItem, pszPath, MAX_PATH);
+		
 		pszPath[2] = '\\';
 		pszPath[3] = '\0';
 
-		if (m_treeView2.isItemExpand(hCurrentItem))
+		//if (m_treeView2.isItemExpand(hCurrentItem))
 		{
-            m_treeView2.getItemText(hCurrentItem, pszPath, MAX_PATH);
-			pszPath[2] = '\0';
+			//pszPath[2] = '\0';
 //			UpdateFolderRecursive(pszPath, hCurrentItem);
             UpDateChildren(pszPath, hCurrentItem, true);
 		}
-		hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
+//		hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
+		hCurrentItem = m_treeView2.getNext(hCurrentItem);
 	}
 
 	delete [] pszPath;
@@ -444,13 +458,13 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
 	CNppFile searchPath(pszParentPath);
     LPWIN32_FIND_DATA lpfindData = NULL;
     std::vector<tstring> vFolderList;
-    
+    searchPath.addBackslash();
     lpfindData = searchPath.findFirstFile();
     if( lpfindData != NULL)
     {
         do
         {
-            if(IsValidFolder(lpfindData))
+            if(IsValidFolder(lpfindData) && !searchPath.findIsHidden() )
             {
                 vFolderList.push_back(searchPath.findGetName());
             }
@@ -463,36 +477,66 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
     // get child item
     HTREEITEM hCurrItem = m_treeView2.getChild(hParentItem);
     TCHAR lpszItem[MAX_PATH] = {0};
+    TCHAR szItemPath[MAX_PATH] = {0};
     CNppFile fileTmp;
     
     for(unsigned int i=0; i < vFolderList.size(); ++i)
     {
-        if(m_treeView2.getItemText(hCurrItem, lpszItem, MAX_PATH))
+    	
+    	int iIconNormal = 0;
+    	int iIconSelect = 0;
+    	int iOverloadIcon   = 0;
+        if(m_treeView2.getText(hCurrItem, lpszItem, MAX_PATH))
         {
-            // if not exist then add it
-            if(IsExistAfter(lpszItem, hCurrItem))
+//        	while(_tcscmp(lpszItem, vFolderList[i].c_str()) != 0 && hCurrItem != NULL)
+//        	{
+//				// if not exist then add it
+//	            if(IsExistAfter(vFolderList[i].c_str(), hCurrItem))
+//	            {
+//					hCurrItem = m_treeView2.delItem(hCurrItem);
+//	            }
+//	            else
+//	            {
+//	                
+//	            }
+//        	}
+        	// if exist to update or add 
+            if(_tcscmp(lpszItem, vFolderList[i].c_str()) == 0)
             {
-
+				_stprintf(szItemPath, _T("%s%s"), searchPath.getPath(), lpszItem);
+				dbg_log(_T("itemPath = %s"), szItemPath);
+				bool haveChildren = HaveChildDir(szItemPath);
+				m_treeView2.getFileIcon(szItemPath, &iIconNormal);
+				m_treeView2.setItem(hCurrItem, lpszItem, iIconNormal, haveChildren);
             }
             else
             {
-                
+				HTREEITEM hfindItem = IsExistAfter(vFolderList[i].c_str(), hCurrItem);
+				if( hfindItem != NULL)
+				{
+					m_treeView2.delChildren(hfindItem);
+					m_treeView2.delItem(hfindItem);
+				}
+				_stprintf(szItemPath, _T("%s%s"), searchPath.getPath(), lpszItem);
+//					dbg_log(_T("itemPath = %s"), szItemPath);
+				bool haveChildren = HaveChildDir(szItemPath);
+				m_treeView2.getFileIcon(szItemPath, &iIconNormal);
+				hCurrItem = m_treeView2.addLast(hCurrItem, vFolderList[i].c_str(), iIconNormal, haveChildren);
             }
+            /* update recursive */
+			if(doRecursive && m_treeView2.isItemExpand(hCurrItem) )
+			{
+				UpDateChildren(szItemPath, hCurrItem, true);
+			}
+			hCurrItem = m_treeView2.getNext(hCurrItem);
         }
         else
         {
-            TCHAR szItemPath[MAX_PATH] = {0};
-            static int iIconNormal = 0;
-            GetFolderFullPath(hCurrItem, szItemPath, vFolderList[0].c_str());
-            
-            // ����item�����ļ��У�iIconNormal һ��
-            if( iIconNormal == 0)
-                m_treeView2.getFileIcon(szItemPath, &iIconNormal);
-                
-//                fileTmp.setPath(szItemPath);
-            bool haveChildren = !fileTmp.isEmptyDir(szItemPath);
-            hCurrItem = m_treeView2.addItem(hParentItem, lpszItem, iIconNormal, haveChildren);
-            hCurrItem = m_treeView2.getNextItem(hCurrItem);
+            GetFolderFullPath(hParentItem, szItemPath, vFolderList[i].c_str());
+            m_treeView2.getFileIcon(szItemPath, &iIconNormal, &iIconSelect, &iOverloadIcon);
+            bool haveChildren = HaveChildDir(szItemPath);
+            hCurrItem = m_treeView2.addLast(hParentItem, vFolderList[i].c_str(), iIconNormal, haveChildren);
+            hCurrItem = m_treeView2.getNext(hCurrItem);
         }
     }
 }
@@ -507,32 +551,37 @@ bool CExplorerDlg::IsValidFolder(const LPWIN32_FIND_DATA Find)
 
 	return false;
 }
-bool CExplorerDlg::IsExistAfter(LPCTSTR lpszText, HTREEITEM hPrevItem)
+HTREEITEM CExplorerDlg::IsExistAfter(LPCTSTR lpszText, HTREEITEM hPrevItem)
 {
-    HTREEITEM hCurrItem = m_treeView2.getNextItem(hPrevItem);
+    HTREEITEM hCurrItem = m_treeView2.getNext(hPrevItem);
+    
     TCHAR szCurText[MAX_PATH] = {0};
     bool isFind = false;
     
     while( hCurrItem != NULL)
     {
-        if( m_treeView2.getItemText(hCurrItem, szCurText, MAX_PATH) && (_tcscmp(lpszText, szCurText) == 0) )
+        if( m_treeView2.getText(hCurrItem, szCurText, MAX_PATH) && (_tcscmp(lpszText, szCurText) == 0) )
         {
             isFind = true;
-            hCurrItem = NULL;
+            //hCurrItem = NULL;
+            break;
         }
         else
         {
-            hCurrItem = m_treeView2.getNextItem(hCurrItem);
+            hCurrItem = m_treeView2.getNext(hCurrItem);
         }
             
     }
-    return isFind;
+    if(isFind)
+    	return hCurrItem;
+    else
+    	return NULL;
 }
-void CExplorerDlg::GetFolderFullPath(HTREEITEM hItem, LPTSTR lpszFolderFullPath, LPCTSTR lpszChildName)
+void CExplorerDlg::GetFolderFullPath(HTREEITEM hParentItem, LPTSTR lpszFolderFullPath, LPCTSTR lpszChildName)
 {
 //    lpszFolderFullPath[0] = '\0';
     TCHAR szTmp[MAX_PATH] = {0};
-    int nLen = m_treeView2.getItemPath(hItem, szTmp);
+    int nLen = m_treeView2.getItemPath(hParentItem, szTmp);
  
     // "C: [...]"
     if(nLen > 3)
@@ -547,146 +596,22 @@ void CExplorerDlg::GetFolderFullPath(HTREEITEM hItem, LPTSTR lpszFolderFullPath,
     }
    
 }
-void CExplorerDlg::UpdateFolderRecursive(LPTSTR pszParentPath, HTREEITEM hParentItem)
+
+bool CExplorerDlg::HaveChildDir(LPCTSTR lpszPath)
 {
-	WIN32_FIND_DATA		Find			= {0};
-	HANDLE				hFind			= NULL;
-	TVITEM				item			= {0};
-	
-	vector<tItemList>	vFolderList;
-	tItemList			listElement;
-	LPTSTR				pszItem			= (LPTSTR) new TCHAR[MAX_PATH];
-	LPTSTR				pszPath			= (LPTSTR) new TCHAR[MAX_PATH];
-	LPTSTR				pszSearch		= (LPTSTR) new TCHAR[MAX_PATH];
-	HTREEITEM			hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, hParentItem, TVGN_CHILD);
-
-	strcpy(pszSearch, pszParentPath);
-
-	/* add wildcard */
-	strcat(pszSearch, "\\*");
-
-	if ((hFind = ::FindFirstFile(pszSearch, &Find)) == INVALID_HANDLE_VALUE)
+	CNppFile fileSearch(lpszPath);
+	LPWIN32_FIND_DATA lpFindData = NULL;
+	lpFindData = fileSearch.findFirstFile();
+	bool bHaveChildDir = false;
+	while(lpFindData != NULL)
 	{
-		delete [] pszItem;
-		delete [] pszPath;
-		delete [] pszSearch;
-		return;
+		if(IsValidFolder(lpFindData))
+		{
+//			dbg_log("validdir = %s", fileSearch.findGetName());
+			bHaveChildDir = true;
+			break;
+		}
+		lpFindData = fileSearch.findNextFile();
 	}
-
-	/* find folders */
-	do
-	{
-		if (IsValidFolder(&Find) == TRUE)
-		{
-			listElement.strName			= Find.cFileName;
-			listElement.dwAttributes	= Find.dwFileAttributes;
-			vFolderList.push_back(listElement);
-		}
-	} while (FindNextFile(hFind, &Find));
-
-	::FindClose(hFind);
-
-	/* sort data */
-	// m_treeView.QuickSortItems(&vFolderList, 0, vFolderList.size()-1);
-
-	/* update tree */
-	for (size_t i = 0; i < vFolderList.size(); i++)
-	{
-		if (m_treeView.GetItemText(hCurrentItem, pszItem, MAX_PATH) == TRUE)
-		{
-			/* compare current item and the current folder name */
-			while ((strcmp(pszItem, vFolderList[i].strName.c_str()) != 0) && (hCurrentItem != NULL))
-			{
-				HTREEITEM	pPrevItem = NULL;
-
-				/* if it's not equal delete or add new item */
-				if (FindFolderAfter((LPTSTR)vFolderList[i].strName.c_str(), hCurrentItem) == TRUE)
-				{
-					pPrevItem		= hCurrentItem;
-					hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
-					TreeView_DeleteItem(m_hTreeCtrl, pPrevItem);
-				}
-				else
-				{
-					pPrevItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_PREVIOUS);
-
-					/* Note: If hCurrentItem is the first item in the list pPrevItem is NULL */
-					if (pPrevItem == NULL)
-						hCurrentItem = m_treeView.InsertChildFolder((LPTSTR)vFolderList[i].strName.c_str(), hParentItem, TVI_FIRST);
-					else
-						hCurrentItem = m_treeView.InsertChildFolder((LPTSTR)vFolderList[i].strName.c_str(), hParentItem, pPrevItem);
-				}
-
-				if (hCurrentItem != NULL)
-					m_treeView.GetItemText(hCurrentItem, pszItem, MAX_PATH);
-			}
-
-			/* get current path */
-			sprintf(pszPath, "%s\\%s", pszParentPath, pszItem);
-
-			/* update icons and expandable information */
-			int					iIconNormal		= 0;
-			int					iIconSelected	= 0;
-			int					iIconOverlayed	= 0;
-			BOOL				haveChildren	= m_treeView.HaveChildren(pszPath);
-			BOOL				bHidden			= FALSE;
-
-			/* correct by HaveChildren() modified pszPath */
-			pszPath[strlen(pszPath) - 2] = '\0';
-
-			/* get icons and update item */
-			m_treeView.ExtractIcons(pszPath, NULL, true, &iIconNormal, &iIconSelected, &iIconOverlayed);
-			bHidden = ((vFolderList[i].dwAttributes & FILE_ATTRIBUTE_HIDDEN) != 0);
-			m_treeView.UpdateItem(hCurrentItem, pszItem, iIconNormal, iIconSelected, iIconOverlayed, bHidden, haveChildren);
-
-			/* update recursive */
-			if (TreeView_GetChild(m_hTreeCtrl, hCurrentItem) != NULL)
-			{
-				UpdateFolderRecursive(pszPath, hCurrentItem);
-			}
-
-			/* select next item */
-			hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
-		}
-		else
-		{
-			hCurrentItem = m_treeView.InsertChildFolder((LPTSTR)vFolderList[i].strName.c_str(), hParentItem);
-			hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
-		}
-	}
-
-	/* delete possible not existed items */
-	while (hCurrentItem != NULL)
-	{
-		HTREEITEM	pPrevItem	= hCurrentItem;
-		hCurrentItem			= TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
-		TreeView_DeleteItem(m_hTreeCtrl, pPrevItem);
-	}
-
-	delete [] pszItem;
-	delete [] pszPath;
-	delete [] pszSearch;
-}
-
-BOOL CExplorerDlg::FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem)
-{
-	BOOL		isFound			= FALSE;
-	LPTSTR		pszItem			= (LPTSTR) new TCHAR[MAX_PATH];
-	HTREEITEM	hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, pAfterItem, TVGN_NEXT);
-
-	while (hCurrentItem != NULL)
-	{
-		m_treeView.GetItemText(hCurrentItem, pszItem, MAX_PATH);
-		if (strcmp(itemName, pszItem) == 0)
-		{
-			isFound = TRUE;
-			hCurrentItem = NULL;
-		}
-		else
-		{
-			hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
-		}
-	}
-
-	return isFound;
+	return bHaveChildDir;
 }

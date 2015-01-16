@@ -117,7 +117,7 @@ void TreeView::setImageList(bool bIsSysImageList)
 	::SendMessage(_hSelf, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)himl);
 
 }
-bool TreeView::getItemText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
+bool TreeView::getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
 {
 	TVITEM			tvi;
 	tvi.mask		= TVIF_TEXT;
@@ -132,26 +132,12 @@ HTREEITEM TreeView::getSpecItem(HTREEITEM hitem, UINT flag)
 {
 	return (HTREEITEM)::SendMessage(_hSelf, TVM_GETNEXTITEM, (WPARAM)flag, (LPARAM)(HTREEITEM)(hitem));
 }
-HTREEITEM TreeView::getNextItem(HTREEITEM hitem)
+HTREEITEM TreeView::getNext(HTREEITEM hitem)
 {
 	return getSpecItem(hitem, TVGN_NEXT);
 }
-HTREEITEM TreeView::addFolderItem(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter, bool bChildrenTest)
-{
-	HTREEITEM pCurrentItem = getSpecItem(parentItem, TVGN_CHILD);
-	bool				bHidden			= FALSE;
-	WIN32_FIND_DATA		Find			= {0};
-	HANDLE				hFind			= NULL;
-	
-	/* insert item */
-	int					iIconNormal		= 0;
-	int					iIconSelected	= 0;
-	int					iIconOverlayed	= 0;
-	getFileIcon(childFolderName, &iIconNormal);
-	return insertItem(childFolderName, parentItem, insertAfter, bChildrenTest, false, iIconNormal, iIconNormal, iIconOverlayed);
-}
 
-HTREEITEM TreeView::insertItem(LPTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter, int haveChildren,
+HTREEITEM TreeView::insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter, int haveChildren,
 								bool bHidden, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam)
 {
 	TV_INSERTSTRUCT tvis;
@@ -160,7 +146,7 @@ HTREEITEM TreeView::insertItem(LPTSTR lpszItem, HTREEITEM hParent, HTREEITEM hIn
 	tvis.hParent			 = hParent;
 	tvis.hInsertAfter		 = hInsertAfter;
 	tvis.item.mask			 = TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT | TVIF_CHILDREN;
-	tvis.item.pszText		 = lpszItem;
+	tvis.item.pszText		 = (LPTSTR)lpszItem;
 	tvis.item.cchTextMax	 = sizeof(tvis.item.pszText)/sizeof(TCHAR); //sizeof(tvis.item.pszText[0]); 
 	tvis.item.iImage		 = nImage;
 	tvis.item.iSelectedImage = nSelectedImage;
@@ -237,18 +223,25 @@ void TreeView::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelec
 	::DestroyIcon(sfi.hIcon);
 }
 
-HTREEITEM TreeView::addRootItem(LPTSTR lpszName, int nImage, int haveChildren)
+HTREEITEM TreeView::addRoot(LPCTSTR lpszName, int nImage, int haveChildren)
 {
 	return insertItem(lpszName, TVI_ROOT, TVI_LAST, haveChildren, false, nImage, nImage);
 }
-HTREEITEM TreeView::addItem(HTREEITEM hParentItem, LPTSTR lpszName, int nImage, int haveChildren)
+HTREEITEM TreeView::addLast(HTREEITEM hParentItem, LPCTSTR lpszName, int nImage, int haveChildren)
 {
 	return insertItem(lpszName, hParentItem, TVI_LAST, haveChildren, false, nImage, nImage);
 }
-
-BOOL TreeView::delItem(HTREEITEM hItem)
+HTREEITEM TreeView::addFirst(HTREEITEM hParentItem, LPCTSTR lpszName, int nImage, int haveChildren)
 {
-	return TreeView_DeleteItem(_hSelf, hItem);
+	return insertItem(lpszName, hParentItem, TVI_FIRST, haveChildren, false, nImage, nImage);
+}
+HTREEITEM TreeView::delItem(HTREEITEM hItem)
+{
+	HTREEITEM hNextItem = TreeView_GetNextItem(_hSelf, hItem, TVGN_NEXT);
+	if(TreeView_DeleteItem(_hSelf, hItem) == TRUE)
+		return hNextItem;
+	else
+		return NULL;
 }
 HTREEITEM TreeView::getChild(HTREEITEM hParentItem)
 {
@@ -313,7 +306,7 @@ BOOL TreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildr
 }
 void TreeView::delChildren(HTREEITEM hParentItem)
 {
-	HTREEITEM	pCurrentItem = TreeView_GetNextItem(_hSelf, hParentItem, TVGN_CHILD);
+	HTREEITEM pCurrentItem = TreeView_GetNextItem(_hSelf, hParentItem, TVGN_CHILD);
 	// HTREEITEM	pCurrentItem = getChild(hParentItem);
 	while (pCurrentItem != NULL)
 	{
@@ -379,7 +372,7 @@ int TreeView::getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath)
     TCHAR szCurItemText[MAX_PATH] = {0};
     while( hItem != NULL)
     {
-        getItemText(hItem, szCurItemText, MAX_PATH);
+        getText(hItem, szCurItemText, MAX_PATH);
         _stprintf(szTmp, _T("%s\\%s"), szCurItemText, lpszItemPath);
         _tcscpy(lpszItemPath, szTmp);
         hItem = getParent(hItem);

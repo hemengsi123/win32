@@ -3,7 +3,7 @@
 
 #include "../nppUI/StaticDialog.h"
 #include "../nppUI/ComboOrgi.h"
-#include "../nppUI/TreeHelperClass.h"
+// #include "../nppUI/TreeHelperClass.h"
 #include "../nppUI/TreeView.h"
 
 
@@ -51,8 +51,9 @@ public:
 	BOOL FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem);
 	void UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOOL doRecursive = TRUE);
     bool IsValidFolder(const LPWIN32_FIND_DATA  Find);
-    bool IsExistAfter(LPCTSTR lpszText, HTREEITEM hPrevItem);
+    HTREEITEM IsExistAfter(LPCTSTR lpszText, HTREEITEM hPrevItem);
     void GetFolderFullPath(HTREEITEM hItem, LPTSTR lpszFolderFullPath, LPCTSTR lpszChildName);
+    bool HaveChildDir(LPCTSTR lpszPath);
 protected:
 	HWND m_hTreeCtrl;
 	HWND m_listCtrlAll;
@@ -61,7 +62,7 @@ protected:
 	HWND m_splitterCtrl;
 	//
 	ComboOrgi m_comBoFilter;
-	TreeHelper m_treeView;
+//	TreeHelper m_treeView;
 	TreeView  m_treeView2;
 	//
 	HIMAGELIST	m_hImageListSmall;

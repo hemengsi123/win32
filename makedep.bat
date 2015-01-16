@@ -119,52 +119,54 @@ for %%x in (%EXTS%) do (
 				set /a oneTime=1
 				rem 列举 /s 子目录
 				for /f "delims=" %%j in ('dir /b %%i\*%%x') do (
+					set /a isExist=0
 					for %%e in (%EXCLUDE%) do (
-						if "%%~ne" neq "%%~nj" (
-							if "!oneTime!" == "1" (
-								rem =============== make srcfile =============
-								rem 去掉'.'
-								set ddot=%%x
-								REM echo !ddot:~1!
-								echo.>>%srcfile%
-								echo !ddot:~1!%SUFFIX% = ^$^(!ddot:~1!%SUFFIX%^) \>>%srcfile%
-							)
-							REM echo %%i\%%j \
-							echo.			%%i\%%j \>>%srcfile%
-							rem *.obj 排除 *.h 文件
-							if "%%x" neq ".H" (
-								set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
-								rem == make depfile ==
-								if "!oneTime!" == "1" (
-									echo.>>%depfile%
-									echo {%%i}%%x{^$^(OUTDIR^)}.obj::>>%depfile%
-									echo.	^$^(CC^) ^$^(CFLAGS^) ^$^(DEFINE^) ^$^(ENCODE^) ^$^(INCDIRS^) /Fo"$(OUTDIR)\\" ^$^(CDBGFLAGS^) ^$^< >>%depfile%
-								)
-							)
-							rem *.h
-							if "%%x" equ ".H" (
-								set HSRCS=!HSRCS! %%i\%%j
-							)
-							rem *.c *.obj
-							if "%%x" equ ".C" (
-								set CSRCS=!CSRCS! %%i\%%j
-								rem *.obj
-								REM set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
-							)
-							rem *.cpp *.obj
-							if "%%x" equ ".CPP" (
-								set CPPSRCS=!CPPSRCS! %%i\%%j
-								rem *.obj
-								REM set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
-							)
-							if "!oneTime!" == "1" (
-								set /a oneTime=0
-							)
+						if "%%~ne" equ "%%~nj" (
+							REM echo %%~nj %%~xj
+							set /a isExist=1
 						)
 					)
-					REM echo %%~nj
-					
-					
+					if "!isExist!" neq "1" (
+						if "!oneTime!" == "1" (
+							rem =============== make srcfile =============
+							rem 去掉'.'
+							set ddot=%%x
+							REM echo !ddot:~1!
+							echo.>>%srcfile%
+							echo !ddot:~1!%SUFFIX% = ^$^(!ddot:~1!%SUFFIX%^) \>>%srcfile%
+						)
+						REM echo %%i\%%j \
+						echo.			%%i\%%j \>>%srcfile%
+						rem *.obj 排除 *.h 文件
+						if "%%x" neq ".H" (
+							set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
+							rem == make depfile ==
+							if "!oneTime!" == "1" (
+								echo.>>%depfile%
+								echo {%%i}%%x{^$^(OUTDIR^)}.obj::>>%depfile%
+								echo.	^$^(CC^) ^$^(CFLAGS^) ^$^(DEFINE^) ^$^(ENCODE^) ^$^(INCDIRS^) /Fo"$(OUTDIR)\\" ^$^(CDBGFLAGS^) ^$^< >>%depfile%
+							)
+						)
+						rem *.h
+						if "%%x" equ ".H" (
+							set HSRCS=!HSRCS! %%i\%%j
+						)
+						rem *.c *.obj
+						if "%%x" equ ".C" (
+							set CSRCS=!CSRCS! %%i\%%j
+							rem *.obj
+							REM set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
+						)
+						rem *.cpp *.obj
+						if "%%x" equ ".CPP" (
+							set CPPSRCS=!CPPSRCS! %%i\%%j
+							rem *.obj
+							REM set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
+						)
+						if "!oneTime!" == "1" (
+							set /a oneTime=0
+						)
+					)
 				)
 			)
 		)

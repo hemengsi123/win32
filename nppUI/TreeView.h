@@ -27,15 +27,15 @@ public :
 	void createImageList(int nWidth, int nHight, UINT flags=(ILC_COLOR32 | ILC_MASK), int cInitial=5, int cGrow=10);
 	int addImageIcon(int iconId);
 	void setImageList(bool bIsSysImageList);
-	bool getItemText(HTREEITEM hItem, LPTSTR szBuf, int bufSize = MAX_PATH);
-	HTREEITEM getNextItem(HTREEITEM hitem);
+	bool getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize = MAX_PATH);
+	HTREEITEM getNext(HTREEITEM hitem);
 	HTREEITEM getSpecItem(HTREEITEM hitem, UINT flag);
-	HTREEITEM addFolderItem(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter, bool bChildrenTest = TRUE);
 	BOOL getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, LPINT piOverlay);
 	void getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelected = NULL, LPINT iIconOverlayed = NULL);
-	HTREEITEM addRootItem(LPTSTR lpszName, int nImage = 0, int haveChildren = true);
-	HTREEITEM addItem(HTREEITEM hParentItem, LPTSTR lpszName, int nImage = 0, int haveChildren = true);
-	BOOL delItem(HTREEITEM hItem);
+	HTREEITEM addRoot(LPCTSTR lpszName, int nImage = 0, int haveChildren = true);
+	HTREEITEM addLast(HTREEITEM hParentItem, LPCTSTR lpszName, int nImage = 0, int haveChildren = true);
+	HTREEITEM addFirst(HTREEITEM hParentItem, LPCTSTR lpszName, int nImage = 0, int haveChildren = true);
+	HTREEITEM delItem(HTREEITEM hItem);
 	void delChildren(HTREEITEM hParentItem);
 	HTREEITEM getChild(HTREEITEM hParentItem);
 	HTREEITEM getParent(HTREEITEM hChildItem);
@@ -49,7 +49,7 @@ public :
 	void setParam(HTREEITEM hItem, LPARAM lParam);
     int getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath);
 // protected:
-	HTREEITEM insertItem(LPTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, int haveChildren = true, bool bHidden = false, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL);
+	HTREEITEM insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, int haveChildren = true, bool bHidden = false, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL);
 	BOOL updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren = true, bool bHidden = false, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = -1, LPARAM lParam = NULL, bool delChildren = true); 
 private :
 	HIMAGELIST _hImglst;
