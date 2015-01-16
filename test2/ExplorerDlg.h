@@ -49,7 +49,10 @@ public:
 	BOOL ExploreVolumeInformation(LPCTSTR pszDrivePathName, LPTSTR pszVolumeName, UINT maxSize);
 	void NotifyEvent(DWORD event);
 	BOOL FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem);
-	void upDateFolder();
+	void UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOOL doRecursive = TRUE);
+    bool IsValidFolder(const LPWIN32_FIND_DATA  Find);
+    bool IsExistAfter(LPCTSTR lpszText, HTREEITEM hPrevItem);
+    void GetFolderFullPath(HTREEITEM hItem, LPTSTR lpszFolderFullPath, LPCTSTR lpszChildName);
 protected:
 	HWND m_hTreeCtrl;
 	HWND m_listCtrlAll;

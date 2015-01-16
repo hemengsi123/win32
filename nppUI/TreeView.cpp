@@ -125,12 +125,8 @@ bool TreeView::getItemText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
 	tvi.pszText		= szBuf;
 	tvi.cchTextMax	= bufSize;
 	
-//	return TreeView_GetItem(_hTreeCtrl, &tvi);
+//	return TreeView_GetItem(_hSelf, &tvi);
 	return (bool)::SendMessage(_hSelf, TVM_GETITEM, 0, (LPARAM)(TV_ITEM *)&tvi);
-}
-HTREEITEM TreeView::getRootItem()
-{
-	return getSpecItem(NULL, TVGN_ROOT);
 }
 HTREEITEM TreeView::getSpecItem(HTREEITEM hitem, UINT flag)
 {
@@ -185,7 +181,7 @@ HTREEITEM TreeView::insertItem(LPTSTR lpszItem, HTREEITEM hParent, HTREEITEM hIn
 		tvis.item.stateMask |= LVIS_CUT;
 	}
 
-//	return TreeView_InsertItem(_hTreeCtrl, &tvis);
+//	return TreeView_InsertItem(_hSelf, &tvis);
 	return (HTREEITEM)::SendMessage(_hSelf, TVM_INSERTITEM, 0, (LPARAM)(LPTV_INSERTSTRUCT)(&tvis));
 }
 
@@ -253,4 +249,146 @@ HTREEITEM TreeView::addItem(HTREEITEM hParentItem, LPTSTR lpszName, int nImage, 
 BOOL TreeView::delItem(HTREEITEM hItem)
 {
 	return TreeView_DeleteItem(_hSelf, hItem);
+}
+HTREEITEM TreeView::getChild(HTREEITEM hParentItem)
+{
+	return getSpecItem(hParentItem, TVGN_CHILD);
+}
+HTREEITEM TreeView::getParent(HTREEITEM hChildItem)
+{
+	return getSpecItem(hChildItem, TVGN_PARENT);
+}
+HTREEITEM TreeView::getPrevious(HTREEITEM hCurrItem)
+{
+	return getSpecItem(hCurrItem, TVGN_PREVIOUS);
+}
+HTREEITEM TreeView::getSelect()
+{
+	return getSpecItem(NULL,  TVGN_CARET);
+}
+HTREEITEM TreeView::getRoot()
+{
+	return getSpecItem(NULL, TVGN_ROOT);
+}
+
+BOOL TreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren, bool bHidden, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, bool bDelChildren)
+{
+	TVITEM		item;
+	::ZeroMemory(&item, sizeof(TVITEM));
+	
+	item.hItem			 = hUpdateItem;
+	item.mask			 = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT | TVIF_CHILDREN;
+	item.pszText		 = lpszItem;
+	item.iImage			 = nImage;
+	item.iSelectedImage	 = nSelectedImage;
+	item.cChildren		 = haveChildren;
+	if( lParam != NULL)
+	{
+		item.mask			|= TVIF_PARAM;
+		item.lParam			 = lParam;
+	}
+	/* update overlay icon in any case */
+	if( nOverlayedImage != -1)
+	{
+		item.mask			|= TVIF_STATE;
+		item.state			 = INDEXTOOVERLAYMASK(nOverlayedImage);
+		item.stateMask		 = TVIS_OVERLAYMASK;
+	}
+
+	/* mark as cut if the icon is hidden */
+	if (bHidden == TRUE)
+	{
+		item.state		|= LVIS_CUT;
+		item.stateMask  |= LVIS_CUT;
+	}
+
+	/* delete children items when available but not needed */
+	if ((haveChildren == FALSE) && bDelChildren && TreeView_GetChild(_hSelf, hUpdateItem))	
+	{
+		delChildren(hUpdateItem);
+	}
+
+	// return TreeView_SetItem(_hSelf, &item);
+	return (BOOL)::SendMessage(_hSelf, TVM_SETITEM, 0, (LPARAM)(const TV_ITEM *)(&item));
+}
+void TreeView::delChildren(HTREEITEM hParentItem)
+{
+	HTREEITEM	pCurrentItem = TreeView_GetNextItem(_hSelf, hParentItem, TVGN_CHILD);
+	// HTREEITEM	pCurrentItem = getChild(hParentItem);
+	while (pCurrentItem != NULL)
+	{
+		TreeView_DeleteItem(_hSelf, pCurrentItem);
+		// delItem(pCurrentItem);
+		pCurrentItem = TreeView_GetNextItem(_hSelf, hParentItem, TVGN_CHILD);
+	}
+}
+
+BOOL TreeView::setItem(HTREEITEM hItem, LPTSTR lpszName, int nImage, int haveChildren)
+{
+	return updateItem(hItem, lpszName, haveChildren, nImage, nImage);
+}
+BOOL TreeView::isItemExpand(HTREEITEM hItem)const
+{
+	return (BOOL)(TreeView_GetItemState(_hSelf, hItem, TVIS_EXPANDED) & TVIS_EXPANDED);
+}
+void TreeView::setOverlayIcon(HTREEITEM hItem, INT iOverlayIcon)
+{
+	/* Note: No LOCK */
+	TVITEM		item;
+
+	ZeroMemory(&item, sizeof(TVITEM));
+	item.hItem			 = hItem;
+	item.mask			 = TVIF_STATE;
+	item.state			|= INDEXTOOVERLAYMASK(iOverlayIcon);
+	item.stateMask		|= TVIS_OVERLAYMASK;
+
+	TreeView_SetItem(_hSelf, &item);
+}
+
+LPARAM TreeView::getParam(HTREEITEM hItem)
+{
+	TVITEM			tvi;
+	tvi.mask		= TVIF_PARAM;
+	tvi.hItem		= hItem;
+	tvi.lParam		= 0;
+	
+	TreeView_GetItem(_hSelf, &tvi);
+
+	return tvi.lParam;
+}
+
+void TreeView::setParam(HTREEITEM hItem, LPARAM lParam)
+{
+	TVITEM		item;
+
+	ZeroMemory(&item, sizeof(TVITEM));
+	item.hItem			 = hItem;
+	item.mask			 = TVIF_PARAM;
+	item.lParam			 = lParam;
+
+	TreeView_SetItem(_hSelf, &item);
+}
+int TreeView::getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath)
+{
+    int nPathLen = 0;
+    if( hItem == TVI_ROOT)
+        return nPathLen;
+    
+    lpszItemPath[0] = '\0';
+    TCHAR szTmp[MAX_PATH]         = {0};
+    TCHAR szCurItemText[MAX_PATH] = {0};
+    while( hItem != NULL)
+    {
+        getItemText(hItem, szCurItemText, MAX_PATH);
+        _stprintf(szTmp, _T("%s\\%s"), szCurItemText, lpszItemPath);
+        _tcscpy(lpszItemPath, szTmp);
+        hItem = getParent(hItem);
+    }
+
+    nPathLen = _tcslen(lpszItemPath);
+    // remove last '\'
+//    if( nPathLen > 0)
+//        lpszItemPath[--nPathLen] = '\0';
+    
+    return nPathLen;
 }

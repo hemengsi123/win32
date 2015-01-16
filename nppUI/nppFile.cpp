@@ -176,11 +176,20 @@ bool CNppFile::isValidFolder(const LPWIN32_FIND_DATA lpfindData) const
 
 	return false;
 }
-LPWIN32_FIND_DATA CNppFile::findFirstFile()
+LPWIN32_FIND_DATA CNppFile::findFirstFile(LPCTSTR lpszDirPath)
 {
 	::ZeroMemory(&m_findData, sizeof(WIN32_FIND_DATA));
 	findClose();
-	m_hFind = ::FindFirstFile(m_szFilePath, &m_findData);
+	TCHAR tmpPath[MAX_PATH] = {0};
+	if( lpszDirPath )
+		_tcscpy(tmpPath, lpszDirPath);
+	else
+		_tcscpy(tmpPath, m_szFilePath);
+	::PathAddBackslash(tmpPath);
+	::PathAppend(tmpPath, _T("*"));
+	//tstring tmpPath = m_szFilePath;
+	
+	m_hFind = ::FindFirstFile(tmpPath, &m_findData);
 	if ( m_hFind== INVALID_HANDLE_VALUE)
 	{
 		m_hFind = NULL;
@@ -250,5 +259,5 @@ bool CNppFile::findIsDir() const
 }
 bool CNppFile::findIsFile() const
 {
-	return !(m_findData..dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY); 
+	return !(m_findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY); 
 }

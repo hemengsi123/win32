@@ -73,18 +73,24 @@ void CExplorerDlg::initCtrl()
 	m_treeView2.init(_hInst, _hSelf, m_hTreeCtrl);
 	m_treeView2.setImageList(true);
 	
-	UpdateDevices();
-	/*
+	// UpdateDevices();
+	TCHAR szItemPath[MAX_PATH] = {0};
 	HTREEITEM himl2 = NULL;
 	HTREEITEM himl3 = NULL;
 	himl2 = m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST, true);
-	dbg_log(_T("%x"), himl2);
-	m_treeView2.addFolderItem(_T("E:\\Simon\\projects\\win32\\common\\"), himl2, TVI_LAST, false);
+	dbg_log(_T("child = %x"), m_treeView2.getChild(himl2));
+	himl2 = m_treeView2.addFolderItem(_T("Simon"), himl2, TVI_LAST, false);
+	m_treeView2.getItemPath(himl2, szItemPath);
+	dbg_log(_T("itemPath = %s"), szItemPath);
+	himl2 = m_treeView2.getNextItem(himl2);
+	m_treeView2.getItemPath(himl2, szItemPath);
+	dbg_log(_T("itemPath = %s\tp= %x"), szItemPath, himl2);
 	m_treeView2.addFolderItem(_T("D:\\"), TVI_ROOT, TVI_LAST, true);
 	// TreeView_Expand(m_treeView2.getHSelf(), himl2, TVE_EXPAND);
 	// TreeView_EnsureVisible(m_treeView2.getHSelf(), himl2);
 	TCHAR szTmp[MAX_PATH] = {0};
-	HTREEITEM hItem = m_treeView2.getRootItem();
+	HTREEITEM hItem = m_treeView2.getRoot();
+	dbg_log(_T("root = %x"), hItem);
 	m_treeView2.getSpecItem(hItem, TVGN_CHILD);
 	TreeView_SelectItem(m_treeView2.getHSelf(), himl2);
 	if(hItem == NULL)
@@ -97,7 +103,7 @@ void CExplorerDlg::initCtrl()
 		m_treeView2.getItemText(hItem, szTmp, MAX_PATH);
 		dbg_log(_T("%s"), szTmp);
 	}
-	*/
+
 	// m_treeView2.display();
 	//
 	// HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
@@ -109,10 +115,7 @@ void CExplorerDlg::initCtrl()
 	// ::SendMessage(m_hTreeCtrl, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)m_hImageListSmall/*m_hImageListSmall*/);
 	
 }
-void CExplorerDlg::upDateFolder()
-{
-	
-}
+
 BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch(message)
@@ -226,7 +229,7 @@ void CExplorerDlg::UpdateDevices(void)
 	DWORD			space			= 0;
 	DWORD			flags			= 0;
 	
-	HTREEITEM		hCurrentItem	= m_treeView2.getRootItem();
+	HTREEITEM		hCurrentItem	= m_treeView2.getRoot();
 	dbg_log(_T("rootItem = %x"), hCurrentItem);
 	TCHAR			drivePathName[]	= _T(" :\\\0\0");	// it is longer for function 'HaveChildren()'
 	TCHAR			TEMP[MAX_PATH]	= {0};
@@ -266,7 +269,8 @@ void CExplorerDlg::UpdateDevices(void)
 					/* if names are equal, go to next item in tree */
 					//m_treeView.ExtractIcons(drivePathName, NULL, DEVT_DRIVE, &iIconNormal, &iIconSelected, &iIconOverlayed);
 					m_treeView2.getFileIcon(drivePathName, &iIconNormal, &iIconSelected, &iIconOverlayed);
-					m_treeView.UpdateItem(hCurrentItem, volumeName, iIconNormal, iIconSelected, iIconOverlayed, 0, haveChildren);
+					// m_treeView.UpdateItem(hCurrentItem, volumeName, iIconNormal, iIconSelected, iIconOverlayed, 0, haveChildren);
+					m_treeView2.setItem(hCurrentItem, volumeName, iIconNormal, haveChildren);
 					hCurrentItem = m_treeView2.getNextItem(hCurrentItem);
 				}
 				else if (volumeName[0] == TEMP[0])
@@ -274,16 +278,21 @@ void CExplorerDlg::UpdateDevices(void)
 					/* if names are not the same but the drive letter are equal, rename item */
 
 					/* get icons */
-					m_treeView.ExtractIcons(drivePathName, NULL, DEVT_DRIVE, &iIconNormal, &iIconSelected, &iIconOverlayed);
-					m_treeView.UpdateItem(hCurrentItem, volumeName, iIconNormal, iIconSelected, iIconOverlayed, 0, haveChildren);
-					m_treeView.DeleteChildren(hCurrentItem);
-					hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
+					// m_treeView.ExtractIcons(drivePathName, NULL, DEVT_DRIVE, &iIconNormal, &iIconSelected, &iIconOverlayed);
+					m_treeView2.getFileIcon(drivePathName, &iIconNormal, &iIconSelected, &iIconOverlayed);
+					// m_treeView.UpdateItem(hCurrentItem, volumeName, iIconNormal, iIconSelected, iIconOverlayed, 0, haveChildren);
+					// m_treeView.DeleteChildren(hCurrentItem);
+					m_treeView2.setItem(hCurrentItem, volumeName, iIconNormal, haveChildren);
+					// hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
+					hCurrentItem = m_treeView2.getNextItem(hCurrentItem);
 				}
 				else
 				{
 					/* insert the device when new and not present before */
-					HTREEITEM	hItem	= TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_PREVIOUS);
-					m_treeView.InsertChildFolder(volumeName, TVI_ROOT, hItem, isValidDrive);
+					// HTREEITEM	hItem	= TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_PREVIOUS);
+					HTREEITEM	hItem	= m_treeView2.getPrevious(hCurrentItem);
+					// m_treeView.InsertChildFolder(volumeName, TVI_ROOT, hItem, isValidDrive);
+					m_treeView2.insertItem(volumeName, TVI_ROOT, hItem, haveChildren, iIconNormal, iIconNormal);
 				}
 			}
 			else
@@ -405,28 +414,139 @@ void CExplorerDlg::NotifyEvent(DWORD event)
 void CExplorerDlg::UpdateFolders(void)
 {
 	LPTSTR			pszPath			= (LPTSTR)new TCHAR[MAX_PATH];
-	HTREEITEM		hCurrentItem	= TreeView_GetChild(m_hTreeCtrl, TVI_ROOT);
+//	HTREEITEM		hCurrentItem	= TreeView_GetChild(m_hTreeCtrl, TVI_ROOT);
+	HTREEITEM		hCurrentItem	= m_treeView2.getChild(TVI_ROOT);
+	
 	DWORD			serialNr		= 0;
 	DWORD			space			= 0;
 	DWORD			flags			= 0;
 
 	while (hCurrentItem != NULL)
 	{
-		m_treeView.GetItemText(hCurrentItem, pszPath, MAX_PATH);
+//		m_treeView.GetItemText(hCurrentItem, pszPath, MAX_PATH);
 		pszPath[2] = '\\';
 		pszPath[3] = '\0';
 
-		if (GetVolumeInformation(pszPath, NULL, 0, &serialNr, &space, &flags, NULL, 0))
+		if (m_treeView2.isItemExpand(hCurrentItem))
 		{
+            m_treeView2.getItemText(hCurrentItem, pszPath, MAX_PATH);
 			pszPath[2] = '\0';
-			UpdateFolderRecursive(pszPath, hCurrentItem);
+//			UpdateFolderRecursive(pszPath, hCurrentItem);
+            UpDateChildren(pszPath, hCurrentItem, true);
 		}
 		hCurrentItem = TreeView_GetNextItem(m_hTreeCtrl, hCurrentItem, TVGN_NEXT);
 	}
 
 	delete [] pszPath;
 }
+void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOOL doRecursive)
+{
+	CNppFile searchPath(pszParentPath);
+    LPWIN32_FIND_DATA lpfindData = NULL;
+    std::vector<tstring> vFolderList;
+    
+    lpfindData = searchPath.findFirstFile();
+    if( lpfindData != NULL)
+    {
+        do
+        {
+            if(IsValidFolder(lpfindData))
+            {
+                vFolderList.push_back(searchPath.findGetName());
+            }
+            
+            lpfindData = searchPath.findNextFile();
+            
+        }while(lpfindData != NULL);
+    }
+    searchPath.findClose();
+    // get child item
+    HTREEITEM hCurrItem = m_treeView2.getChild(hParentItem);
+    TCHAR lpszItem[MAX_PATH] = {0};
+    CNppFile fileTmp;
+    
+    for(unsigned int i=0; i < vFolderList.size(); ++i)
+    {
+        if(m_treeView2.getItemText(hCurrItem, lpszItem, MAX_PATH))
+        {
+            // if not exist then add it
+            if(IsExistAfter(lpszItem, hCurrItem))
+            {
 
+            }
+            else
+            {
+                
+            }
+        }
+        else
+        {
+            TCHAR szItemPath[MAX_PATH] = {0};
+            static int iIconNormal = 0;
+            GetFolderFullPath(hCurrItem, szItemPath, vFolderList[0].c_str());
+            
+            // ����item�����ļ��У�iIconNormal һ��
+            if( iIconNormal == 0)
+                m_treeView2.getFileIcon(szItemPath, &iIconNormal);
+                
+//                fileTmp.setPath(szItemPath);
+            bool haveChildren = !fileTmp.isEmptyDir(szItemPath);
+            hCurrItem = m_treeView2.addItem(hParentItem, lpszItem, iIconNormal, haveChildren);
+            hCurrItem = m_treeView2.getNextItem(hCurrItem);
+        }
+    }
+}
+bool CExplorerDlg::IsValidFolder(const LPWIN32_FIND_DATA Find)
+{
+	if ((Find->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
+		(!(Find->dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) /*|| exProp.bShowHidden*/) &&
+		 (_tcscmp(Find->cFileName, _T(".")) != 0) && 
+		 (_tcscmp(Find->cFileName, _T("..")) != 0) &&
+		 (Find->cFileName[0] != _T('?')))
+		return true;
+
+	return false;
+}
+bool CExplorerDlg::IsExistAfter(LPCTSTR lpszText, HTREEITEM hPrevItem)
+{
+    HTREEITEM hCurrItem = m_treeView2.getNextItem(hPrevItem);
+    TCHAR szCurText[MAX_PATH] = {0};
+    bool isFind = false;
+    
+    while( hCurrItem != NULL)
+    {
+        if( m_treeView2.getItemText(hCurrItem, szCurText, MAX_PATH) && (_tcscmp(lpszText, szCurText) == 0) )
+        {
+            isFind = true;
+            hCurrItem = NULL;
+        }
+        else
+        {
+            hCurrItem = m_treeView2.getNextItem(hCurrItem);
+        }
+            
+    }
+    return isFind;
+}
+void CExplorerDlg::GetFolderFullPath(HTREEITEM hItem, LPTSTR lpszFolderFullPath, LPCTSTR lpszChildName)
+{
+//    lpszFolderFullPath[0] = '\0';
+    TCHAR szTmp[MAX_PATH] = {0};
+    int nLen = m_treeView2.getItemPath(hItem, szTmp);
+ 
+    // "C: [...]"
+    if(nLen > 3)
+    {
+        LPTSTR lpSlash = _tcschr(szTmp, '\\');
+        if( lpSlash )
+        {
+            _stprintf(lpszFolderFullPath, _T("%c:%s"), szTmp[0], lpSlash);
+        }
+         _tcscat(lpszFolderFullPath, lpszChildName);
+        // dbgLog(_T("ItemPath = %s"), lpszFolderFullPath);
+    }
+   
+}
 void CExplorerDlg::UpdateFolderRecursive(LPTSTR pszParentPath, HTREEITEM hParentItem)
 {
 	WIN32_FIND_DATA		Find			= {0};
@@ -456,7 +576,7 @@ void CExplorerDlg::UpdateFolderRecursive(LPTSTR pszParentPath, HTREEITEM hParent
 	/* find folders */
 	do
 	{
-		if (IsValidFolder(Find) == TRUE)
+		if (IsValidFolder(&Find) == TRUE)
 		{
 			listElement.strName			= Find.cFileName;
 			listElement.dwAttributes	= Find.dwFileAttributes;

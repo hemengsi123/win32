@@ -23,7 +23,7 @@ public:
 	LPCTSTR append(LPCTSTR  pszMore=NULL, LPTSTR pszPath =NULL);
 	//
 	bool isValidFolder(const LPWIN32_FIND_DATA lpfindData)const;
-	LPWIN32_FIND_DATA findFirstFile(/*LPWIN32_FIND_DATA lpFindFileData*/);
+	LPWIN32_FIND_DATA findFirstFile(LPCTSTR lpszDirPath = NULL);
 	LPWIN32_FIND_DATA findNextFile(/*LPWIN32_FIND_DATA lpFindFileData*/);
 	void findClose();
 	bool findIsHidden() const;

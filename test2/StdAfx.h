@@ -9,6 +9,7 @@
 #include <windows.h>
 #include "resource.h"
 #include "ExplorerDlg.h"
+#include <vector>
 
 // #pragma warning(disable:4006)
 

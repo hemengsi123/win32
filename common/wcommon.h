@@ -26,17 +26,7 @@ bool IsExits(LPCTSTR lpPath)
 {
 	return _taccess(lpPath, 0) != -1;
 }
-bool IsValidFolder(const WIN32_FIND_DATA& Find)
-{
-	if ((Find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
-		(!(Find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) /*|| exProp.bShowHidden*/) &&
-		 (_tcscmp(Find.cFileName, _T(".")) != 0) && 
-		 (_tcscmp(Find.cFileName, _T("..")) != 0) &&
-		 (Find.cFileName[0] != _T('?')))
-		return true;
 
-	return false;
-}
 bool IsValidParentFolder(WIN32_FIND_DATA Find)
 {
 	if ((Find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
