@@ -7,7 +7,7 @@
 // syserror
 
 #define SYSERR_HSELF_NULL	56	
-#define SYSERR_HANDLE_NULL  -1
+#define SYSERR_HWND_NULL  -1
 
 //////////////////////////////
 #define lengthof(x) (sizeof((x))/sizeof(*(x)))

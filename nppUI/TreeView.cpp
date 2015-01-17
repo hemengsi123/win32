@@ -1,38 +1,13 @@
-// This file is part of Notepad++ project
-// Copyright (C)2003 Don HO <don.h@free.fr>
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
-//
-// Note that the GPL places important restrictions on "derived works", yet
-// it does not provide a detailed definition of that term.  To avoid      
-// misunderstandings, we consider an application to constitute a          
-// "derivative work" for the purpose of this license if it does any of the
-// following:                                                             
-// 1. Integrates source code from Notepad++.
-// 2. Integrates/includes/aggregates Notepad++ into a proprietary executable
-//    installer, such as those produced by InstallShield.
-// 3. Links to a library or executes a program that does any of the above.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-
+#include "StdAfx.h"
 #include "TreeView.h"
 // #include "nppLib.h"
-#include "StdAfx.h"
+
 
 void TreeView::init(HINSTANCE hInst, HWND hPare, HWND hSelf)
 {
 	Window::init(hInst, hPare);
+	dbg_log(_T("TreeVies this = %x"), this);
 	if( hSelf == NULL)
 	{
 		_hSelf = CreateWindowEx(0,
@@ -137,12 +112,11 @@ HTREEITEM TreeView::getNext(HTREEITEM hitem)
 	return getSpecItem(hitem, TVGN_NEXT);
 }
 
-HTREEITEM TreeView::insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter, int haveChildren,
-								bool bHidden, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam)
+HTREEITEM TreeView::insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter, int haveChildren, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, bool bHidden)
 {
 	TV_INSERTSTRUCT tvis;
 
-	ZeroMemory(&tvis, sizeof(TV_INSERTSTRUCT));
+	::ZeroMemory(&tvis, sizeof(TV_INSERTSTRUCT));
 	tvis.hParent			 = hParent;
 	tvis.hInsertAfter		 = hInsertAfter;
 	tvis.item.mask			 = TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT | TVIF_CHILDREN;
@@ -169,6 +143,50 @@ HTREEITEM TreeView::insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hI
 
 //	return TreeView_InsertItem(_hSelf, &tvis);
 	return (HTREEITEM)::SendMessage(_hSelf, TVM_INSERTITEM, 0, (LPARAM)(LPTV_INSERTSTRUCT)(&tvis));
+}
+
+BOOL TreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, bool bHidden, bool bDelChildren)
+{
+	TVITEM		item;
+	::ZeroMemory(&item, sizeof(TVITEM));
+	
+	item.hItem			 = hUpdateItem;
+	item.mask			 = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT | TVIF_CHILDREN;
+	item.pszText		 = lpszItem;
+	item.cchTextMax	     = sizeof(item.pszText)/sizeof(TCHAR);
+	item.iImage			 = nImage;
+	item.iSelectedImage	 = nSelectedImage;
+	item.cChildren		 = haveChildren;
+	
+	if( lParam != NULL)
+	{
+		item.mask			|= TVIF_PARAM;
+		item.lParam			 = lParam;
+	}
+	/* update overlay icon in any case */
+	if( nOverlayedImage != 0)
+	{
+		item.mask			|= TVIF_STATE;
+		item.state			 = INDEXTOOVERLAYMASK(nOverlayedImage);
+		item.stateMask		 = TVIS_OVERLAYMASK;
+	}
+
+	/* mark as cut if the icon is hidden */
+	if (bHidden == true)
+	{
+	    item.mask		|= LVIF_STATE;
+		item.state		|= LVIS_CUT;
+		item.stateMask  |= LVIS_CUT;
+	}
+
+	/* delete children items when available but not needed */
+	if ((haveChildren == true) && bDelChildren && TreeView_GetChild(_hSelf, hUpdateItem))	
+	{
+		delChildren(hUpdateItem);
+	}
+
+	// return TreeView_SetItem(_hSelf, &item);
+	return (BOOL)::SendMessage(_hSelf, TVM_SETITEM, 0, (LPARAM)(const TV_ITEM *)(&item));
 }
 
 BOOL TreeView::getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, LPINT piOverlay)
@@ -225,15 +243,15 @@ void TreeView::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelec
 
 HTREEITEM TreeView::addRoot(LPCTSTR lpszName, int nImage, int haveChildren)
 {
-	return insertItem(lpszName, TVI_ROOT, TVI_LAST, haveChildren, false, nImage, nImage);
+	return insertItem(lpszName, TVI_ROOT, TVI_LAST, haveChildren, nImage, nImage);
 }
 HTREEITEM TreeView::addLast(HTREEITEM hParentItem, LPCTSTR lpszName, int nImage, int haveChildren)
 {
-	return insertItem(lpszName, hParentItem, TVI_LAST, haveChildren, false, nImage, nImage);
+	return insertItem(lpszName, hParentItem, TVI_LAST, haveChildren, nImage, nImage);
 }
 HTREEITEM TreeView::addFirst(HTREEITEM hParentItem, LPCTSTR lpszName, int nImage, int haveChildren)
 {
-	return insertItem(lpszName, hParentItem, TVI_FIRST, haveChildren, false, nImage, nImage);
+	return insertItem(lpszName, hParentItem, TVI_FIRST, haveChildren, nImage, nImage);
 }
 HTREEITEM TreeView::delItem(HTREEITEM hItem)
 {
@@ -262,47 +280,6 @@ HTREEITEM TreeView::getSelect()
 HTREEITEM TreeView::getRoot()
 {
 	return getSpecItem(NULL, TVGN_ROOT);
-}
-
-BOOL TreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren, bool bHidden, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, bool bDelChildren)
-{
-	TVITEM		item;
-	::ZeroMemory(&item, sizeof(TVITEM));
-	
-	item.hItem			 = hUpdateItem;
-	item.mask			 = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT | TVIF_CHILDREN;
-	item.pszText		 = lpszItem;
-	item.iImage			 = nImage;
-	item.iSelectedImage	 = nSelectedImage;
-	item.cChildren		 = haveChildren;
-	if( lParam != NULL)
-	{
-		item.mask			|= TVIF_PARAM;
-		item.lParam			 = lParam;
-	}
-	/* update overlay icon in any case */
-	if( nOverlayedImage != -1)
-	{
-		item.mask			|= TVIF_STATE;
-		item.state			 = INDEXTOOVERLAYMASK(nOverlayedImage);
-		item.stateMask		 = TVIS_OVERLAYMASK;
-	}
-
-	/* mark as cut if the icon is hidden */
-	if (bHidden == TRUE)
-	{
-		item.state		|= LVIS_CUT;
-		item.stateMask  |= LVIS_CUT;
-	}
-
-	/* delete children items when available but not needed */
-	if ((haveChildren == FALSE) && bDelChildren && TreeView_GetChild(_hSelf, hUpdateItem))	
-	{
-		delChildren(hUpdateItem);
-	}
-
-	// return TreeView_SetItem(_hSelf, &item);
-	return (BOOL)::SendMessage(_hSelf, TVM_SETITEM, 0, (LPARAM)(const TV_ITEM *)(&item));
 }
 void TreeView::delChildren(HTREEITEM hParentItem)
 {

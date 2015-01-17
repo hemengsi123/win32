@@ -18,7 +18,7 @@ public:
 	typedef HTREEITEM iterator;
 public :
 	TreeView(): _bIsCreate(false){};
-	~TreeView(){};
+	virtual ~TreeView(){};
 	virtual void init(HINSTANCE hInst, HWND hPare, HWND hSelf=NULL);
 	virtual void destroy() {
 		if(_bIsCreate)
@@ -49,8 +49,8 @@ public :
 	void setParam(HTREEITEM hItem, LPARAM lParam);
     int getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath);
 // protected:
-	HTREEITEM insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, int haveChildren = true, bool bHidden = false, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL);
-	BOOL updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren = true, bool bHidden = false, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = -1, LPARAM lParam = NULL, bool delChildren = true); 
+	HTREEITEM insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, int haveChildren = true, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL, bool bHidden = false);
+	BOOL updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren = true, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL, bool bHidden = false, bool delChildren = true); 
 private :
 	HIMAGELIST _hImglst;
 	BOOL _bIsCreate;

@@ -7,7 +7,7 @@ TARGET  = test2
 OUTDIR  = .\bin
 SRCDIRS = . ..\nppUI ..\utils
 # 排除
-EXCLUDE = TreeHelperClass
+EXCLUDE = TreeHelperClass ListView
 DEBUG   = Debug
 MAKEDEP = true
 # OBJS    = $(OUTDIR)\main.obj
