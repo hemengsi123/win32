@@ -1,7 +1,7 @@
 
 #include <Shlwapi.h>
-// #include "nppFile.h"
-#include "nppLib.h"
+#include "NppBase.h"
+#include "NppFile.h"
 
 CNppFile::CNppFile(LPCTSTR lpszFilePath): m_lpszPath(NULL), m_lpszName(NULL), m_lpszExtension(NULL), m_hFind(NULL)
 {

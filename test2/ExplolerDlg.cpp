@@ -47,9 +47,8 @@ DWORD WINAPI GetVolumeInformationTimeoutThread(LPVOID lpParam)
 
 void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 {
-	Window::init(hInst, NULL);
-	dbg_log(_T("Explore this = %x"), this);
-	StaticDialog::create(dialogId, false);
+	CNppWnd::init(hInst, NULL);
+	CNppStaticDialog::create(dialogId, false);
 }
 void CExplorerDlg::initCtrl()
 {
@@ -64,49 +63,18 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
 	
-//	CNppFile tmpFile(_T("G:\\"));
-//	dbg_log(_T("dir = %d"), tmpFile.isEmptyDir());
-	// dbg_log(_T("%s"), tmpFile.getFullPath());
-	// tmpFile.addBackslash();
-	// tmpFile.append(_T("*"));
-	// dbg_log(_T("%s"), tmpFile.getFullPath());
 	m_treeView2.init(_hInst, _hSelf, m_hTreeCtrl);
 	m_treeView2.setImageList(true);
 	
     UpdateDevices();
 	UpdateFolders();
-    /*
-	TCHAR szItemPath[MAX_PATH] = {0};
-	HTREEITEM himl2 = NULL;
-	HTREEITEM himl3 = NULL;
-	himl2 = m_treeView2.addFolderItem(_T("C:\\"), TVI_ROOT, TVI_LAST, true);
-	dbg_log(_T("child = %x"), m_treeView2.getChild(himl2));
-	himl2 = m_treeView2.addFolderItem(_T("Simon"), himl2, TVI_LAST, false);
-	m_treeView2.getItemPath(himl2, szItemPath);
-	dbg_log(_T("itemPath = %s"), szItemPath);
-	himl2 = m_treeView2.getNext(himl2);
-	m_treeView2.getItemPath(himl2, szItemPath);
-	dbg_log(_T("itemPath = %s\tp= %x"), szItemPath, himl2);
-	m_treeView2.addFolderItem(_T("D:\\"), TVI_ROOT, TVI_LAST, true);
-	// TreeView_Expand(m_treeView2.getHSelf(), himl2, TVE_EXPAND);
-	// TreeView_EnsureVisible(m_treeView2.getHSelf(), himl2);
-	TCHAR szTmp[MAX_PATH] = {0};
-	HTREEITEM hItem = m_treeView2.getRoot();
-	dbg_log(_T("root = %x"), hItem);
-	m_treeView2.getSpecItem(hItem, TVGN_CHILD);
-	TreeView_SelectItem(m_treeView2.getHSelf(), himl2);
-	if(hItem == NULL)
-	{
-		HTREEITEM		hCurrentItem	= TreeView_GetNextItem(m_hTreeCtrl, TVI_ROOT, TVGN_CHILD);
-		dbg_log(_T("hItem == NULL\t%x\tCurr: %x"), m_treeView2.getHSelf(), hCurrentItem);
-	}
-	else
-	{
-		m_treeView2.getText(hItem, szTmp, MAX_PATH);
-		dbg_log(_T("%s"), szTmp);
-	}
-	*/
 
+  	// list view
+  	dbg_log(_T("list view"));
+  	m_listViewAll.init(_hInst, _hSelf, m_listCtrlAll);
+	m_listViewAll.addColumn(_T("name"), 100);
+	m_listViewAll.addColumn(_T("size"), 100);
+	
 	// m_treeView2.display();
 	//
 	// HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
@@ -125,7 +93,6 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 	{
 		case WM_INITDIALOG:
 		{
-			dbg_log(_T("dialog init"));
 			initCtrl();
 			DWORD			dwThreadId		= 0;
 			// for (int i = 0; i < EID_MAX; i++)
