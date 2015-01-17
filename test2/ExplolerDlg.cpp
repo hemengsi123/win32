@@ -503,11 +503,14 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
         	// if exist to update or add 
             if(_tcscmp(lpszItem, vFolderList[i].c_str()) == 0)
             {
+				// /*
 				_stprintf(szItemPath, _T("%s%s"), searchPath.getPath(), lpszItem);
 				dbg_log(_T("itemPath = %s"), szItemPath);
 				bool haveChildren = HaveChildDir(szItemPath);
 				m_treeView2.getFileIcon(szItemPath, &iIconNormal);
 				m_treeView2.setItem(hCurrItem, lpszItem, iIconNormal, haveChildren);
+				
+				// */
             }
             else
             {
@@ -516,6 +519,7 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
 				{
 					m_treeView2.delChildren(hfindItem);
 					m_treeView2.delItem(hfindItem);
+					dbg_log(_T("test done"))
 				}
 				_stprintf(szItemPath, _T("%s%s"), searchPath.getPath(), lpszItem);
 //					dbg_log(_T("itemPath = %s"), szItemPath);
@@ -533,7 +537,7 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
         else
         {
             GetFolderFullPath(hParentItem, szItemPath, vFolderList[i].c_str());
-            m_treeView2.getFileIcon(szItemPath, &iIconNormal, &iIconSelect, &iOverloadIcon);
+            m_treeView2.getFileIcon(szItemPath, &iIconNormal);
             bool haveChildren = HaveChildDir(szItemPath);
             hCurrItem = m_treeView2.addLast(hParentItem, vFolderList[i].c_str(), iIconNormal, haveChildren);
             hCurrItem = m_treeView2.getNext(hCurrItem);
