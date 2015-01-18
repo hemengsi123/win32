@@ -78,7 +78,14 @@ HIMAGELIST CNppImageList::getImglst()const
 {
 	return _hImglst;
 }
-
+void CNppImageList::setImglst(HIMAGELIST hImglst, bool bDestroy)
+{
+	if( bDestroy )
+	{
+		destroy();
+	}
+	_hImglst = hImglst;
+}
 
 
 

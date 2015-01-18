@@ -3,7 +3,7 @@
 #include "NppListView.h"
 
 
-void CNppListView::init(HINSTANCE hInst, HWND hParent, HWND hSelf)
+void CNppListView::init(HINSTANCE hInst, HWND hParent, HWND hSelf, DWORD dwStyle)
 {
 	CNppWnd::init(hInst, hParent);
     if( hSelf == NULL )
@@ -35,28 +35,79 @@ void CNppListView::init(HINSTANCE hInst, HWND hParent, HWND hSelf)
       	_hSelf = hSelf;
       }
 	CNppWnd::setWndProc();
-
-	DWORD exStyle = ListView_GetExtendedListViewStyle(_hSelf);
-	exStyle |= LVS_EX_FULLROWSELECT | LVS_EX_BORDERSELECT ;
-	ListView_SetExtendedListViewStyle(_hSelf, exStyle);
+	setHeaderWndProc(headerWndProcWrap);
+	
 
 }
 
-int CNppListView::addColumn(LPTSTR pszText, int cx, UINT mask)
+int CNppListView::addColumn(LPTSTR pszText, int cWidth, int fmt)
 {
 	LVCOLUMN lvColumn;
 	
-	lvColumn.mask    = mask;
-	lvColumn.cx      = cx;
+	lvColumn.mask    = (LVCF_TEXT | LVCF_WIDTH | LVCF_FMT);
+	lvColumn.cx      = cWidth;
+	lvColumn.fmt     = fmt;
 	lvColumn.pszText = pszText;
+	lvColumn.cchTextMax = _tcslen(pszText);
 //	::ListView_InsertColumn(_hSelf, 2, &lvColumn);
-	int index = (int)::SendMessage(_hSelf, LVM_INSERTCOLUMN, (WPARAM)(int)_iColumnIndx, (LPARAM)(const LV_COLUMN *)&lvColumn);
+	int index = (int)::SendMessage(_hSelf, LVM_INSERTCOLUMN, (WPARAM)(int)_iColumnCount, (LPARAM)(const LV_COLUMN *)&lvColumn);
 //	int index = ListView_InsertColumn(_hSelf, 1, &lvColumn);
 	if( index != -1)
 	{
-		++_iColumnIndx;
+		++_iColumnCount;
 	}
 	return index;
+}
+bool CNppListView::setColumn(int iCol, LPTSTR pszText, int cWidth, int fmt)
+{
+	LVCOLUMN lvColumn;
+	lvColumn.mask    = (LVCF_TEXT | LVCF_WIDTH | LVCF_FMT);
+	lvColumn.fmt     = fmt;
+	lvColumn.cx      = cWidth;
+	lvColumn.pszText = pszText;
+	lvColumn.cchTextMax = _tcslen(pszText);
+	return (bool)ListView_SetColumn(_hSelf, iCol, &lvColumn);
+}
+bool CNppListView::setScroll(int cWidth, int cHight)
+{
+
+	return ListView_Scroll(_hSelf, cWidth, cHight);
+}
+void CNppListView::setExtStyle(DWORD dwExStyle)
+{
+	ListView_SetExtendedListViewStyle(_hSelf, dwExStyle);
+}
+DWORD CNppListView::getExtStyle()const
+{
+	return ListView_GetExtendedListViewStyle(_hSelf);
+}
+int CNppListView::getColumnWidth(int iCol)const
+{
+	return ListView_GetColumnWidth(_hSelf, iCol);
+}
+bool CNppListView::setColumnWidth(int iCol, int cWidth)const
+{
+	return (bool)ListView_SetColumnWidth(_hSelf, iCol, cWidth);
+}
+int CNppListView::getheaderHight()const
+{
+	RECT rc = {0};
+	Header_GetItemRect(_hHeader, 0, &rc);
+	return rc.bottom;
+}
+bool CNppListView::isSelect(int iItem) const
+{
+	return (ListView_GetItemState(_hSelf, iItem, LVIS_SELECTED) == LVIS_SELECTED);
+}
+void CNppListView::setFocusItem(int iItem)
+{
+	/* at first unselect all */
+	for (int i = 0; i < _iItemCount; i++)
+		ListView_SetItemState(_hSelf, iItem, 0, 0xFF);
+	// to select the iItem
+	ListView_SetItemState(_hSelf, iItem, LVIS_SELECTED|LVIS_FOCUSED, 0xFF);
+	ListView_EnsureVisible(_hSelf, iItem, TRUE);
+	ListView_SetSelectionMark(_hSelf, iItem);
 }
 /*
 void CNppListView::resetValues(int codepage)
@@ -198,4 +249,11 @@ LRESULT CNppListView::runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPAR
 {
 	
 	return ::CallWindowProc(_sysHeaderWndProc, hwnd, Message, wParam, lParam);
+}
+WNDPROC CNppListView::setHeaderWndProc(WNDPROC headerProc)
+{
+	_hHeader = ListView_GetHeader(_hSelf);
+	::SetWindowLongPtr(_hHeader, GWLP_USERDATA, LONG_PTR(this));
+	_sysHeaderWndProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hHeader, GWL_WNDPROC, reinterpret_cast<LONG>(headerProc)));
+	return _sysHeaderWndProc;
 }

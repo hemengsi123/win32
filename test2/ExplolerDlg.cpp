@@ -68,13 +68,19 @@ void CExplorerDlg::initCtrl()
 	
     UpdateDevices();
 	UpdateFolders();
-
+	
   	// list view
   	dbg_log(_T("list view"));
   	m_listViewAll.init(_hInst, _hSelf, m_listCtrlAll);
-	m_listViewAll.addColumn(_T("name"), 100);
-	m_listViewAll.addColumn(_T("size"), 100);
+//	m_listViewAll.setColumn(_T("name"), 100, 0);
+	m_listViewAll.addColumn(_T("size"), 266, LVCFMT_RIGHT);
 	
+//	m_listViewAll.setScroll(266, 0);
+//	CNppFile fileOp1;
+//	fileOp1.setFullPath(_T("D:\\新建文件夹"));
+//	int errNum = fileOp1.delFile();
+//	dbg_log(_T("done %X"), errNum);
+
 	// m_treeView2.display();
 	//
 	// HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
@@ -196,7 +202,6 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 		case WM_DESTROY:
 		{
 			::PostQuitMessage(0);
-			dbg_log(_T("wm_destroy"));
 			return TRUE;
 		}
 		default:

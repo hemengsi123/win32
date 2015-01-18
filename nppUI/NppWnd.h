@@ -38,11 +38,11 @@ public:
 	}
 	virtual DWORD setStyle(DWORD nStyle)
 	{
-		return (DWORD)::SetWindowLongPtr(hwnd, GWL_STYLE, nStyle);
+		return (DWORD)::SetWindowLongPtr(_hSelf, GWL_STYLE, nStyle);
 	}
 	virtual DWORD getStyle() const
 	{
-		return (DWORD)::GetWindowLongPtr(hwnd, GWL_STYLE);
+		return (DWORD)::GetWindowLongPtr(_hSelf, GWL_STYLE);
 	}
 	virtual void reSizeTo(RECT & rc) // should NEVER be const !!!
 	{ 

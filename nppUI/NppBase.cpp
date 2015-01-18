@@ -24,3 +24,39 @@ void DbgPrintf(LPCTSTR lpStrFormt, ...)
 #endif
 }
 
+bool WildCmp(LPCTSTR string, LPCTSTR wild)
+{
+	// Written by Jack Handy - jakkhandy@hotmail.com
+	// See: http://www.codeproject.com/string/wildcmp.asp
+	LPCTSTR		cp = NULL;
+	LPCTSTR		mp = NULL;
+
+	while ((*string) && (*wild != '*')) {
+		if ((tolower(*wild) != tolower(*string)) && (*wild != '?')) {
+			return 0;
+		}
+		wild++;
+		string++;
+	}
+
+	while (*string) {
+		if (*wild == '*') {
+			if (!*++wild) {
+				return 1;
+			}
+			mp = wild;
+			cp = string+1;
+		} else if ((tolower(*wild) == tolower(*string)) || (*wild == '?')) {
+			wild++;
+			string++;
+		} else {
+			wild = mp;
+			string = cp++;
+		}
+	}
+
+	while (*wild == '*') {
+		wild++;
+	}
+	return !*wild;
+}

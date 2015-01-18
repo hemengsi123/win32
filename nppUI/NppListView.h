@@ -8,11 +8,22 @@
 class CNppListView : public CNppWnd
 {
 public:
-	CNppListView() : _bIsCreate(false), _iColumnIndx(0){};
+	CNppListView() : _bIsCreate(false), _iColumnCount(0){};
 	virtual ~CNppListView() {};
-	virtual void init(HINSTANCE hInst, HWND hParent, HWND hSelf=NULL);
+	virtual void init(HINSTANCE hInst, HWND hParent, HWND hSelf=NULL, DWORD dwStyle = LVS_REPORT);
 	virtual void destroy();
-	int addColumn(LPTSTR pszText, int cx, UINT mask = (LVCF_TEXT | LVCF_WIDTH));
+	int addColumn(LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
+	bool setColumn(int iCol, LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
+	bool setScroll(int cWidth, int cHight);
+	void setExtStyle(DWORD dwExStyle);
+	DWORD getExtStyle()const;
+	WNDPROC setHeaderWndProc(WNDPROC headerProc = headerWndProcWrap);
+	int addItem();
+	bool setColumnWidth(int iCol, int cWidth)const;
+	int getColumnWidth(int iCol)const;
+	int getheaderHight()const;
+	bool isSelect(int iItem)const;
+	void setFocusItem(int iItem);
 //	void setValues(int codepage = 0);
 //	void resetValues(int codepage);
 
@@ -20,7 +31,8 @@ public:
 
 protected:
     bool _bIsCreate;
-	int _iColumnIndx;
+	int _iColumnCount;
+	int _iItemCount;
 	CNppImageList _hImglst;
 	HWND _hHeader;
 	WNDPROC _sysHeaderWndProc;

@@ -66,7 +66,7 @@ void CNppStaticDialog::create(int dialogID, bool isRTL)
 
 	if (!_hSelf)
 	{
-		systemMessage("CNppStaticDialog");
+		systemMessage(_T("CNppStaticDialog"));
 		throw int(666);
 	}
 

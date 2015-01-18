@@ -20,6 +20,7 @@ public :
 	int addImage(HBITMAP hbmImage,HBITMAP hbmMask=NULL);
 	void setIconSize(int size) const;
 	HIMAGELIST getImglst()const;
+	void setImglst(HIMAGELIST hImglst, bool bDestroy=true);
 	int getCount()const;
 	void clear();
 	HICON getHIcon(int indx,UINT uFlags);
