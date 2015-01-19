@@ -69,7 +69,8 @@ void CNppStaticDialog::create(int dialogID, bool isRTL)
 		systemMessage(_T("CNppStaticDialog"));
 		throw int(666);
 	}
-
+	// diaog 大小不可以改变
+	CNppWnd::setStyle(getStyle() & ~WS_SIZEBOX);
 	// ::SendMessage(_hParent, WM_MODELESSDIALOG, MODELESSDIALOGADD, (WPARAM)_hSelf);
 }
 

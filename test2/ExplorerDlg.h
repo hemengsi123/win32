@@ -30,7 +30,14 @@ typedef struct{
 		string	strName;
 		DWORD	dwAttributes;
 	}tItemList;
-	
+
+struct ListViewItem
+{
+	tstring m_currentDir;
+	tstring m_fileName;
+	tstring m_fileExt;
+	__int64 m_filesize;
+};
 class CExplorerDlg: public CNppStaticDialog
 {
 public:
@@ -44,10 +51,12 @@ public:
 	void NotifyEvent(DWORD event);
 	BOOL FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem);
 	void UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOOL doRecursive = TRUE);
-    bool IsValidFolder(const LPWIN32_FIND_DATA  Find);
+    bool IsValidFolder(const LPWIN32_FIND_DATA  lpFind);
+	bool IsValidFile(const LPWIN32_FIND_DATA  lpFind);
     HTREEITEM IsExistAfter(LPCTSTR lpszText, HTREEITEM hPrevItem);
     void GetFolderFullPath(HTREEITEM hItem, LPTSTR lpszFolderFullPath, LPCTSTR lpszChildName);
     bool HaveChildDir(LPCTSTR lpszPath);
+	void UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard = _T("*")/*HTREEITEM hSelectItem*/);
 protected:
 	HWND m_hTreeCtrl;
 	HWND m_listCtrlAll;
@@ -58,9 +67,11 @@ protected:
 	ComboOrgi     m_comBoFilter;
 	CNppTreeView  m_treeView2;
 	CNppListView  m_listViewAll;
+	CNppListView  m_listViewFiles;
 	
 	HIMAGELIST	m_hImageListSmall;
 	HANDLE	m_hExploreVolumeThread;
+	std::vector<ListViewItem> m_vListViewAll;
 };
 
 #endif

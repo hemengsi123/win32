@@ -240,6 +240,16 @@ DWORD CNppFile::findGetAttri(const WIN32_FIND_DATA * lpfindData) const
 	}
 	return 0;
 }
+unsigned __int64 CNppFile::findGetSize(const WIN32_FIND_DATA* lpfindData)const
+{
+	if( !lpfindData )
+		lpfindData = &m_findData;
+	
+	unsigned __int64 lFilesize = 0;
+	lFilesize = (((unsigned __int64)lpfindData->nFileSizeHigh) << 32) + lpfindData->nFileSizeLow;
+	
+	return lFilesize;
+}
 bool CNppFile::findIsDir(const WIN32_FIND_DATA* lpfindData) const
 {
 	if( !lpfindData )

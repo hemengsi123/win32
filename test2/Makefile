@@ -13,7 +13,7 @@ MAKEDEP = true
 # OBJS    = $(OUTDIR)\main.obj
 RESRCS  = $(OUTDIR)\ExplorerDlg.res
 
-LIBS    = user32.lib kernel32.lib Shlwapi.lib Shell32.lib comctl32.lib
+LIBS    = user32.lib kernel32.lib Shlwapi.lib Shell32.lib comctl32.lib ole32.lib
 
 INCDIRS = /I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include" /I"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include" \
 			/I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\atlmfc\include" /I.
@@ -33,7 +33,7 @@ CFLAGS    = /c /nologo /Zi /W3 /Od /FD /Gm /EHsc /MTd /GS /fp:precise /Zc:wchar_
 
 DEFINE    = /D WIN32
 # ENCODE    = /D UNICODE /D _UNICODE
-DEFINE    = $(DEFINE) /D UNICODE /D _UNICODE
+# DEFINE    = $(DEFINE) /D UNICODE /D _UNICODE
 LOGFILE   = >> $(OUTDIR)\make.log 2>&1
 
 # 编译资源 0x804 中国,0x409 美国

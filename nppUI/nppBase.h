@@ -36,5 +36,12 @@ void DbgPrintf(LPCTSTR lpStrFormt, ...);
  *@usage: WildCmp("bl?h.*", "blah.jpg");
 */
 bool WildCmp(LPCTSTR string, LPCTSTR wild);
+LPCTSTR GetLastErrStr();
+/**************************************************************************
+ *	Scroll up/down test function
+ * @retrn: if up return 1, down return 2, outside return -1
+ */
+int GetScrollDirection(HWND hWnd, UINT offTop, UINT offBottom);
+
 #endif
 

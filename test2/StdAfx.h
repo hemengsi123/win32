@@ -6,6 +6,8 @@
 #include <windows.h>
 #include <vector>
 #include <algorithm>
+#include <Wingdi.h>
+#include "ole2.h"
 
 #include "resource.h"
 

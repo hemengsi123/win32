@@ -70,16 +70,37 @@ void CExplorerDlg::initCtrl()
 	UpdateFolders();
 	
   	// list view
-  	dbg_log(_T("list view"));
+//  	dbg_log(_T("list view"));
+	OleInitialize(NULL);
   	m_listViewAll.init(_hInst, _hSelf, m_listCtrlAll);
+	m_listViewAll.setExtStyle(m_listViewAll.getExtStyle() | LVS_EX_FULLROWSELECT);
+	int errRet = 0;
 //	m_listViewAll.setColumn(_T("name"), 100, 0);
-	m_listViewAll.addColumn(_T("size"), 266, LVCFMT_RIGHT);
+	m_listViewAll.addColumn(_T("item1\0"), 100, LVCFMT_LEFT);
+	m_listViewAll.addColumn(_T("subitem1\0"), 100, LVCFMT_LEFT);
+	m_listViewAll.setStyle(m_listViewAll.getStyle() & ~WS_HSCROLL);
+//	ListView_SetTextColor(m_listViewAll.getHSelf(), 255);
+	errRet = m_listViewAll.addItem(_T("item0\0"), 0);
+	dbg_log(_T("errRet = %x"), errRet);
+	errRet = m_listViewAll.addSubItem(_T("subitem0\0"), 1);
+	m_listViewAll.setFocusItem(0);
+	TCHAR szText[MAX_PATH] = {0};
+	m_listViewAll.getItemText(0, 0, szText, MAX_PATH);
+//	dbg_log(_T("errRet = %x\t %s"), errRet, GetLastErrStr());
+//	m_listViewAll.setItemText(_T("test.txt"), 0, 0);
+//	ListView_EnsureVisible(m_listViewAll.getHSelf(), 0, true);
+
+	m_listViewFiles.init(_hInst, _hSelf, m_listCtrlFiles);
+	m_listViewFiles.hiddenHeader();
+	ListView_SetItemCountEx(m_listViewFiles.getHSelf(), 2, LVSICF_NOSCROLL);
+	m_listViewFiles.addColumn(_T("File"), 355);
+	m_listViewFiles.addItem(_T("test1.txt"), 0);
 	
 //	m_listViewAll.setScroll(266, 0);
 //	CNppFile fileOp1;
 //	fileOp1.setFullPath(_T("D:\\新建文件夹"));
 //	int errNum = fileOp1.delFile();
-//	dbg_log(_T("done %X"), errNum);
+	dbg_log(_T("done %s"), szText);
 
 	// m_treeView2.display();
 	//
@@ -154,6 +175,8 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 							GetFolderFullPath(tvi.hItem, szItemPath, _T(""));
 //							dbg_log("ItemPath = %s", szItemPath);
 							UpDateChildren(szItemPath, tvi.hItem, true);
+
+							UpdateFileListAll(szItemPath);
 						}
 						else
 						{
@@ -533,6 +556,14 @@ bool CExplorerDlg::IsValidFolder(const LPWIN32_FIND_DATA Find)
 
 	return false;
 }
+bool CExplorerDlg::IsValidFile(const LPWIN32_FIND_DATA  lpFind)
+{
+	if (!(lpFind->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
+		(!(lpFind->dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)))
+		return true;
+
+	return false;
+}
 HTREEITEM CExplorerDlg::IsExistAfter(LPCTSTR lpszText, HTREEITEM hPrevItem)
 {
     HTREEITEM hCurrItem = m_treeView2.getNext(hPrevItem);
@@ -596,4 +627,32 @@ bool CExplorerDlg::HaveChildDir(LPCTSTR lpszPath)
 		lpFindData = fileSearch.findNextFile();
 	}
 	return bHaveChildDir;
+}
+void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
+{
+	LPWIN32_FIND_DATA lpfindData = NULL;
+	
+	CNppFile searchFile(lpszSelDir);
+	lpfindData = searchFile.findFirstFile(NULL, lpszWildcard);
+	while( lpfindData != NULL)
+	{
+		if(IsValidFile(lpfindData) || IsValidFolder(lpfindData) )
+		{
+			ListViewItem lvItem = {0};
+			lvItem.m_currentDir = lpszSelDir;
+			lvItem.m_fileName   = searchFile.findGetName();
+			lvItem.m_fileExt    = searchFile.getExtension(lvItem.m_fileName.c_str());
+			lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
+			m_vListViewAll.push_back(lvItem);
+		}
+		lpfindData = searchFile.findNextFile();
+	}
+	
+	std::vector<ListViewItem>::iterator iter = m_vListViewAll.begin();
+	for(int i=0; iter != m_vListViewAll.end(); ++iter,++i)
+	{
+		m_listViewAll.addItem(iter->m_fileName.c_str(), i);
+		m_listViewAll.addSubItem(iter->m_fileExt.c_str(), 1);
+	}
+	
 }

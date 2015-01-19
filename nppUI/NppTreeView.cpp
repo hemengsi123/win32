@@ -73,7 +73,7 @@ bool CNppTreeView::getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
 	tvi.cchTextMax	= bufSize;
 	
 //	return TreeView_GetItem(_hSelf, &tvi);
-	return (bool)::SendMessage(_hSelf, TVM_GETITEM, 0, (LPARAM)(TV_ITEM *)&tvi);
+	return static_cast<bool>(::SendMessage(_hSelf, TVM_GETITEM, 0, (LPARAM)(TV_ITEM *)&tvi));
 }
 HTREEITEM CNppTreeView::getSpecItem(HTREEITEM hitem, UINT flag)
 {
@@ -322,7 +322,7 @@ int CNppTreeView::getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath)
     while( hItem != NULL)
     {
         getText(hItem, szCurItemText, MAX_PATH);
-        _stprintf(szTmp, _T("%s\\%s"), szCurItemText, lpszItemPath);
+        _sntprintf(szTmp, MAX_PATH, _T("%s\\%s"), szCurItemText, lpszItemPath);
         _tcscpy(lpszItemPath, szTmp);
         hItem = getParent(hItem);
     }

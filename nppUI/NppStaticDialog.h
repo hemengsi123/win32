@@ -19,7 +19,7 @@ struct DLGTEMPLATEEX {
       short  cy;
       // The structure has more fields but are variable length
 } ;
-
+/**/
 class CNppStaticDialog : public CNppWnd
 {
 public :

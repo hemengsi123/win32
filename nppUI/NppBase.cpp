@@ -60,3 +60,40 @@ bool WildCmp(LPCTSTR string, LPCTSTR wild)
 	}
 	return !*wild;
 }
+
+LPCTSTR GetLastErrStr()
+{
+	static TCHAR errStr[255];
+	::ZeroMemory(errStr, sizeof(errStr));
+	DWORD errNo = ::GetLastError();
+	::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, errNo, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) & errStr, sizeof(errStr), NULL);
+	return errStr;
+}
+/**************************************************************************
+ *	Scroll up/down test function
+ * @retrn: if up return 1, down return 2, outside return -1
+ */
+int GetScrollDirection(HWND hWnd, UINT offTop, UINT offBottom)
+{
+	RECT	rcUp	= {0};
+	RECT	rcDown	= {0};
+
+//	::GetClientRect(hWnd, &rcUp);
+//	::ClientToScreen(hWnd, &rcUp);
+	rcDown = rcUp;
+
+	rcUp.top += offTop;
+	rcUp.bottom = rcUp.top + 20;
+	rcDown.bottom += offBottom;
+	rcDown.top = rcDown.bottom - 20;
+
+	POINT	pt		= {0};
+	::GetCursorPos(&pt);
+	if (::PtInRect(&rcUp, pt) == TRUE)
+		return 1; //SCR_UP;
+	else if (::PtInRect(&rcDown, pt) == TRUE)
+		return 2; //SCR_DOWN;
+		
+	return -1; //SCR_OUTSIDE;
+}
+

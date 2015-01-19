@@ -24,6 +24,14 @@ public:
 	int getheaderHight()const;
 	bool isSelect(int iItem)const;
 	void setFocusItem(int iItem);
+	void hiddenHeader();
+	/*@retrn: if successful return index, or return -1*/
+	int addItem(LPCTSTR lpszText, int iItem/*, int iCol*/);
+	/*@retrn: if successful return true, or false*/
+	bool addSubItem(LPCTSTR lpszText, int iCol, int iItem = -1);
+	bool getItemText(int iItem, int iCol, LPTSTR lpszText, int cMaxLen);
+	bool setItemText(LPTSTR lpszText, int iItem, int iCol);
+	
 //	void setValues(int codepage = 0);
 //	void resetValues(int codepage);
 
@@ -32,7 +40,7 @@ public:
 protected:
     bool _bIsCreate;
 	int _iColumnCount;
-	int _iItemCount;
+	int _iItemIndx;
 	CNppImageList _hImglst;
 	HWND _hHeader;
 	WNDPROC _sysHeaderWndProc;

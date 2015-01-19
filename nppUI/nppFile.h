@@ -34,6 +34,7 @@ public:
 	bool findIsFile(const WIN32_FIND_DATA* lpfindData = NULL) const;
 	LPCTSTR findGetName(const WIN32_FIND_DATA* lpfindData = NULL) const;
 	DWORD findGetAttri(const WIN32_FIND_DATA* lpfindData = NULL) const;
+	unsigned __int64 findGetSize(const WIN32_FIND_DATA* lpfindData = NULL)const;
 	LPSYSTEMTIME getSysTime(LPFILETIME lpftTime)const;
 	DWORD getLogicalDrives() const;
 	int delFile(LPCTSTR lpszFile = NULL, int fFlags = (FOF_ALLOWUNDO|FOF_NOCONFIRMATION), HWND hwnd = NULL)const;
