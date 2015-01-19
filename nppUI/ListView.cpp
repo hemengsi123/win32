@@ -31,7 +31,7 @@
 #include "Parameters.h"
 #include "localization.h"
 
-void CNppImageList::init(HINSTANCE hInst, HWND hParent, HWND hSelf)
+void ListView::init(HINSTANCE hInst, HWND hParent, HWND hSelf)
 {
 	Window::init(hInst, hParent);
     INITCOMMONCONTROLSEX icex;
