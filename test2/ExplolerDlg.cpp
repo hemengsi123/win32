@@ -71,21 +71,19 @@ void CExplorerDlg::initCtrl()
 	
   	// list view
 //  	dbg_log(_T("list view"));
-	OleInitialize(NULL);
+
   	m_listViewAll.init(_hInst, _hSelf, m_listCtrlAll);
 	m_listViewAll.setExtStyle(m_listViewAll.getExtStyle() | LVS_EX_FULLROWSELECT);
 	int errRet = 0;
 //	m_listViewAll.setColumn(_T("name"), 100, 0);
-	m_listViewAll.addColumn(_T("item1\0"), 100, LVCFMT_LEFT);
-	m_listViewAll.addColumn(_T("subitem1\0"), 100, LVCFMT_LEFT);
-	m_listViewAll.setStyle(m_listViewAll.getStyle() & ~WS_HSCROLL);
+	m_listViewAll.addColumn(_T("Name"), 100, LVCFMT_LEFT);
+	m_listViewAll.addColumn(_T("Ext."), 100, LVCFMT_LEFT);
+	m_listViewAll.addColumn(_T("Size"), 100, LVCFMT_CENTER);
+//	m_listViewAll.setStyle(m_listViewAll.getStyle() & ~WS_HSCROLL);
 //	ListView_SetTextColor(m_listViewAll.getHSelf(), 255);
-	errRet = m_listViewAll.addItem(_T("item0\0"), 0);
-	dbg_log(_T("errRet = %x"), errRet);
-	errRet = m_listViewAll.addSubItem(_T("subitem0\0"), 1);
-	m_listViewAll.setFocusItem(0);
-	TCHAR szText[MAX_PATH] = {0};
-	m_listViewAll.getItemText(0, 0, szText, MAX_PATH);
+//	errRet = m_listViewAll.addItem(_T("item0\0"), 0);
+//	errRet = m_listViewAll.addSubItem(_T("subitem0\0"), 1);
+//	m_listViewAll.setFocusItem(0);
 //	dbg_log(_T("errRet = %x\t %s"), errRet, GetLastErrStr());
 //	m_listViewAll.setItemText(_T("test.txt"), 0, 0);
 //	ListView_EnsureVisible(m_listViewAll.getHSelf(), 0, true);
@@ -96,12 +94,12 @@ void CExplorerDlg::initCtrl()
 	m_listViewFiles.addColumn(_T("File"), 355);
 	m_listViewFiles.addItem(_T("test1.txt"), 0);
 	
+//	UpdateFileListAll(_T("C:\\"));
 //	m_listViewAll.setScroll(266, 0);
 //	CNppFile fileOp1;
 //	fileOp1.setFullPath(_T("D:\\新建文件夹"));
 //	int errNum = fileOp1.delFile();
-	dbg_log(_T("done %s"), szText);
-
+	
 	// m_treeView2.display();
 	//
 	// HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
@@ -631,20 +629,24 @@ bool CExplorerDlg::HaveChildDir(LPCTSTR lpszPath)
 void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 {
 	LPWIN32_FIND_DATA lpfindData = NULL;
-	
+	m_vListViewAll.clear();
 	CNppFile searchFile(lpszSelDir);
 	lpfindData = searchFile.findFirstFile(NULL, lpszWildcard);
 	while( lpfindData != NULL)
 	{
+//		dbg_log(_T("name = %s"), searchFile.findGetName());
 		if(IsValidFile(lpfindData) || IsValidFolder(lpfindData) )
 		{
-			ListViewItem lvItem = {0};
-			lvItem.m_currentDir = lpszSelDir;
-			lvItem.m_fileName   = searchFile.findGetName();
-			lvItem.m_fileExt    = searchFile.getExtension(lvItem.m_fileName.c_str());
+			ListViewItem lvItem;
+			LPCTSTR lpszExt = NULL;
+			lvItem.m_currentDir = tstring(lpszSelDir);
+			lvItem.m_fileName   = tstring(searchFile.findGetName());
+			lpszExt = searchFile.getExtension(lvItem.m_fileName.c_str());
+			lvItem.m_fileExt    = lpszExt;
 			lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
 			m_vListViewAll.push_back(lvItem);
 		}
+		
 		lpfindData = searchFile.findNextFile();
 	}
 	
@@ -653,6 +655,9 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 	{
 		m_listViewAll.addItem(iter->m_fileName.c_str(), i);
 		m_listViewAll.addSubItem(iter->m_fileExt.c_str(), 1);
+//		TCHAR strSize[20] = {0};
+		_stprintf(iter->m_strSize, _T("%u"), iter->m_filesize);
+		m_listViewAll.addSubItem(iter->m_strSize, 2);
 	}
 	
 }

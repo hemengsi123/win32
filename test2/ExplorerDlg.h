@@ -36,7 +36,8 @@ struct ListViewItem
 	tstring m_currentDir;
 	tstring m_fileName;
 	tstring m_fileExt;
-	__int64 m_filesize;
+	unsigned __int64 m_filesize;
+	TCHAR   m_strSize[20];
 };
 class CExplorerDlg: public CNppStaticDialog
 {
