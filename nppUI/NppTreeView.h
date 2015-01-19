@@ -1,24 +1,21 @@
 
-
 #ifndef TREE_VIEW_H
-#define  TREE_VIEW_H
-
-#include <windows.h>
-#include "Window.h"
+#define TREE_VIEW_H
 
 #ifndef _WIN32_IE
 #define _WIN32_IE	0x0600
 #endif //_WIN32_IE
 
 #include <commctrl.h>
+#include "NppWnd.h"
 
-class TreeView : public Window
+class CNppTreeView : public CNppWnd
 {
 public:
 	typedef HTREEITEM iterator;
 public :
-	TreeView(): _bIsCreate(false){};
-	virtual ~TreeView(){};
+	CNppTreeView(): _bIsCreate(false){};
+	virtual ~CNppTreeView(){};
 	virtual void init(HINSTANCE hInst, HWND hPare, HWND hSelf=NULL);
 	virtual void destroy() {
 		if(_bIsCreate)

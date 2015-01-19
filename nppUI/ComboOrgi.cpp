@@ -17,8 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include "NppLib.h"
 #include "SysMsg.h"
-// #include "ExplorerResource.h"
 #include "ComboOrgi.h"
 
 #include "StdAfx.h"
@@ -55,7 +55,7 @@ LRESULT ComboOrgi::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 			// 13 ENTER
 			if (wParam == 13)
 			{
-				LPSTR	pszText	= (LPSTR)new TCHAR[MAX_PATH];
+				LPTSTR	pszText	= (LPTSTR)new TCHAR[MAX_PATH];
 
 				getText(pszText);
 				addText(pszText);
@@ -78,7 +78,7 @@ LRESULT ComboOrgi::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 }
 
 
-void ComboOrgi::addText(LPSTR pszText)
+void ComboOrgi::addText(LPCTSTR pszText)
 {
 	/* find item */
 	INT		count		= _comboItems.size();
@@ -87,7 +87,7 @@ void ComboOrgi::addText(LPSTR pszText)
 
 	for (; i < count; i++)
 	{
-		if (strcmp(pszText, _comboItems[i].c_str()) == 0)
+		if (_tcscmp(pszText, _comboItems[i].c_str()) == 0)
 		{
 			hasFoundOn = count - i - 1;
 		}
@@ -108,17 +108,17 @@ void ComboOrgi::addText(LPSTR pszText)
 }
 
 
-void ComboOrgi::setText(LPSTR pszText, UINT size)
+void ComboOrgi::setText(LPCTSTR pszText, UINT size)
 {
 	::SendMessage(_hCombo, WM_SETTEXT, size, (LPARAM)pszText);
 }
 
-void ComboOrgi::getText(LPSTR pszText, UINT size)
+void ComboOrgi::getText(LPTSTR pszText, UINT size)
 {
 	::SendMessage(_hCombo, WM_GETTEXT, size, (LPARAM)pszText);
 }
 
-bool ComboOrgi::getSelText(LPSTR pszText)
+bool ComboOrgi::getSelText(LPTSTR pszText)
 {
 	INT		curSel = ::SendMessage(_hCombo, CB_GETCURSEL, 0, 0);
 
@@ -133,7 +133,7 @@ bool ComboOrgi::getSelText(LPSTR pszText)
 	return false;
 }
 
-void ComboOrgi::selectComboText(LPSTR pszText)
+void ComboOrgi::selectComboText(LPCTSTR pszText)
 {
 	LRESULT			lResult	= -1;
 
@@ -141,20 +141,20 @@ void ComboOrgi::selectComboText(LPSTR pszText)
 	::SendMessage(_hCombo, CB_SETCURSEL, lResult, 0);
 }
 
-void ComboOrgi::setComboList(vector<string> vStrList)
+void ComboOrgi::setComboList(vector<tstring> vStrList)
 {
 	size_t	iCnt	= vStrList.size();
 
 	::SendMessage(_hCombo, CB_RESETCONTENT, 0, 0);
 	for (size_t i = 0; i < iCnt; i++)
 	{
-		addText((LPSTR)vStrList[i].c_str());
+		addText((LPCTSTR)vStrList[i].c_str());
 	}
 }
 
-void ComboOrgi::getComboList(vector<string> & vStrList)
+void ComboOrgi::getComboList(vector<tstring> & vStrList)
 {
-	LPSTR	pszTemp	= (LPSTR)new TCHAR[MAX_PATH];
+	LPTSTR	pszTemp	= (LPTSTR)new TCHAR[MAX_PATH];
 	size_t	iCnt	= ::SendMessage(_hCombo, CB_GETCOUNT, 0, 0);
 
 	vStrList.clear();

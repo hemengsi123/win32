@@ -1,12 +1,6 @@
 #ifndef EXPLOERDLG_ONE_H
 #define EXPLOERDLG_ONE_H
 
-#include "../nppUI/StaticDialog.h"
-#include "../nppUI/ComboOrgi.h"
-// #include "../nppUI/TreeHelperClass.h"
-#include "../nppUI/TreeView.h"
-
-
 typedef enum {
 	EID_INIT = 0,
 	EID_UPDATE_USER,
@@ -37,7 +31,7 @@ typedef struct{
 		DWORD	dwAttributes;
 	}tItemList;
 	
-class CExplorerDlg: public StaticDialog
+class CExplorerDlg: public CNppStaticDialog
 {
 public:
 	void create(HINSTANCE hInst, int dialogId);
@@ -61,12 +55,11 @@ protected:
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;
 	//
-	ComboOrgi m_comBoFilter;
-//	TreeHelper m_treeView;
-	TreeView  m_treeView2;
-	//
+	ComboOrgi     m_comBoFilter;
+	CNppTreeView  m_treeView2;
+	CNppListView  m_listViewAll;
+	
 	HIMAGELIST	m_hImageListSmall;
-	//
 	HANDLE	m_hExploreVolumeThread;
 };
 

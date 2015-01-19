@@ -21,9 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef COMBOORGI_DEFINE_H
 #define COMBOORGI_DEFINE_H
 
-// #include "PluginInterface.h"
 #include <vector>
 #include <string>
+#include "NppBase.h"
 using namespace std;
 
 #ifndef CB_GETCOMBOBOXINFO
@@ -52,23 +52,23 @@ public :
 	virtual void destroy() {
 	};
 
-	void addText(LPSTR pszText);
-	void setText(LPSTR pszText, UINT size = MAX_PATH);
-	void getText(LPSTR pszText, UINT size = MAX_PATH);
-	bool getSelText(LPSTR pszText);
+	void addText(LPCTSTR pszText);
+	void setText(LPCTSTR pszText, UINT size = MAX_PATH);
+	void getText(LPTSTR pszText, UINT size = MAX_PATH);
+	bool getSelText(LPTSTR pszText);
 
-	void setComboList(vector<string> vStrList);
-	void getComboList(vector<string> & vStrList);
+	void setComboList(vector<tstring> vStrList);
+	void getComboList(vector<tstring> & vStrList);
 
 private:
-	void selectComboText(LPSTR pszText);
+	void selectComboText(LPCTSTR pszText);
 
 private :
 	HWND					_hCombo;
     WNDPROC					_hDefaultComboProc;
 
-	string					_currData;
-	vector<string>			_comboItems;
+	tstring					_currData;
+	vector<tstring>			_comboItems;
 
 	LRESULT runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK wndDefaultProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {

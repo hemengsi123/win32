@@ -1,31 +1,12 @@
-//this file is part of notepad++
-//Copyright (C)2003 Don HO ( donho@altern.org )
-//
-//This program is free software; you can redistribute it and/or
-//modify it under the terms of the GNU General Public License
-//as published by the Free Software Foundation; either
-//version 2 of the License, or (at your option) any later version.
-//
-//This program is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
-//
-//You should have received a copy of the GNU General Public License
-//along with this program; if not, write to the Free Software
-//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-#include "StdAfx.h"
-
-#include <windows.h>
-
-#include "StaticDialog.h"
+#include "NppLib.h"
+#include "NppStaticDialog.h"
 #include "SysMsg.h"
 
 #define WS_EX_LAYOUTRTL 0x00400000L
 
 
-void StaticDialog::goToCenter()
+void CNppStaticDialog::goToCenter()
 {
     RECT rc;
 	HWND hParen = NULL;
@@ -48,7 +29,7 @@ void StaticDialog::goToCenter()
 	::SetWindowPos(_hSelf, HWND_TOP, x, y, _rc.right - _rc.left, _rc.bottom - _rc.top, SWP_SHOWWINDOW);
 }
 
-HGLOBAL StaticDialog::makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplate)
+HGLOBAL CNppStaticDialog::makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplate)
 {
 	// Get Dlg Template resource
 	HRSRC  hDialogRC = ::FindResource(_hInst, MAKEINTRESOURCE(dialogID), RT_DIALOG);
@@ -71,7 +52,7 @@ HGLOBAL StaticDialog::makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplat
 	return hMyDlgTemplate;
 }
 
-void StaticDialog::create(int dialogID, bool isRTL)
+void CNppStaticDialog::create(int dialogID, bool isRTL)
 {
 	if (isRTL)
 	{
@@ -85,20 +66,20 @@ void StaticDialog::create(int dialogID, bool isRTL)
 
 	if (!_hSelf)
 	{
-		systemMessage("StaticDialog");
+		systemMessage(_T("CNppStaticDialog"));
 		throw int(666);
 	}
 
 	// ::SendMessage(_hParent, WM_MODELESSDIALOG, MODELESSDIALOGADD, (WPARAM)_hSelf);
 }
 
-BOOL CALLBACK StaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
+BOOL CALLBACK CNppStaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 {
 	switch (message) 
 	{
 		case WM_INITDIALOG :
 		{
-			StaticDialog *pStaticDlg = (StaticDialog *)(lParam);
+			CNppStaticDialog *pStaticDlg = (CNppStaticDialog *)(lParam);
 			pStaticDlg->_hSelf = hwnd;
 			::SetWindowLong(hwnd, GWL_USERDATA, (long)lParam);
 			::GetWindowRect(hwnd, &(pStaticDlg->_rc));
@@ -109,7 +90,7 @@ BOOL CALLBACK StaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
 
 		default :
 		{
-			StaticDialog *pStaticDlg = reinterpret_cast<StaticDialog *>(::GetWindowLong(hwnd, GWL_USERDATA));
+			CNppStaticDialog *pStaticDlg = reinterpret_cast<CNppStaticDialog *>(::GetWindowLong(hwnd, GWL_USERDATA));
 			if (!pStaticDlg)
 				return FALSE;
 			return pStaticDlg->run_dlgProc(hwnd, message, wParam, lParam);
@@ -117,7 +98,7 @@ BOOL CALLBACK StaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
 	}
 }
 
-void StaticDialog::alignWith(HWND handle, HWND handle2Align, PosAlign pos, POINT & point)
+void CNppStaticDialog::alignWith(HWND handle, HWND handle2Align, PosAlign pos, POINT & point)
 {
     RECT rc, rc2;
     ::GetWindowRect(handle, &rc);

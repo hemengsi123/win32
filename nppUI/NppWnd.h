@@ -2,30 +2,28 @@
 #ifndef WINDOW_CONTROL_H
 #define WINDOW_CONTROL_H
 
-//#include <stdlib.h>
+#include <windows.h>
 
-// #include <windows.h>
-
-// CNppWindow NppWindow CNppWnd
-class Window
+class CNppWnd
 {
 protected:
 		static LRESULT CALLBACK WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
-			return (((Window *)(::GetWindowLongPtr(hwnd, GWL_USERDATA)))->runProc(hwnd, uMsg, wParam, lParam));
+			return (((CNppWnd *)(::GetWindowLongPtr(hwnd, GWL_USERDATA)))->runWndProc(hwnd, uMsg, wParam, lParam));
 		}
 public:
-	Window(): _hInst(NULL), _hParent(NULL), _hSelf(NULL), _sysWndProc(NULL){};
-	virtual ~Window() {};
+	CNppWnd(): _hInst(NULL), _hParent(NULL), _hSelf(NULL), _sysWndProc(NULL){};
+	virtual ~CNppWnd() {};
 	virtual WNDPROC setWndProc(WNDPROC userWndProc = WndProcWrap)
 	{
 		::SetWindowLongPtr(_hSelf, GWLP_USERDATA, LONG_PTR(this));
 		_sysWndProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hSelf, GWLP_WNDPROC, (LONG_PTR)userWndProc));
 		return _sysWndProc;
 	}
-	virtual LRESULT runProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		return _sysWndProc(hwnd, uMsg, wParam, lParam);
+//		return _sysWndProc(hwnd, uMsg, wParam, lParam); // ³ö´í
+		return ::CallWindowProc(_sysWndProc, hwnd, uMsg, wParam, lParam);
 	}
 	virtual void init(HINSTANCE hInst, HWND parent)
 	{
@@ -37,8 +35,15 @@ public:
 
 	virtual void display(bool toShow = true) const {
 		::ShowWindow(_hSelf, toShow?SW_SHOW:SW_HIDE);
-	};
-	
+	}
+	virtual DWORD setStyle(DWORD nStyle)
+	{
+		return (DWORD)::SetWindowLongPtr(_hSelf, GWL_STYLE, nStyle);
+	}
+	virtual DWORD getStyle() const
+	{
+		return (DWORD)::GetWindowLongPtr(_hSelf, GWL_STYLE);
+	}
 	virtual void reSizeTo(RECT & rc) // should NEVER be const !!!
 	{ 
 		//::MoveWindow(_hSelf, rc.left, rc.top, rc.right, rc.bottom, TRUE);

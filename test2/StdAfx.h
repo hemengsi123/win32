@@ -7,11 +7,12 @@
 #include <vector>
 #include <algorithm>
 
-#include "../common/wcommon.h"
-#include "../utils/winVersion.h"
-#include "../nppUI/nppBase.h"
-#include "../nppUI/nppFile.h"
 #include "resource.h"
+
+#include "../utils/winVersion.h"
+#include "../nppUI/ComboOrgi.h"
+#include "../nppUI/NppLib.h"
+
 #include "ExplorerDlg.h"
 // #pragma warning(disable:4006)
 

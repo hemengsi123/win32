@@ -1,7 +1,6 @@
 
-#include <Shlwapi.h>
-// #include "nppFile.h"
-#include "nppLib.h"
+#include "NppBase.h"
+#include "NppFile.h"
 
 CNppFile::CNppFile(LPCTSTR lpszFilePath): m_lpszPath(NULL), m_lpszName(NULL), m_lpszExtension(NULL), m_hFind(NULL)
 {
@@ -17,59 +16,53 @@ CNppFile::~CNppFile()
 void CNppFile::setFullPath(LPCTSTR lpszFilePath)
 {
 	if(lpszFilePath)
+	{
+		::ZeroMemory(m_szFilePath, sizeof(m_szFilePath));
+//		_stprintf(m_szFilePath, _T("%s\0\0"), lpszFilePath);
 		_tcscpy(m_szFilePath, lpszFilePath);
+	}
 }
 LPCTSTR CNppFile::getFullPath() const
 {
 	return m_szFilePath;
 }
-BOOL CNppFile::isExist(LPCTSTR lpszFilePath) const
+bool CNppFile::isExist(LPCTSTR lpszFilePath) const
 {
-	if( lpszFilePath )
-		return ::PathFileExists(lpszFilePath);
-	else
-		return ::PathFileExists(m_szFilePath);
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+		
+	return (bool)::PathFileExists(lpszFilePath);
 }
-BOOL CNppFile::isFile(LPCTSTR lpszFilePath) const
+bool CNppFile::isFile(LPCTSTR lpszFilePath) const
 {
-	if( lpszFilePath )
-		return !::PathIsDirectory(lpszFilePath);
-	else
-		return !isDir(m_szFilePath);
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+		
+	return (bool)!::PathIsDirectory(lpszFilePath);
 }
-BOOL CNppFile::isDir(LPCTSTR lpszFilePath) const
+bool CNppFile::isDir(LPCTSTR lpszFilePath) const
 {
-	if( lpszFilePath )
-		return ::PathIsDirectory(lpszFilePath);
-	else
-		return ::PathIsDirectory(m_szFilePath);
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+		
+	return (bool)::PathIsDirectory(lpszFilePath);
 }
-BOOL CNppFile::isEmptyDir(LPCTSTR lpszFilePath) const
+bool CNppFile::isEmptyDir(LPCTSTR lpszFilePath) const
 {
-	if( lpszFilePath )
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+	
+	if( isDir(lpszFilePath) )
 	{
-		if( isDir(lpszFilePath) )
-		{
-			return ::PathIsDirectoryEmpty(lpszFilePath);
-		}
-		else
-			return TRUE;
+		return (bool)::PathIsDirectoryEmpty(lpszFilePath);
 	}
-	else
-	{
-		if( isDir(m_szFilePath) )
-		{
-			return ::PathIsDirectoryEmpty(m_szFilePath);
-		}
-		else
-			return TRUE;
-	}
+	return true;
 }
 LPCTSTR CNppFile::getName(LPCTSTR lpszFilePath)
 {
 	if( lpszFilePath )
 	{
-		return setName(::PathFindFileName(lpszFilePath));
+		return ::PathFindFileName(lpszFilePath);
 	}
 	else
 	{
@@ -91,20 +84,22 @@ LPCTSTR CNppFile::setName(LPCTSTR lpszName)
 
 LPCTSTR CNppFile::getPath(LPCTSTR lpszFilePath)
 {
-	if( isDir(m_szFilePath) )
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+		
+	if( isDir(lpszFilePath) )
 	{
-		return m_szFilePath;
+		return lpszFilePath;
 	}
 	else
 	{
-		setPath(m_szFilePath);
+		setPath(lpszFilePath);
 		if(::PathRemoveFileSpec(m_lpszPath) )
 		{
 			return m_lpszPath;
 		}
-		else
-			return NULL;
 	}
+	return NULL;
 }
 LPCTSTR CNppFile::setPath(LPCTSTR lpszPath)
 {
@@ -116,54 +111,45 @@ LPCTSTR CNppFile::setPath(LPCTSTR lpszPath)
 }
 LPCTSTR CNppFile::getNameExt(LPCTSTR lpszFilePath)const
 {
-	if( lpszFilePath )
-		return NULL;
-	else
-		return NULL;
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+
+	return NULL;
 }
 
 LPCTSTR CNppFile::getExtension(LPCTSTR lpszFilePath)const
 {
-	if( lpszFilePath )
-		return ::PathFindExtension(lpszFilePath);
-	else
-		return ::PathFindExtension(m_szFilePath);
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+		
+	return ::PathFindExtension(lpszFilePath);
 }
 // add '\'
 LPTSTR CNppFile::addBackslash(LPTSTR lpszFilePath)
 {
-	if( lpszFilePath )
-		return ::PathAddBackslash(lpszFilePath);
-	else
-		return ::PathAddBackslash(m_szFilePath);
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+		
+	return ::PathAddBackslash(lpszFilePath);
 }
 
 void CNppFile::rmExtension(LPTSTR lpszFilePath)
 {
-	if( lpszFilePath )
-		::PathRemoveExtension(lpszFilePath);
-	else
-		::PathRemoveExtension(m_szFilePath);
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+	
+	::PathRemoveExtension(lpszFilePath);
 }
 
 LPCTSTR CNppFile::append(LPCTSTR pszMore, LPTSTR  pszPath)
 {
-	if( pszMore == NULL)
-		return NULL;
-	if( pszPath )
+	if( !pszPath )
+		pszPath = m_szFilePath;
+	if( pszMore )
 	{
-		if(::PathAppend(pszPath, pszMore) )
-			return pszPath;
-		else
-			return  NULL;
+		::PathAppend(pszPath, pszMore);
 	}
-	else
-	{
-		if(::PathAppend(m_szFilePath, pszMore) )
-			return pszPath;
-		else
-			return  NULL;
-	}
+	return pszPath;
 }
 bool CNppFile::isValidFolder(const LPWIN32_FIND_DATA lpfindData) const
 {
@@ -176,7 +162,7 @@ bool CNppFile::isValidFolder(const LPWIN32_FIND_DATA lpfindData) const
 
 	return false;
 }
-LPWIN32_FIND_DATA CNppFile::findFirstFile(LPCTSTR lpszDirPath)
+LPWIN32_FIND_DATA CNppFile::findFirstFile(LPCTSTR lpszDirPath, LPCTSTR lpszwildcard)
 {
 	::ZeroMemory(&m_findData, sizeof(WIN32_FIND_DATA));
 	findClose();
@@ -186,8 +172,7 @@ LPWIN32_FIND_DATA CNppFile::findFirstFile(LPCTSTR lpszDirPath)
 	else
 		_tcscpy(tmpPath, m_szFilePath);
 	::PathAddBackslash(tmpPath);
-	::PathAppend(tmpPath, _T("*"));
-	//tstring tmpPath = m_szFilePath;
+	::PathAppend(tmpPath, lpszwildcard);
 	
 	m_hFind = ::FindFirstFile(tmpPath, &m_findData);
 	if ( m_hFind== INVALID_HANDLE_VALUE)
@@ -221,43 +206,128 @@ void CNppFile::findClose()
 		::ZeroMemory(&m_findData, sizeof(WIN32_FIND_DATA));
 	}
 }
-bool CNppFile::findIsHidden() const
+bool CNppFile::findIsHidden(const WIN32_FIND_DATA * lpfindData) const
 {
+	if( !lpfindData )
+		lpfindData = &m_findData;
+		
 	if(m_hFind)
 	{
-		return (m_findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN);
+		return (lpfindData->dwFileAttributes & FILE_ATTRIBUTE_HIDDEN);
 	}
-	else
-		return false;
+	return false;
 }
 
-LPCTSTR CNppFile::findGetName() const
+LPCTSTR CNppFile::findGetName(const WIN32_FIND_DATA * lpfindData) const
 {
+	if( !lpfindData )
+		lpfindData = &m_findData;
+		
 	if(m_hFind)
 	{
-		return m_findData.cFileName;
+		return lpfindData->cFileName;
 	}
-	else
-		return NULL;
+	return NULL;
 }
-DWORD CNppFile::findGetAttri() const
+DWORD CNppFile::findGetAttri(const WIN32_FIND_DATA * lpfindData) const
 {
+	if( !lpfindData )
+		lpfindData = &m_findData;
+		
 	if(m_hFind)
 	{
-		return m_findData.dwFileAttributes;
+		return lpfindData->dwFileAttributes;
 	}
-	else
-		return 0;
+	return 0;
+}
+bool CNppFile::findIsDir(const WIN32_FIND_DATA* lpfindData) const
+{
+	if( !lpfindData )
+		lpfindData = &m_findData;
+	return (lpfindData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+bool CNppFile::findIsFile(const WIN32_FIND_DATA* lpfindData) const
+{
+	if( !lpfindData )
+		lpfindData = &m_findData;
+		
+	return !(lpfindData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY); 
+}
+LPSYSTEMTIME CNppFile::getSysTime(LPFILETIME lpftTime)const
+{
+	static SYSTEMTIME sysTime;
+	FILETIME          ftLocalTime;
+	::FileTimeToLocalFileTime(lpftTime, &ftLocalTime);
+	::FileTimeToSystemTime(&ftLocalTime, &sysTime);
+	
+	return &sysTime;
 }
 DWORD CNppFile::getLogicalDrives() const
 {
 	return ::GetLogicalDrives();
 }
-bool CNppFile::findIsDir() const
+/*
+ * @brief SHFileOperation支持中同时删除多个文件，
+ * 在pFrom中加入多个文件路径，每个路径之间用'\0'分隔，最后用"\0\0"结尾
+ *eg. delFile(_T("D:\\1.txt\0D:\\2.txt\0\0"));
+*/
+int CNppFile::delFile(LPCTSTR lpszFile, int fFlags, HWND hwnd)const
 {
-	return (m_findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+	if( lpszFile == NULL)
+	{
+		lpszFile = m_szFilePath;
+	}
+	SHFILEOPSTRUCT	fileOp	= {0};
+	fileOp.hwnd				= hwnd;
+	fileOp.pFrom			= lpszFile;
+//	fileOp.pTo              = NULL;
+	fileOp.fFlags			= fFlags;
+	fileOp.wFunc			= FO_DELETE;
+	return ::SHFileOperation(&fileOp);
 }
-bool CNppFile::findIsFile() const
+int CNppFile::copyFile(LPCTSTR lpszTo, LPCTSTR lpszFrom, int fFlags, HWND hwnd)const
 {
-	return !(m_findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY); 
+	if( lpszFrom == NULL)
+	{
+		lpszFrom = m_szFilePath;
+	}
+	SHFILEOPSTRUCT	fileOp	= {0};
+	fileOp.hwnd				= hwnd;
+	fileOp.pFrom			= lpszFrom;
+	fileOp.pTo              = lpszTo;
+	fileOp.fFlags			= fFlags;
+	fileOp.wFunc			= FO_COPY;
+	
+	return ::SHFileOperation(&fileOp);
+}
+
+int CNppFile::moveFile(LPCTSTR lpszTo, LPCTSTR lpszFrom, int fFlags, HWND hwnd)const
+{
+	if( lpszFrom == NULL)
+	{
+		lpszFrom = m_szFilePath;
+	}
+	SHFILEOPSTRUCT	fileOp	= {0};
+	fileOp.hwnd				= hwnd;
+	fileOp.pFrom			= lpszFrom;
+	fileOp.pTo              = lpszTo;
+	fileOp.fFlags			= fFlags;
+	fileOp.wFunc			= FO_MOVE;
+	
+	return ::SHFileOperation(&fileOp);
+}
+int CNppFile::renameFile(LPCTSTR lpszTo, LPCTSTR lpszFrom, int fFlags, HWND hwnd)
+{
+	if( lpszFrom == NULL)
+	{
+		lpszFrom = m_szFilePath;
+	}
+	SHFILEOPSTRUCT	fileOp	= {0};
+	fileOp.hwnd				= hwnd;
+	fileOp.pFrom			= lpszFrom;
+	fileOp.pTo              = lpszTo;
+	fileOp.fFlags			= fFlags;
+	fileOp.wFunc			= FO_RENAME;
+	
+	return ::SHFileOperation(&fileOp);
 }

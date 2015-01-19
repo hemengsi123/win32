@@ -1,7 +1,8 @@
 
-#include "ImageList.h"
+#include "NppLib.h"
+#include "NppImageList.h"
 
-bool CNppImageList::create(int cx,int cy,UINT flags, int cInitial, int cGrow)
+bool CNppImageList::create(int nWidth, int nHight, UINT flags, int cInitial, int cGrow)
 {
 	_hImglst = ::ImageList_Create(nWidth, nHight, flags, cInitial, cGrow);
 	if (!_hImglst)
@@ -10,18 +11,16 @@ bool CNppImageList::create(int cx,int cy,UINT flags, int cInitial, int cGrow)
 		return true;
 }
 
-int CNppImageList::addIcon(HINSTANCE hInst, int iconID) const 
+int CNppImageList::addIcon(HINSTANCE hInst, int iconID)
 {
-	HICON hIcon = ::LoadIcon(_hInst, MAKEINTRESOURCE(iconID));
+	HICON hIcon = ::LoadIcon(hInst, MAKEINTRESOURCE(iconID));
 	int index = -1;
-//	if (!hIcon)
-//		throw std::runtime_error("CNppImageList::addIcon : LoadIcon() function return null");
 	if( hIcon )
 	{
 		index = ::ImageList_AddIcon(_hImglst, hIcon);
 		::DestroyIcon(hIcon);
 	}
-	return -1;
+	return index;
 }
 bool CNppImageList::delIcon(int iconID)
 {
@@ -34,7 +33,7 @@ bool CNppImageList::delIcon(int iconID)
 }
 int CNppImageList::addImage(HBITMAP hbmImage,HBITMAP hbmMask)
 {
-	int indx = -1;
+	int index = -1;
 	if(_hImglst)
 		index = ::ImageList_Add(_hImglst, hbmImage, hbmMask);
 	return index;
@@ -63,16 +62,6 @@ HIMAGELIST CNppImageList::getSysImgLst(UINT uFlags)
 	}
 	return himl;
 }
-bool CNppImageList::changeIcon(int index, const TCHAR *iconLocation) const
-{
-	HBITMAP hBmp = (HBITMAP)::LoadImage(_hInst, iconLocation, IMAGE_ICON, _iconSize, _iconSize, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
-	if (!hBmp)
-		return false;
-	int i = ImageList_ReplaceIcon(_hImglst, index, (HICON)hBmp);
-	ImageList_AddMasked(_hImglst, (HBITMAP)hBmp, RGB(255,0,255));
-	::DeleteObject(hBmp);
-	return (i == index);
-}
 
 bool CNppImageList::destroy() 
 {
@@ -82,13 +71,21 @@ bool CNppImageList::destroy()
 		bSuccess = ::ImageList_Destroy(_hImglst);
 		_hImglst = NULL;
 	}
-	return bSuccess
+	return bSuccess;
 }
+
 HIMAGELIST CNppImageList::getImglst()const
 {
 	return _hImglst;
 }
-
+void CNppImageList::setImglst(HIMAGELIST hImglst, bool bDestroy)
+{
+	if( bDestroy )
+	{
+		destroy();
+	}
+	_hImglst = hImglst;
+}
 
 
 
