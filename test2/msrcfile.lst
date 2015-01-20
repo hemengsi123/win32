@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-01-20[13:32] 
+# By Simon 2015-01-20[21:34] 
 # 
 
 HSRCS = $(HSRCS) \
@@ -34,11 +34,12 @@ CPPSRCS = $(CPPSRCS) \
 			..\nppUI\NppListView.cpp \
 			..\nppUI\NppStaticDialog.cpp \
 			..\nppUI\NppTreeView.cpp \
+			..\nppUI\NppWnd.cpp \
 			..\nppUI\SysMsg.cpp \
 
 CPPSRCS = $(CPPSRCS) \
 			..\utils\winVersion.cpp \
 
 OBJS = $(OBJS) \
-			 $(OUTDIR)\ExplolerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\ComboOrgi.obj $(OUTDIR)\NppBase.obj $(OUTDIR)\NppFile.obj $(OUTDIR)\NppImageList.obj $(OUTDIR)\NppListView.obj $(OUTDIR)\NppStaticDialog.obj $(OUTDIR)\NppTreeView.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\winVersion.obj
+			 $(OUTDIR)\ExplolerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\ComboOrgi.obj $(OUTDIR)\NppBase.obj $(OUTDIR)\NppFile.obj $(OUTDIR)\NppImageList.obj $(OUTDIR)\NppListView.obj $(OUTDIR)\NppStaticDialog.obj $(OUTDIR)\NppTreeView.obj $(OUTDIR)\NppWnd.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\winVersion.obj
 

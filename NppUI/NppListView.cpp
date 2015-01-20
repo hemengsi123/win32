@@ -2,6 +2,10 @@
 #include "NppLib.h"
 #include "NppListView.h"
 
+LPCTSTR CNppListView::getWndClassName()const
+{
+	return _T("SysListView32");
+}
 void CNppListView::init(HINSTANCE hInst, HWND hParent, HWND hSelf, DWORD dwStyle)
 {
 	CNppWnd::init(hInst, hParent);

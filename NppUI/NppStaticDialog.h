@@ -29,7 +29,7 @@ public :
 			destroy();
 	};
 	virtual void create(int dialogID, bool isRTL = false);
-
+	virtual LPCTSTR getWndClassName() const {return _T("StaticDailog");};
     virtual bool isCreated() const {
 		return (m_hSelf != NULL);
 	};

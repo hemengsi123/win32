@@ -53,6 +53,7 @@ LRESULT ComboOrgi::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 		case WM_KEYUP:
 		{
 			// 13 ENTER
+			/*
 			if (wParam == 13)
 			{
 				LPTSTR	pszText	= (LPTSTR)new TCHAR[MAX_PATH];
@@ -63,7 +64,10 @@ LRESULT ComboOrgi::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 				delete [] pszText;
 
 				return TRUE;
-			}
+			}*/
+			dbg_log(_T("combo hwnd = 0x%08X"), _hCombo);
+			::SendMessage(::GetParent(_hCombo), Message, wParam, lParam);
+			return true;
 			break;
 		}
 		case WM_DESTROY:

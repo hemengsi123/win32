@@ -2,6 +2,10 @@
 #include "NppLib.h"
 #include "NppTreeView.h"
 
+LPCTSTR CNppTreeView::getWndClassName()const
+{
+	return _T("SysTreeView32");// WC_TREEVIEW;
+}
 void CNppTreeView::init(HINSTANCE hInst, HWND hPare, HWND hSelf)
 {
 	CNppWnd::init(hInst, hPare);
@@ -345,4 +349,10 @@ int CNppTreeView::getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath)
 //        lpszItemPath[--nPathLen] = '\0';
     
     return nPathLen;
+}
+
+void CNppTreeView::destroy() 
+{
+	if(_bIsCreate && m_hSelf)
+		::DestroyWindow(m_hSelf);
 }

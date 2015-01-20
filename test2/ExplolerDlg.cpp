@@ -56,6 +56,7 @@ void CExplorerDlg::initCtrl()
 	m_listCtrlAll  = ::GetDlgItem(m_hSelf, IDC_LIST_ALL);
 	m_listCtrlFiles = ::GetDlgItem(m_hSelf, IDC_LIST_FILES);
 	m_filterCtrl    = ::GetDlgItem(m_hSelf, IDC_CBO_FILTER);
+	dbg_log(_T("m_filterCtrl = 0x%08X"), m_filterCtrl);
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 	
 	m_comBoFilter.init(m_filterCtrl);
@@ -118,6 +119,7 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 	{
 		case WM_INITDIALOG:
 		{
+			dbg_log(_T("ini nhwnd = 0x%08X"), hwnd);
 			initCtrl();
 			DWORD			dwThreadId		= 0;
 			// for (int i = 0; i < EID_MAX; i++)
@@ -142,6 +144,11 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 				}
 			}
 			return TRUE;
+		}
+		case WM_KEYUP:
+		{
+			dbg_log(_T("WM_KEYUP hwnd = 0x%08X"), hwnd);
+			break;
 		}
 		case WM_NOTIFY:
 		{

@@ -9,6 +9,7 @@ public:
 	virtual ~CNppListView() {};
 	virtual void init(HINSTANCE hInst, HWND hParent, HWND hSelf=NULL, DWORD dwStyle = LVS_REPORT);
 	virtual void destroy();
+	virtual LPCTSTR getWndClassName()const;
 	int addColumn(LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
 	bool setColumn(int iCol, LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
 	bool setScroll(int cWidth, int cHight);

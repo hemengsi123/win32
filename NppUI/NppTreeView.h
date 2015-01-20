@@ -17,10 +17,8 @@ public :
 	CNppTreeView(): _bIsCreate(false){};
 	virtual ~CNppTreeView(){};
 	virtual void init(HINSTANCE hInst, HWND hPare, HWND hSelf=NULL);
-	virtual void destroy() {
-		if(_bIsCreate)
-			::DestroyWindow(m_hSelf);
-	};
+	virtual void destroy();
+	virtual LPCTSTR getWndClassName()const;
 	void createImageList(int nWidth, int nHight, UINT flags=(ILC_COLOR32 | ILC_MASK), int cInitial=5, int cGrow=10);
 	int addImageIcon(int iconId);
 	void setImageList(bool bIsSysImageList);

@@ -5208,7 +5208,7 @@ typedef struct tagNMLVEMPTYMARKUP
 
 #ifdef _WIN32
 #define WC_TREEVIEWA            "SysTreeView32"
-#define WC_TREEVIEWW            L"SysTreeView32"
+#define WC_TREEVIEWW            L"c"
 
 #ifdef UNICODE
 #define  WC_TREEVIEW            WC_TREEVIEWW
