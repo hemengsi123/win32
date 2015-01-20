@@ -31,13 +31,13 @@ public :
 	virtual void create(int dialogID, bool isRTL = false);
 
     virtual bool isCreated() const {
-		return (_hSelf != NULL);
+		return (m_hSelf != NULL);
 	};
 
 	void goToCenter();
     void destroy() {
-		// ::SendMessage(_hParent, WM_MODELESSDIALOG, MODELESSDIALOGREMOVE, (WPARAM)_hSelf);
-		::DestroyWindow(_hSelf);
+		// ::SendMessage(m_hParent, WM_MODELESSDIALOG, MODELESSDIALOGREMOVE, (WPARAM)m_hSelf);
+		::DestroyWindow(m_hSelf);
 	};
 
 protected :

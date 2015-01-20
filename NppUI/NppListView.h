@@ -2,10 +2,7 @@
 #ifndef LISTVIEW_H
 #define LISTVIEW_H
 
-#include "NppWnd.h"
-#include "NppImageList.h"
-
-class CNppListView : public CNppWnd
+class NPPLIB_API CNppListView : public CNppWnd
 {
 public:
 	CNppListView() : _bIsCreate(false), _iColumnCount(0){};
@@ -31,7 +28,9 @@ public:
 	bool addSubItem(LPCTSTR lpszText, int iCol, int iItem = -1);
 	bool getItemText(int iItem, int iCol, LPTSTR lpszText, int cMaxLen);
 	bool setItemText(LPTSTR lpszText, int iItem, int iCol);
-	
+	BOOL clearItem();
+	BOOL delItem(int iItem);
+	BOOL delColumn(int iCol);
 //	void setValues(int codepage = 0);
 //	void resetValues(int codepage);
 

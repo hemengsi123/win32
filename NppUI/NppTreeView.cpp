@@ -7,21 +7,21 @@ void CNppTreeView::init(HINSTANCE hInst, HWND hPare, HWND hSelf)
 	CNppWnd::init(hInst, hPare);
 	if( hSelf == NULL)
 	{
-		_hSelf = CreateWindowEx(0,
+		m_hSelf = CreateWindowEx(0,
                             WC_TREEVIEW,
                             TEXT("Tree View"),
                             WS_VISIBLE | WS_CHILD | WS_BORDER | 
 							TVS_HASLINES | TVS_HASBUTTONS | TVS_SHOWSELALWAYS , 
                             0,  0,  0, 0,
-                            _hParent, 
+                            m_hParent, 
                             NULL, 
-                            _hInst, 
+                            m_hInst, 
                             NULL);
 		_bIsCreate = true;
 	}
 	else
-		_hSelf = hSelf;
-	if (!_hSelf)
+		m_hSelf = hSelf;
+	if (!m_hSelf)
 		throw int(56);
 
 }
@@ -46,7 +46,7 @@ int CNppTreeView::addImageIcon(int iconId)
 	{
 		return -1;
 	}
-	HICON hIcon = ::LoadIcon(_hInst, MAKEINTRESOURCE(iconId));
+	HICON hIcon = ::LoadIcon(m_hInst, MAKEINTRESOURCE(iconId));
 	return ::ImageList_AddIcon(_hImglst, hIcon);
 }
 void CNppTreeView::setImageList(bool bIsSysImageList)
@@ -61,7 +61,7 @@ void CNppTreeView::setImageList(bool bIsSysImageList)
 	{
 		himl = _hImglst;
 	}
-	::SendMessage(_hSelf, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)himl);
+	::SendMessage(m_hSelf, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)himl);
 
 }
 bool CNppTreeView::getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
@@ -72,12 +72,12 @@ bool CNppTreeView::getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
 	tvi.pszText		= szBuf;
 	tvi.cchTextMax	= bufSize;
 	
-//	return TreeView_GetItem(_hSelf, &tvi);
-	return static_cast<bool>(::SendMessage(_hSelf, TVM_GETITEM, 0, (LPARAM)(TV_ITEM *)&tvi));
+//	return TreeView_GetItem(m_hSelf, &tvi);
+	return static_cast<bool>(::SendMessage(m_hSelf, TVM_GETITEM, 0, (LPARAM)(TV_ITEM *)&tvi));
 }
 HTREEITEM CNppTreeView::getSpecItem(HTREEITEM hitem, UINT flag)
 {
-	return (HTREEITEM)::SendMessage(_hSelf, TVM_GETNEXTITEM, (WPARAM)flag, (LPARAM)(HTREEITEM)(hitem));
+	return (HTREEITEM)::SendMessage(m_hSelf, TVM_GETNEXTITEM, (WPARAM)flag, (LPARAM)(HTREEITEM)(hitem));
 }
 HTREEITEM CNppTreeView::getNext(HTREEITEM hitem)
 {
@@ -113,8 +113,8 @@ HTREEITEM CNppTreeView::insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITE
 		tvis.item.stateMask |= LVIS_CUT;
 	}
 
-//	return TreeView_InsertItem(_hSelf, &tvis);
-	return (HTREEITEM)::SendMessage(_hSelf, TVM_INSERTITEM, 0, (LPARAM)(LPTV_INSERTSTRUCT)(&tvis));
+//	return TreeView_InsertItem(m_hSelf, &tvis);
+	return (HTREEITEM)::SendMessage(m_hSelf, TVM_INSERTITEM, 0, (LPARAM)(LPTV_INSERTSTRUCT)(&tvis));
 }
 
 BOOL CNppTreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, bool bHidden, bool bDelChildren)
@@ -152,13 +152,13 @@ BOOL CNppTreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveCh
 	}
 
 	/* delete children items when available but not needed */
-	if ((haveChildren == true) && bDelChildren && TreeView_GetChild(_hSelf, hUpdateItem))	
+	if ((haveChildren == true) && bDelChildren && TreeView_GetChild(m_hSelf, hUpdateItem))	
 	{
 		delChildren(hUpdateItem);
 	}
 
-	// return TreeView_SetItem(_hSelf, &item);
-	return (BOOL)::SendMessage(_hSelf, TVM_SETITEM, 0, (LPARAM)(const TV_ITEM *)(&item));
+	// return TreeView_SetItem(m_hSelf, &item);
+	return (BOOL)::SendMessage(m_hSelf, TVM_SETITEM, 0, (LPARAM)(const TV_ITEM *)(&item));
 }
 
 BOOL CNppTreeView::getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, LPINT piOverlay)
@@ -171,7 +171,7 @@ BOOL CNppTreeView::getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, 
 	tvi.hItem		= hItem;
 	tvi.stateMask	= TVIS_OVERLAYMASK;
 
-	BOOL bRet = TreeView_GetItem(_hSelf, &tvi);
+	BOOL bRet = TreeView_GetItem(m_hSelf, &tvi);
 
 	if (bRet) {
 		*piIcon			= tvi.iImage;
@@ -227,8 +227,8 @@ HTREEITEM CNppTreeView::addFirst(HTREEITEM hParentItem, LPCTSTR lpszName, int nI
 }
 HTREEITEM CNppTreeView::delItem(HTREEITEM hItem)
 {
-	HTREEITEM hNextItem = TreeView_GetNextItem(_hSelf, hItem, TVGN_NEXT);
-	if(TreeView_DeleteItem(_hSelf, hItem) == TRUE)
+	HTREEITEM hNextItem = TreeView_GetNextItem(m_hSelf, hItem, TVGN_NEXT);
+	if(TreeView_DeleteItem(m_hSelf, hItem) == TRUE)
 		return hNextItem;
 	else
 		return NULL;
@@ -253,15 +253,23 @@ HTREEITEM CNppTreeView::getRoot()
 {
 	return getSpecItem(NULL, TVGN_ROOT);
 }
+BOOL CNppTreeView::clearItem()
+{
+	return TreeView_DeleteAllItems(m_hSelf);
+}
+BOOL CNppTreeView::selectItem(HTREEITEM  hSelItem)
+{
+	return TreeView_SelectItem(m_hSelf, hSelItem);
+}
 void CNppTreeView::delChildren(HTREEITEM hParentItem)
 {
-	HTREEITEM pCurrentItem = TreeView_GetNextItem(_hSelf, hParentItem, TVGN_CHILD);
+	HTREEITEM pCurrentItem = TreeView_GetNextItem(m_hSelf, hParentItem, TVGN_CHILD);
 	// HTREEITEM	pCurrentItem = getChild(hParentItem);
 	while (pCurrentItem != NULL)
 	{
-		TreeView_DeleteItem(_hSelf, pCurrentItem);
+		TreeView_DeleteItem(m_hSelf, pCurrentItem);
 		// delItem(pCurrentItem);
-		pCurrentItem = TreeView_GetNextItem(_hSelf, hParentItem, TVGN_CHILD);
+		pCurrentItem = TreeView_GetNextItem(m_hSelf, hParentItem, TVGN_CHILD);
 	}
 }
 
@@ -269,9 +277,13 @@ BOOL CNppTreeView::setItem(HTREEITEM hItem, LPTSTR lpszName, int nImage, int hav
 {
 	return updateItem(hItem, lpszName, haveChildren, nImage, nImage);
 }
-BOOL CNppTreeView::isItemExpand(HTREEITEM hItem)const
+BOOL CNppTreeView::isExpanded(HTREEITEM hItem)const
 {
-	return (BOOL)(TreeView_GetItemState(_hSelf, hItem, TVIS_EXPANDED) & TVIS_EXPANDED);
+	return (BOOL)(TreeView_GetItemState(m_hSelf, hItem, TVIS_EXPANDED) & TVIS_EXPANDED);
+}
+BOOL CNppTreeView::isSelected(HTREEITEM hItem)const
+{
+	return (BOOL)(TreeView_GetItemState(m_hSelf, hItem, TVIS_SELECTED) & TVIS_SELECTED);
 }
 void CNppTreeView::setOverlayIcon(HTREEITEM hItem, INT iOverlayIcon)
 {
@@ -284,7 +296,7 @@ void CNppTreeView::setOverlayIcon(HTREEITEM hItem, INT iOverlayIcon)
 	item.state			|= INDEXTOOVERLAYMASK(iOverlayIcon);
 	item.stateMask		|= TVIS_OVERLAYMASK;
 
-	TreeView_SetItem(_hSelf, &item);
+	TreeView_SetItem(m_hSelf, &item);
 }
 
 LPARAM CNppTreeView::getParam(HTREEITEM hItem)
@@ -294,7 +306,7 @@ LPARAM CNppTreeView::getParam(HTREEITEM hItem)
 	tvi.hItem		= hItem;
 	tvi.lParam		= 0;
 	
-	TreeView_GetItem(_hSelf, &tvi);
+	TreeView_GetItem(m_hSelf, &tvi);
 
 	return tvi.lParam;
 }
@@ -308,7 +320,7 @@ void CNppTreeView::setParam(HTREEITEM hItem, LPARAM lParam)
 	item.mask			 = TVIF_PARAM;
 	item.lParam			 = lParam;
 
-	TreeView_SetItem(_hSelf, &item);
+	TreeView_SetItem(m_hSelf, &item);
 }
 int CNppTreeView::getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath)
 {

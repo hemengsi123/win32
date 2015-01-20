@@ -1651,7 +1651,7 @@ typedef struct tagMSG {
  * Window field offsets for GetWindowLong()
  */
 #define GWL_WNDPROC         (-4)
-#define GWL_HINSTANCE       (-6)
+#define GWLm_hInstANCE       (-6)
 #define GWL_HWNDPARENT      (-8)
 #define GWL_STYLE           (-16)
 #define GWL_EXSTYLE         (-20)
@@ -1661,14 +1661,14 @@ typedef struct tagMSG {
 #ifdef _WIN64
 
 #undef GWL_WNDPROC
-#undef GWL_HINSTANCE
+#undef GWLm_hInstANCE
 #undef GWL_HWNDPARENT
 #undef GWL_USERDATA
 
 #endif /* _WIN64 */
 
 #define GWLP_WNDPROC        (-4)
-#define GWLP_HINSTANCE      (-6)
+#define GWLPm_hInstANCE      (-6)
 #define GWLP_HWNDPARENT     (-8)
 #define GWLP_USERDATA       (-21)
 #define GWLP_ID             (-12)
@@ -9502,7 +9502,7 @@ void _Button(){}
 #define BM_SETCHECK        0x00F1
 #define BM_GETSTATE        0x00F2
 #define BM_SETSTATE        0x00F3
-#define BM_SETSTYLE        0x00F4
+#define BM_setWndStyle        0x00F4
 #if(WINVER >= 0x0400)
 #define BM_CLICK           0x00F5
 #define BM_GETIMAGE        0x00F6

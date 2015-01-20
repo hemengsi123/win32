@@ -19,7 +19,7 @@ public :
 	virtual void init(HINSTANCE hInst, HWND hPare, HWND hSelf=NULL);
 	virtual void destroy() {
 		if(_bIsCreate)
-			::DestroyWindow(_hSelf);
+			::DestroyWindow(m_hSelf);
 	};
 	void createImageList(int nWidth, int nHight, UINT flags=(ILC_COLOR32 | ILC_MASK), int cInitial=5, int cGrow=10);
 	int addImageIcon(int iconId);
@@ -39,8 +39,11 @@ public :
 	HTREEITEM getPrevious(HTREEITEM hCurrItem);
 	HTREEITEM getSelect();
 	HTREEITEM getRoot();
+	BOOL clearItem();
+	BOOL selectItem(HTREEITEM  hSelItem);
 	BOOL setItem(HTREEITEM hItem, LPTSTR lpszName, int nImage = 0, int haveChildren = true);
-	BOOL isItemExpand(HTREEITEM hItem)const;
+	BOOL isExpanded(HTREEITEM hItem)const;
+	BOOL isSelected(HTREEITEM hItem)const;
 	void setOverlayIcon(HTREEITEM hItem, INT iOverlayIcon);
 	LPARAM getParam(HTREEITEM hItem);
 	void setParam(HTREEITEM hItem, LPARAM lParam);

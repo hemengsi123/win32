@@ -4,7 +4,7 @@
 
 #include <CommCtrl.h>
 
-class CNppImageList
+class NPPLIB_API CNppImageList
 {
 public :
 	CNppImageList() : _hImglst(NULL){};

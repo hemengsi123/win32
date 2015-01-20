@@ -73,6 +73,7 @@ protected:
 	HIMAGELIST	m_hImageListSmall;
 	HANDLE	m_hExploreVolumeThread;
 	std::vector<ListViewItem> m_vListViewAll;
+	std::vector<ListViewItem> m_vListViewFiles;
 };
 
 #endif

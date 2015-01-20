@@ -10,12 +10,12 @@ void CNppStaticDialog::goToCenter()
 {
     RECT rc;
 	HWND hParen = NULL;
-	if( _hParent == NULL)
+	if( m_hParent == NULL)
 	{
 		hParen = ::GetDesktopWindow();
 	}
 	else
-		hParen = _hParent;
+		hParen = m_hParent;
 	
     ::GetClientRect(hParen, &rc);
     POINT center;
@@ -26,18 +26,18 @@ void CNppStaticDialog::goToCenter()
 	int x = center.x - (_rc.right - _rc.left)/2;
 	int y = center.y - (_rc.bottom - _rc.top)/2;
 
-	::SetWindowPos(_hSelf, HWND_TOP, x, y, _rc.right - _rc.left, _rc.bottom - _rc.top, SWP_SHOWWINDOW);
+	::SetWindowPos(m_hSelf, HWND_TOP, x, y, _rc.right - _rc.left, _rc.bottom - _rc.top, SWP_SHOWWINDOW);
 }
 
 HGLOBAL CNppStaticDialog::makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplate)
 {
 	// Get Dlg Template resource
-	HRSRC  hDialogRC = ::FindResource(_hInst, MAKEINTRESOURCE(dialogID), RT_DIALOG);
-	HGLOBAL  hDlgTemplate = ::LoadResource(_hInst, hDialogRC);
+	HRSRC  hDialogRC = ::FindResource(m_hInst, MAKEINTRESOURCE(dialogID), RT_DIALOG);
+	HGLOBAL  hDlgTemplate = ::LoadResource(m_hInst, hDialogRC);
 	DLGTEMPLATE *pDlgTemplate = (DLGTEMPLATE *)::LockResource(hDlgTemplate);
 	
 	// Duplicate Dlg Template resource
-	unsigned long sizeDlg = ::SizeofResource(_hInst, hDialogRC);
+	unsigned long sizeDlg = ::SizeofResource(m_hInst, hDialogRC);
 	HGLOBAL hMyDlgTemplate = ::GlobalAlloc(GPTR, sizeDlg);
 	*ppMyDlgTemplate = (DLGTEMPLATE *)::GlobalLock(hMyDlgTemplate);
 
@@ -58,20 +58,20 @@ void CNppStaticDialog::create(int dialogID, bool isRTL)
 	{
 		DLGTEMPLATE *pMyDlgTemplate = NULL;
 		HGLOBAL hMyDlgTemplate = makeRTLResource(dialogID, &pMyDlgTemplate);
-		_hSelf = ::CreateDialogIndirectParam(_hInst, pMyDlgTemplate, _hParent, (DLGPROC)dlgProc, (LPARAM)this);
+		m_hSelf = ::CreateDialogIndirectParam(m_hInst, pMyDlgTemplate, m_hParent, (DLGPROC)dlgProc, (LPARAM)this);
 		::GlobalFree(hMyDlgTemplate);
 	}
 	else
-		_hSelf = ::CreateDialogParam(_hInst, MAKEINTRESOURCE(dialogID), _hParent, (DLGPROC)dlgProc, (LPARAM)this);
+		m_hSelf = ::CreateDialogParam(m_hInst, MAKEINTRESOURCE(dialogID), m_hParent, (DLGPROC)dlgProc, (LPARAM)this);
 
-	if (!_hSelf)
+	if (!m_hSelf)
 	{
 		systemMessage(_T("CNppStaticDialog"));
 		throw int(666);
 	}
 	// diaog 大小不可以改变
-	CNppWnd::setStyle(getStyle() & ~WS_SIZEBOX);
-	// ::SendMessage(_hParent, WM_MODELESSDIALOG, MODELESSDIALOGADD, (WPARAM)_hSelf);
+	CNppWnd::setWndStyle(getWndStyle() & ~WS_SIZEBOX);
+	// ::SendMessage(m_hParent, WM_MODELESSDIALOG, MODELESSDIALOGADD, (WPARAM)m_hSelf);
 }
 
 BOOL CALLBACK CNppStaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
@@ -81,7 +81,7 @@ BOOL CALLBACK CNppStaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 		case WM_INITDIALOG :
 		{
 			CNppStaticDialog *pStaticDlg = (CNppStaticDialog *)(lParam);
-			pStaticDlg->_hSelf = hwnd;
+			pStaticDlg->m_hSelf = hwnd;
 			::SetWindowLong(hwnd, GWL_USERDATA, (long)lParam);
 			::GetWindowRect(hwnd, &(pStaticDlg->_rc));
             pStaticDlg->run_dlgProc(hwnd, message, wParam, lParam);
@@ -130,5 +130,5 @@ void CNppStaticDialog::alignWith(HWND handle, HWND handle2Align, PosAlign pos, P
             break;
     }
     
-    ::ScreenToClient(_hSelf, &point);
+    ::ScreenToClient(m_hSelf, &point);
 }

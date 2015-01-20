@@ -135,7 +135,7 @@ int test_creatWndExample(HINSTANCE hInstance)
 	TCHAR clsName[] = _T("test1");
 	TCHAR wndName[] = _T("Hello, win32");
 	HWND hWnd = NULL;
-	
+	_ASSERTE(_T("assert test"));
 	// 只允许运行一个实例
 	hWnd = ::FindWindow(NULL, wndName);
 	if( hWnd != NULL)
@@ -144,14 +144,14 @@ int test_creatWndExample(HINSTANCE hInstance)
 		SetForegroundWindow(hWnd);  
 		return 0;
 	}
-	WNDCLASS wndClss = {};
+	WNDCLASS wndClss = {0};
 	wndClss.style         = CS_HREDRAW | CS_VREDRAW;
 	wndClss.hbrBackground = (HBRUSH)COLOR_WINDOW;
 	wndClss.lpfnWndProc   = WindowProc;
 	wndClss.lpszClassName = clsName;
 	wndClss.hInstance     = hInstance;
 	wndClss.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
-	
+	dbg_log(_T("wndClss = 0x%08X"), &wndClss);
 	::RegisterClass(&wndClss);
 	hWnd = ::CreateWindow(
 		clsName,
@@ -164,7 +164,7 @@ int test_creatWndExample(HINSTANCE hInstance)
 		NULL,
 		::LoadMenu(hInstance, MAKEINTRESOURCE(IDR_M10_MENU)),  // 加载菜单
 		hInstance,
-		NULL);
+		(LPVOID)1);
 	if( hWnd == NULL)
 	{
 		dbg_log(_T("CreateWindow failed: %x"), GetLastError());
@@ -228,10 +228,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 {
 	
 	
-	test_SHellFunc();
+//	test_SHellFunc();
 	//test_LogicDrivers();
 	//
-	// test_creatWndExample(hInstance);
+	test_creatWndExample(hInstance);
 	// test_creatDlgExample(hInstance);
 	return 0;
 	
@@ -339,6 +339,12 @@ LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, 
 	HMENU hsmn = ::GetSubMenu(hmn, 0);
 	switch(uMsg)
 	{
+	case WM_NCCREATE:
+	{
+		LPCREATESTRUCT lpcs = reinterpret_cast<LPCREATESTRUCT>(lParam);
+		dbg_log(_T("WM_NCCREATE lpCreateParams = 0x%08X"), lpcs->lpCreateParams);
+		return TRUE;
+	}
 	// 用sendmessage或postmessage发送这个消息给它
 	case WM_NOTIFY:
 	{
@@ -421,7 +427,7 @@ LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, 
 			textSize,
 			hWnd,
 			(HMENU)IDC_EDT_SHOW,
-			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+			(HINSTANCE)GetWindowLong(hWnd, GWLm_hInstANCE),
 			NULL);
 		// ::ShowWindow(hEdt, SW_SHOW);
 		::EnableWindow(g_hEdt, true);
@@ -436,7 +442,7 @@ LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, 
 			textSize,
 			hWnd,
 			(HMENU)IDC_CBO_BROWSE,
-			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+			(HINSTANCE)GetWindowLong(hWnd, GWLm_hInstANCE),
 			NULL);
 		//
 		g_hCrytoBtn = ::CreateWindow(
@@ -449,7 +455,7 @@ LRESULT CALLBACK WindowProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, 
 			textSize,
 			hWnd,
 			(HMENU)IDC_BTN_CRYTO,
-			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE),
+			(HINSTANCE)GetWindowLong(hWnd, GWLm_hInstANCE),
 			NULL);
 		// ::ShowWindow(g_hCrytoBtn, SW_SHOW);
 		// ::EnableWindow(g_hCrytoBtn, false);

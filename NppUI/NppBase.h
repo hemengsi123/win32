@@ -8,9 +8,12 @@
 /////////////////////////////
 // syserror
 
-#define SYSERR_HSELF_NULL	56	
+#define SYSERRm_hSelf_NULL	56	
 #define SYSERR_HWND_NULL  -1
 
+#ifndef ASSERT
+#define ASSERT(expr)  _ASSERTE(expr)
+#endif
 //////////////////////////////
 #ifdef _UNICODE 
 	typedef std::wstring tstring;

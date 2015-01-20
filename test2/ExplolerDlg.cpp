@@ -52,18 +52,18 @@ void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 }
 void CExplorerDlg::initCtrl()
 {
-	m_hTreeCtrl = ::GetDlgItem(_hSelf, IDC_TREE_FOLDER);
-	m_listCtrlAll  = ::GetDlgItem(_hSelf, IDC_LIST_ALL);
-	m_listCtrlFiles = ::GetDlgItem(_hSelf, IDC_LIST_FILES);
-	m_filterCtrl    = ::GetDlgItem(_hSelf, IDC_CBO_FILTER);
-	m_splitterCtrl  = ::GetDlgItem(_hSelf, IDC_BUTTON_SPLITTER);
+	m_hTreeCtrl = ::GetDlgItem(m_hSelf, IDC_TREE_FOLDER);
+	m_listCtrlAll  = ::GetDlgItem(m_hSelf, IDC_LIST_ALL);
+	m_listCtrlFiles = ::GetDlgItem(m_hSelf, IDC_LIST_FILES);
+	m_filterCtrl    = ::GetDlgItem(m_hSelf, IDC_CBO_FILTER);
+	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 	
 	m_comBoFilter.init(m_filterCtrl);
 	m_comBoFilter.addText(_T("*.*"));
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
 	
-	m_treeView2.init(_hInst, _hSelf, m_hTreeCtrl);
+	m_treeView2.init(m_hInst, m_hSelf, m_hTreeCtrl);
 	m_treeView2.setImageList(true);
 	
     UpdateDevices();
@@ -72,14 +72,14 @@ void CExplorerDlg::initCtrl()
   	// list view
 //  	dbg_log(_T("list view"));
 
-  	m_listViewAll.init(_hInst, _hSelf, m_listCtrlAll);
+  	m_listViewAll.init(m_hInst, m_hSelf, m_listCtrlAll);
 	m_listViewAll.setExtStyle(m_listViewAll.getExtStyle() | LVS_EX_FULLROWSELECT);
 	int errRet = 0;
 //	m_listViewAll.setColumn(_T("name"), 100, 0);
 	m_listViewAll.addColumn(_T("Name"), 100, LVCFMT_LEFT);
 	m_listViewAll.addColumn(_T("Ext."), 100, LVCFMT_LEFT);
 	m_listViewAll.addColumn(_T("Size"), 100, LVCFMT_CENTER);
-//	m_listViewAll.setStyle(m_listViewAll.getStyle() & ~WS_HSCROLL);
+//	m_listViewAll.setWndStyle(m_listViewAll.getWndStyle() & ~WS_HSCROLL);
 //	ListView_SetTextColor(m_listViewAll.getHSelf(), 255);
 //	errRet = m_listViewAll.addItem(_T("item0\0"), 0);
 //	errRet = m_listViewAll.addSubItem(_T("subitem0\0"), 1);
@@ -88,7 +88,7 @@ void CExplorerDlg::initCtrl()
 //	m_listViewAll.setItemText(_T("test.txt"), 0, 0);
 //	ListView_EnsureVisible(m_listViewAll.getHSelf(), 0, true);
 
-	m_listViewFiles.init(_hInst, _hSelf, m_listCtrlFiles);
+	m_listViewFiles.init(m_hInst, m_hSelf, m_listCtrlFiles);
 	m_listViewFiles.hiddenHeader();
 	ListView_SetItemCountEx(m_listViewFiles.getHSelf(), 2, LVSICF_NOSCROLL);
 	m_listViewFiles.addColumn(_T("File"), 355);
@@ -103,9 +103,9 @@ void CExplorerDlg::initCtrl()
 	// m_treeView2.display();
 	//
 	// HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
-	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_PARENTFOLDER)));
-	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_FOLDER)));
-	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(_hInst, MAKEINTRESOURCE(IDI_FILE)));
+	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(m_hInst, MAKEINTRESOURCE(IDI_PARENTFOLDER)));
+	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(m_hInst, MAKEINTRESOURCE(IDI_FOLDER)));
+	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(m_hInst, MAKEINTRESOURCE(IDI_FILE)));
 	
 	// m_hImageListSmall = GetSmallImageList(true);
 	// ::SendMessage(m_hTreeCtrl, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)m_hImageListSmall/*m_hImageListSmall*/);
@@ -158,6 +158,15 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 					}
 					case TVN_SELCHANGED:
 					{
+						dbg_log(_T("TVN_SELCHANGED"));
+						TVITEM	tvi	= (TVITEM)((LPNMTREEVIEW)lParam)->itemNew;
+						TCHAR szItemPath[MAX_PATH] = {0};
+						if( m_treeView2.isSelected(tvi.hItem) )
+						{
+							m_treeView2.getItemPath(tvi.hItem, szItemPath);
+							GetFolderFullPath(tvi.hItem, szItemPath, _T(""));
+							UpdateFileListAll(szItemPath);
+						}
 						break;
 					}
 					case TVN_ITEMEXPANDING:
@@ -174,7 +183,7 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 //							dbg_log("ItemPath = %s", szItemPath);
 							UpDateChildren(szItemPath, tvi.hItem, true);
 
-							UpdateFileListAll(szItemPath);
+							//UpdateFileListAll(szItemPath);
 						}
 						else
 						{
@@ -363,8 +372,8 @@ void CExplorerDlg::NotifyEvent(DWORD event)
 {
 	POINT	pt;
 
-    // LONG oldCur = ::SetClassLong(_hSelf, GCL_HCURSOR, (LONG)_hCurWait);
-    // ::EnableWindow(_hSelf, FALSE);
+    // LONG oldCur = ::SetClassLong(m_hSelf, GCL_HCURSOR, (LONG)_hCurWait);
+    // ::EnableWindow(m_hSelf, FALSE);
 	// ::GetCursorPos(&pt);
 	// ::SetCursorPos(pt.x, pt.y);
 
@@ -392,7 +401,7 @@ void CExplorerDlg::NotifyEvent(DWORD event)
 			// NotifyNewFile();
 
 			// /* resize to remove splitter problems */
-			// ::SendMessage(_hSelf, WM_SIZE, 0, 0);
+			// ::SendMessage(m_hSelf, WM_SIZE, 0, 0);
 			break;
 		}
 		case EID_UPDATE_DEVICE :
@@ -404,15 +413,15 @@ void CExplorerDlg::NotifyEvent(DWORD event)
 		{
 			UpdateDevices();
 			UpdateFolders();
-			::SendMessage(_hSelf, EXM_UPDATE_PATH, 0, 0);
+			::SendMessage(m_hSelf, EXM_UPDATE_PATH, 0, 0);
 			break;
 		}
 		default:
 			break;
 	}
 
-    // ::SetClassLong(_hSelf, GCL_HCURSOR, oldCur);
-	// ::EnableWindow(_hSelf, TRUE);
+    // ::SetClassLong(m_hSelf, GCL_HCURSOR, oldCur);
+	// ::EnableWindow(m_hSelf, TRUE);
 	// ::GetCursorPos(&pt);
 	// ::SetCursorPos(pt.x, pt.y);
 }
@@ -527,7 +536,7 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
 				hCurrItem = m_treeView2.addLast(hCurrItem, vFolderList[i].c_str(), iIconNormal, haveChildren);
             }
             /* update recursive */
-			if(doRecursive && m_treeView2.isItemExpand(hCurrItem) )
+			if(doRecursive && m_treeView2.isExpanded(hCurrItem) )
 			{
 				UpDateChildren(szItemPath, hCurrItem, true);
 			}
@@ -629,6 +638,7 @@ bool CExplorerDlg::HaveChildDir(LPCTSTR lpszPath)
 void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 {
 	LPWIN32_FIND_DATA lpfindData = NULL;
+	ListViewItem lvItem;
 	m_vListViewAll.clear();
 	CNppFile searchFile(lpszSelDir);
 	lpfindData = searchFile.findFirstFile(NULL, lpszWildcard);
@@ -637,7 +647,7 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 //		dbg_log(_T("name = %s"), searchFile.findGetName());
 		if(IsValidFile(lpfindData) || IsValidFolder(lpfindData) )
 		{
-			ListViewItem lvItem;
+			
 			LPCTSTR lpszExt = NULL;
 			lvItem.m_currentDir = tstring(lpszSelDir);
 			lvItem.m_fileName   = tstring(searchFile.findGetName());
@@ -649,7 +659,7 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 		
 		lpfindData = searchFile.findNextFile();
 	}
-	
+	m_listViewAll.clearItem();
 	std::vector<ListViewItem>::iterator iter = m_vListViewAll.begin();
 	for(int i=0; iter != m_vListViewAll.end(); ++iter,++i)
 	{
