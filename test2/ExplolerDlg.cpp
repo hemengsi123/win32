@@ -52,11 +52,18 @@ void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 }
 void CExplorerDlg::initCtrl()
 {
-	m_hTreeCtrl = ::GetDlgItem(m_hSelf, IDC_TREE_FOLDER);
-	m_listCtrlAll  = ::GetDlgItem(m_hSelf, IDC_LIST_ALL);
-	m_listCtrlFiles = ::GetDlgItem(m_hSelf, IDC_LIST_FILES);
+//	m_hTreeCtrl = ::GetDlgItem(m_hSelf, IDC_TREE_FOLDER);
+	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
+	m_treeView2.create();
+	//m_listCtrlAll  = ::GetDlgItem(m_hSelf, IDC_LIST_ALL);
+	m_listViewAll.init(m_hInst, m_hSelf, IDC_LIST_ALL);
+	m_listViewAll.create();
+//	m_listCtrlFiles = ::GetDlgItem(m_hSelf, IDC_LIST_FILES);
+	m_listViewFiles.init(m_hInst, m_hSelf, IDC_LIST_FILES);
+	m_listViewFiles.create();
+	
 	m_filterCtrl    = ::GetDlgItem(m_hSelf, IDC_CBO_FILTER);
-	dbg_log(_T("m_filterCtrl = 0x%08X"), m_filterCtrl);
+
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 	
 	m_comBoFilter.init(m_filterCtrl);
@@ -64,7 +71,7 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
 	
-	m_treeView2.init(m_hInst, m_hSelf, m_hTreeCtrl);
+//	m_treeView2.init(m_hInst, m_hSelf, m_hTreeCtrl);
 	m_treeView2.setImageList(true);
 	
     UpdateDevices();
@@ -73,13 +80,14 @@ void CExplorerDlg::initCtrl()
   	// list view
 //  	dbg_log(_T("list view"));
 
-  	m_listViewAll.init(m_hInst, m_hSelf, m_listCtrlAll);
+//  	m_listViewAll.init(m_hInst, m_hSelf, m_listCtrlAll);
 	m_listViewAll.setExtStyle(m_listViewAll.getExtStyle() | LVS_EX_FULLROWSELECT);
 	int errRet = 0;
 //	m_listViewAll.setColumn(_T("name"), 100, 0);
 	m_listViewAll.addColumn(_T("Name"), 100, LVCFMT_LEFT);
 	m_listViewAll.addColumn(_T("Ext."), 100, LVCFMT_LEFT);
 	m_listViewAll.addColumn(_T("Size"), 100, LVCFMT_CENTER);
+	m_listViewAll.addItem(_T("test"), 0);
 //	m_listViewAll.setWndStyle(m_listViewAll.getWndStyle() & ~WS_HSCROLL);
 //	ListView_SetTextColor(m_listViewAll.getHSelf(), 255);
 //	errRet = m_listViewAll.addItem(_T("item0\0"), 0);
@@ -89,7 +97,7 @@ void CExplorerDlg::initCtrl()
 //	m_listViewAll.setItemText(_T("test.txt"), 0, 0);
 //	ListView_EnsureVisible(m_listViewAll.getHSelf(), 0, true);
 
-	m_listViewFiles.init(m_hInst, m_hSelf, m_listCtrlFiles);
+//	m_listViewFiles.init(m_hInst, m_hSelf, m_listCtrlFiles);
 	m_listViewFiles.hiddenHeader();
 	ListView_SetItemCountEx(m_listViewFiles.getHSelf(), 2, LVSICF_NOSCROLL);
 	m_listViewFiles.addColumn(_T("File"), 355);
@@ -119,7 +127,6 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 	{
 		case WM_INITDIALOG:
 		{
-			dbg_log(_T("ini nhwnd = 0x%08X"), hwnd);
 			initCtrl();
 			DWORD			dwThreadId		= 0;
 			// for (int i = 0; i < EID_MAX; i++)
@@ -154,7 +161,7 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 		{
 			LPNMHDR		nmhdr = (LPNMHDR)lParam;
 			
-			if (nmhdr->hwndFrom == m_hTreeCtrl)
+			if (nmhdr->hwndFrom == m_treeView2.getHSelf())
 			{
 				switch (nmhdr->code)
 				{
@@ -203,8 +210,6 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 					{
 						if (((LPNMTVKEYDOWN)lParam)->wVKey == VK_RIGHT)
 						{
-							HTREEITEM	hItem = TreeView_GetSelection(m_hTreeCtrl);
-							// DrawChildren(hItem);
 							dbg_log(_T("TVN_KEYDOWN"));
 						}
 						

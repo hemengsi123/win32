@@ -3,7 +3,7 @@
 #include "NppWnd.h"
 
 CNppWnd::CNppWnd(): m_hInst(NULL), m_hParent(NULL), m_hSelf(NULL), \
-					m_bIsCreated(false), m_sysWndProc(::DefWindowProc)
+					m_sysWndProc(::DefWindowProc)
 {
 	
 }
@@ -39,7 +39,7 @@ LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
     }
     if( phSelf != NULL ) 
 	{
-        return phSelf->runWndProc(hwnd, uMsg, wParam, lParam);
+        return phSelf->runWndProc(/*phSelf->m_hSelf, */uMsg, wParam, lParam);
     } 
     else
         return ::DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -73,24 +73,23 @@ UINT CNppWnd::getClassStyle() const
 {
     return 0;
 }
-HWND CNppWnd::create(HWND hwndParent, LPCTSTR lpszCaption, DWORD dwStyle, DWORD dwExStyle, const RECT rc, HMENU hMenu)
+HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, const RECT rc, DWORD dwExStyle)
 {
-    return create(hwndParent, lpszCaption, dwStyle, dwExStyle, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, hMenu);
+    return create(lpszCaption, dwStyle, hMenu, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, dwExStyle);
 }
 
-HWND CNppWnd::create(HWND hwndParent, LPCTSTR lpszCaption, DWORD dwStyle, DWORD dwExStyle, int x, int y, int cx, int cy, HMENU hMenu)
+HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, int x, int y, int cx, int cy, DWORD dwExStyle)
 {
 	if( !registerWndClass() )
 		return NULL;
-	m_hSelf = ::CreateWindowEx(dwExStyle, getWndClassName(), lpszCaption, dwStyle, x, y, cx, cy, hwndParent, hMenu, m_hInst, this);
+	m_hSelf = ::CreateWindowEx(dwExStyle, getWndClassName(), lpszCaption, dwStyle, x, y, cx, cy, m_hParent, hMenu, m_hInst, this);
     ASSERT(m_hSelf!=NULL);
-    
-	m_bIsCreated = true;
+	return m_hSelf;
 }
-LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CNppWnd::runWndProc(/*HWND hwnd, */UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 //		return m_sysWndProc(hwnd, uMsg, wParam, lParam); // ³ö´í
-	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
+	return ::CallWindowProc(m_sysWndProc, m_hSelf, uMsg, wParam, lParam);
 }
 void CNppWnd::init(HINSTANCE hInst, HWND parent)
 {
@@ -112,6 +111,24 @@ DWORD CNppWnd::setWndStyle(DWORD nStyle)
 DWORD CNppWnd::getWndStyle() const
 {
 	return (DWORD)::GetWindowLongPtr(m_hSelf, GWL_STYLE);
+}
+DWORD CNppWnd::setWndExStyle(DWORD dwExStyle)
+{
+	return (DWORD)::SetWindowLongPtr(m_hSelf, GWL_EXSTYLE, dwExStyle);
+}
+DWORD CNppWnd::getWndExStyle() const
+{
+	return (DWORD)::GetWindowLongPtr(m_hSelf, GWL_EXSTYLE);
+}
+BOOL CNppWnd::setWndText(LPCTSTR lpszText)
+{
+	if( !lpszText )
+		return FALSE;
+	return ::SetWindowText(m_hSelf, lpszText);
+}
+int  CNppWnd::getWndText(LPTSTR OUT lpString, int IN nMaxCount)
+{
+	return ::GetWindowText(m_hSelf, lpString, nMaxCount);
 }
 void CNppWnd::reSizeTo(RECT & rc) // should NEVER be const !!!
 { 
@@ -172,6 +189,10 @@ HWND CNppWnd::getHSelf() const
 {
 	return m_hSelf;
 }
+void CNppWnd::setHSelf(HWND hSelf)
+{
+	m_hSelf = hSelf;
+}
 void CNppWnd::getFocus() const 
 {
 	::SetFocus(m_hSelf);
@@ -179,6 +200,10 @@ void CNppWnd::getFocus() const
 HINSTANCE CNppWnd::getHInst() const
 {
 	return m_hInst;
+}
+HWND CNppWnd::getParent()const
+{
+	return m_hParent;
 }
 LRESULT CNppWnd::sendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -190,32 +215,90 @@ LRESULT CNppWnd::postMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	ASSERT(::IsWindow(m_hSelf));
     return ::PostMessage(m_hSelf, uMsg, wParam, lParam);
 }
-UINT CNppWnd::showModal()
+
+////////////////////////////////////////////////////////////////////////////////
+// 
+// CNppCtrlWnd
+//
+UINT CNppCtrlWnd::m_nCtrlCount = 0;
+
+CNppCtrlWnd::CNppCtrlWnd(): m_bIsCreated(false), m_iCtrlID(0)
 {
-/*
-	ASSERT(::IsWindow(m_hSelf));
-    UINT nRet = 0;
-    HWND hWndParent = GetWindowOwner(m_hSelf);
-    ::ShowWindow(m_hSelf, SW_SHOWNORMAL);
-    ::EnableWindow(hWndParent, FALSE);
-    MSG msg = { 0 };
-    while( ::IsWindow(m_hSelf) && ::GetMessage(&msg, NULL, 0, 0) ) {
-        if( msg.message == WM_CLOSE && msg.hwnd == m_hSelf ) {
-            nRet = msg.wParam;
-            ::EnableWindow(hWndParent, TRUE);
-            ::SetFocus(hWndParent);
-        }
-       // if( !CPaintManagerUI::TranslateMessage(&msg) ) {
-            ::TranslateMessage(&msg);
-            ::DispatchMessage(&msg);
-        //}
-        if( msg.message == WM_QUIT ) break;
-    }
-    ::EnableWindow(hWndParent, TRUE);
-    ::SetFocus(hWndParent);
-    if( msg.message == WM_QUIT ) ::PostQuitMessage(msg.wParam);
-   
-    return nRet;
-     */
-     return 0;
+	++m_nCtrlCount;
+}
+CNppCtrlWnd::~CNppCtrlWnd()
+{
+	ASSERT(m_nCtrlCount > 0);
+	--m_nCtrlCount;
+}
+void CNppCtrlWnd::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
+{
+	CNppWnd::init(hInst, hParent);
+	m_iCtrlID = iCtrlIDs;
+}
+HWND CNppCtrlWnd::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
+{
+	HWND hWnd = ::GetDlgItem(getParent(), (int)m_iCtrlID);
+	if(hWnd)
+	{
+		setHSelf(hWnd);
+		if(lpszCaption )
+		{
+			setWndText(lpszCaption);
+		}
+		if( dwStyle > 0)
+		{
+			setWndStyle(getWndStyle() | dwStyle);
+		}
+		if(dwExStyle > 0)
+		{
+			setWndExStyle(getWndExStyle() | dwExStyle);
+		}
+	}
+	else
+	{
+		create(lpszCaption, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, dwExStyle);
+	}
+	
+    return getHSelf();
+}
+
+HWND CNppCtrlWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
+{
+	m_bIsCreated = true;
+	dwStyle |= (WS_CHILD | WS_VISIBLE | WS_BORDER);
+	return CNppWnd::create(lpszCaption, dwStyle, (HMENU)m_iCtrlID, x, y, cx, cy, dwExStyle);
+}
+LRESULT CNppCtrlWnd::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
+{
+	bDone = false;
+	return 0;
+}
+LRESULT CNppCtrlWnd::runWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	bool bDone = false;
+	LRESULT lres = runCtrlProc(uMsg, wParam, lParam, bDone);
+	if( bDone )
+		return lres;
+	return CNppWnd::runWndProc(uMsg, wParam, lParam);
+}
+BOOL CNppCtrlWnd::isControl()const
+{
+	return TRUE;
+}
+void CNppCtrlWnd::destroy()
+{
+
+}
+UINT CNppCtrlWnd::getCtrlID()const
+{
+	return m_iCtrlID;
+}
+void CNppCtrlWnd::setCtrlID(UINT iCtrlID)
+{
+	m_iCtrlID = iCtrlID;
+}
+bool CNppCtrlWnd::isCreated()const
+{
+	return m_bIsCreated;
 }

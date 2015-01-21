@@ -6,28 +6,23 @@ LPCTSTR CNppTreeView::getWndClassName()const
 {
 	return _T("SysTreeView32");// WC_TREEVIEW;
 }
-void CNppTreeView::init(HINSTANCE hInst, HWND hPare, HWND hSelf)
+void CNppTreeView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
 {
-	CNppWnd::init(hInst, hPare);
-	if( hSelf == NULL)
+	CNppCtrlWnd::init(hInst, hParent, iCtrlIDs);
+}
+HWND CNppTreeView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
+{
+	if( CNppCtrlWnd::create(dwStyle, dwExStyle, lpszCaption) )
 	{
-		m_hSelf = CreateWindowEx(0,
-                            WC_TREEVIEW,
-                            TEXT("Tree View"),
-                            WS_VISIBLE | WS_CHILD | WS_BORDER | 
-							TVS_HASLINES | TVS_HASBUTTONS | TVS_SHOWSELALWAYS , 
-                            0,  0,  0, 0,
-                            m_hParent, 
-                            NULL, 
-                            m_hInst, 
-                            NULL);
-		_bIsCreate = true;
+		CNppWnd::setWndProc();
 	}
-	else
-		m_hSelf = hSelf;
-	if (!m_hSelf)
-		throw int(56);
-
+	return getHSelf();
+}
+LRESULT CNppTreeView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
+{
+	bDone = false;
+	
+	return CNppCtrlWnd::runCtrlProc(uMsg, wParam, lParam, bDone);
 }
 /*
  * @param: cInitial list初始化大小；cGrow 超过时增大
@@ -353,6 +348,6 @@ int CNppTreeView::getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath)
 
 void CNppTreeView::destroy() 
 {
-	if(_bIsCreate && m_hSelf)
+	if(isCreated() && m_hSelf)
 		::DestroyWindow(m_hSelf);
 }

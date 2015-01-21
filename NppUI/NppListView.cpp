@@ -2,45 +2,30 @@
 #include "NppLib.h"
 #include "NppListView.h"
 
+LRESULT CALLBACK CNppListView::headerWndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return (((CNppListView *)(::GetWindowLongPtr(hwnd, GWL_USERDATA)))->runHeaderProc(hwnd, uMsg, wParam, lParam));
+}
 LPCTSTR CNppListView::getWndClassName()const
 {
 	return _T("SysListView32");
 }
-void CNppListView::init(HINSTANCE hInst, HWND hParent, HWND hSelf, DWORD dwStyle)
+void CNppListView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
 {
-	CNppWnd::init(hInst, hParent);
-    if( hSelf == NULL )
-    {
-    	int listViewStyles = LVS_REPORT | LVS_NOSORTHEADER\
-    						| LVS_SINGLESEL | LVS_AUTOARRANGE\
-    						| LVS_SHAREIMAGELISTS | LVS_SHOWSELALWAYS;
-
-    	m_hSelf = ::CreateWindow(WC_LISTVIEW, 
-                                    _T(""), 
-                                    WS_CHILD | listViewStyles,
-                                    0,
-                                    0, 
-                                    0,
-                                    0,
-                                    hParent, 
-                                    (HMENU) NULL, 
-                                    hInst,
-                                    NULL);
-		if (!m_hSelf)
+	CNppCtrlWnd::init(hInst, hParent, iCtrlIDs);
+}
+HWND CNppListView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
+{
+	if( CNppCtrlWnd::create(dwStyle, 0, lpszCaption) )
+	{
+		CNppWnd::setWndProc();
+		setHeaderWndProc(headerWndProcWrap);
+		if(dwExStyle > 0)
 		{
-			throw int(SYSERRm_hSelf_NULL);
+			setExtStyle(dwExStyle);
 		}
-		_bIsCreate = true;
-      
-      }
-      else
-      {
-      	m_hSelf = hSelf;
-      }
-	CNppWnd::setWndProc();
-	setHeaderWndProc(headerWndProcWrap);
-	
-
+	}
+	return getHSelf();
 }
 
 int CNppListView::addColumn(LPTSTR pszText, int cWidth, int fmt)
@@ -297,18 +282,24 @@ void CNppListView::setValues(int codepage)
 */
 void CNppListView::destroy()
 {
-	if(_bIsCreate && m_hSelf )
+	if( isCreated() && m_hSelf )
 	{
 		::DestroyWindow(m_hSelf);
 		m_hSelf = NULL;
 	}
 }
 
-LRESULT CNppListView::runListProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CNppListView::runListProc(UINT Message, WPARAM wParam, LPARAM lParam, bool & bDone)
 {
+	bDone = false;
 	
-	return runWndProc(hwnd, Message, wParam, lParam);
+	return 0;
 }
+LRESULT CNppListView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
+{
+	return runListProc(uMsg, wParam, lParam, bDone);
+}
+
 LRESULT CNppListView::runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	

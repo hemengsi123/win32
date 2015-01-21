@@ -59,9 +59,6 @@ public:
     bool HaveChildDir(LPCTSTR lpszPath);
 	void UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard = _T("*")/*HTREEITEM hSelectItem*/);
 protected:
-	HWND m_hTreeCtrl;
-	HWND m_listCtrlAll;
-	HWND m_listCtrlFiles;
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;
 	//

@@ -9,16 +9,18 @@
 #include <commctrl.h>
 #include "NppWnd.h"
 
-class CNppTreeView : public CNppWnd
+class CNppTreeView : public CNppCtrlWnd
 {
 public:
 	typedef HTREEITEM iterator;
 public :
-	CNppTreeView(): _bIsCreate(false){};
+	CNppTreeView(): _hImglst(NULL){};
 	virtual ~CNppTreeView(){};
-	virtual void init(HINSTANCE hInst, HWND hPare, HWND hSelf=NULL);
 	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
+	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
+	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
+	HWND create(DWORD dwStyle =  TVS_HASLINES, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
 	void createImageList(int nWidth, int nHight, UINT flags=(ILC_COLOR32 | ILC_MASK), int cInitial=5, int cGrow=10);
 	int addImageIcon(int iconId);
 	void setImageList(bool bIsSysImageList);
@@ -51,7 +53,6 @@ public :
 	BOOL updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren = true, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL, bool bHidden = false, bool delChildren = true); 
 private :
 	HIMAGELIST _hImglst;
-	BOOL _bIsCreate;
 	
 };
 	

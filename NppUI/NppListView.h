@@ -2,57 +2,53 @@
 #ifndef LISTVIEW_H
 #define LISTVIEW_H
 
-class NPPLIB_API CNppListView : public CNppWnd
+class NPPLIB_API CNppListView : public CNppCtrlWnd
 {
 public:
-	CNppListView() : _bIsCreate(false), _iColumnCount(0){};
+	CNppListView() : _iColumnCount(0){};
 	virtual ~CNppListView() {};
-	virtual void init(HINSTANCE hInst, HWND hParent, HWND hSelf=NULL, DWORD dwStyle = LVS_REPORT);
 	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
-	int addColumn(LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
-	bool setColumn(int iCol, LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
-	bool setScroll(int cWidth, int cHight);
-	void setExtStyle(DWORD dwExStyle);
+	void     init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
+	HWND     create(DWORD dwStyle =  LVS_REPORT, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
+	LRESULT  runListProc(UINT Message, WPARAM wParam, LPARAM lParam, bool & bDone);
+	int   addColumn(LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
+	bool  setColumn(int iCol, LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
+	bool  setScroll(int cWidth, int cHight);
+	void  setExtStyle(DWORD dwExStyle);
 	DWORD getExtStyle()const;
-	WNDPROC setHeaderWndProc(WNDPROC headerProc = headerWndProcWrap);
-	int addItem();
-	bool setColumnWidth(int iCol, int cWidth)const;
-	int getColumnWidth(int iCol)const;
-	int getheaderHight()const;
-	bool isSelect(int iItem)const;
-	void setFocusItem(int iItem);
-	void hiddenHeader();
+	int   addItem();
+	bool  setColumnWidth(int iCol, int cWidth)const;
+	int   getColumnWidth(int iCol)const;
+	int   getheaderHight()const;
+	bool  isSelect(int iItem)const;
+	void  setFocusItem(int iItem);
+	void  hiddenHeader();
 	/*@retrn: if successful return index, or return -1*/
-	int addItem(LPCTSTR lpszText, int iItem/*, int iCol*/);
+	int   addItem(LPCTSTR lpszText, int iItem/*, int iCol*/);
 	/*@retrn: if successful return true, or false*/
-	bool addSubItem(LPCTSTR lpszText, int iCol, int iItem = -1);
-	bool getItemText(int iItem, int iCol, LPTSTR lpszText, int cMaxLen);
-	bool setItemText(LPTSTR lpszText, int iItem, int iCol);
-	BOOL clearItem();
-	BOOL delItem(int iItem);
-	BOOL delColumn(int iCol);
+	bool  addSubItem(LPCTSTR lpszText, int iCol, int iItem = -1);
+	bool  getItemText(int iItem, int iCol, LPTSTR lpszText, int cMaxLen);
+	bool  setItemText(LPTSTR lpszText, int iItem, int iCol);
+	BOOL  clearItem();
+	BOOL  delItem(int iItem);
+	BOOL  delColumn(int iCol);
 //	void setValues(int codepage = 0);
 //	void resetValues(int codepage);
 
 //	generic_string getAscii(unsigned char value);
 
 protected:
-    bool _bIsCreate;
 	int _iColumnCount;
 	int _iItemIndx;
 	CNppImageList _hImglst;
 	HWND _hHeader;
 	WNDPROC _sysHeaderWndProc;
 protected:
-	LRESULT runListProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	
+	WNDPROC setHeaderWndProc(WNDPROC headerProc = headerWndProcWrap);
+	static LRESULT CALLBACK headerWndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	LRESULT runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	static LRESULT CALLBACK headerWndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		return (((CNppListView *)(::GetWindowLongPtr(hwnd, GWL_USERDATA)))->runHeaderProc(hwnd, uMsg, wParam, lParam));
-	}
-//	LRESULT runWndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
+	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
 };
 
 

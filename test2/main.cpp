@@ -29,6 +29,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 	}
 	catch( std::exception excep)
 	{
+		dbg_log(_T("throw error"));
 		dbg_log(_T("error: %s"), excep.what());
 	}
 	return 0;
