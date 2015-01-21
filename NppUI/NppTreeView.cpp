@@ -12,7 +12,9 @@ void CNppTreeView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
 }
 HWND CNppTreeView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 {
-	return CNppCtrlWnd::create(dwStyle, dwExStyle, lpszCaption);
+	CNppCtrlWnd::create(dwStyle, dwExStyle, lpszCaption);
+	setWndProc();
+	return m_hSelf;
 }
 LRESULT CNppTreeView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
 {

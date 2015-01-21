@@ -18,13 +18,14 @@ HWND CNppListView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 {
 	if( CNppCtrlWnd::create(dwStyle, 0, lpszCaption) )
 	{
+		setWndProc();
 		setHeaderWndProc(headerWndProcWrap);
 		if(dwExStyle > 0)
 		{
 			setExtStyle(dwExStyle);
 		}
 	}
-	return getHSelf();
+	return m_hSelf;//getHSelf();
 }
 
 int CNppListView::addColumn(LPTSTR pszText, int cWidth, int fmt)

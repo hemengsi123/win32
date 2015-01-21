@@ -18,10 +18,6 @@ void CNppWnd::destroy()
 LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	 CNppWnd* phSelf = NULL;
-	 if(WM_KEYUP == uMsg)
-	{
-		dbg_log(_T("uMsg = 0x%04X"), uMsg);
-	}
     if( uMsg == WM_NCCREATE && lParam != 0)
 	{
         LPCREATESTRUCT lpcs = reinterpret_cast<LPCREATESTRUCT>(lParam);
@@ -43,7 +39,7 @@ LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
     }
     if( phSelf != NULL ) 
 	{
-        return phSelf->runWndProc(/*phSelf->m_hSelf, */uMsg, wParam, lParam);
+        return phSelf->runWndProc(hwnd, uMsg, wParam, lParam);
     } 
     else
         return ::DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -93,10 +89,10 @@ HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, int x, int
     ASSERT(m_hSelf!=NULL);
 	return m_hSelf;
 }
-LRESULT CNppWnd::runWndProc(/*HWND hwnd, */UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 //		return m_sysWndProc(hwnd, uMsg, wParam, lParam); // ³ö´í
-	return ::CallWindowProc(m_sysWndProc, m_hSelf, uMsg, wParam, lParam);
+	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
 void CNppWnd::init(HINSTANCE hInst, HWND parent)
 {
@@ -252,8 +248,9 @@ HWND CNppCtrlWnd::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 	HWND hWnd = ::GetDlgItem(getParent(), (int)m_iCtrlID);
 	if(hWnd)
 	{
-		setHSelf(hWnd);
+//		setHSelf(hWnd);
 //		CNppWnd::setWndProc();
+		m_hSelf = hWnd;
 		if(lpszCaption )
 		{
 			setWndText(lpszCaption);
@@ -272,7 +269,7 @@ HWND CNppCtrlWnd::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 		create(lpszCaption, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, dwExStyle);
 	}
 	
-    return getHSelf();
+    return m_hSelf;
 }
 
 HWND CNppCtrlWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
@@ -286,14 +283,14 @@ LRESULT CNppCtrlWnd::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool &
 	bDone = false;
 	return 0;
 }
-LRESULT CNppCtrlWnd::runWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CNppCtrlWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	bool bDone = false;
 	
 	LRESULT lres = runCtrlProc(uMsg, wParam, lParam, bDone);
 	if( bDone )
 		return lres;
-	return CNppWnd::runWndProc(uMsg, wParam, lParam);
+	return CNppWnd::runWndProc(hwnd, uMsg, wParam, lParam);
 }
 BOOL CNppCtrlWnd::isControl()const
 {

@@ -6,9 +6,11 @@
 
 #include "StdAfx.h"
 
+using std::vector;
+
 CNppCombox::CNppCombox()
 {
-	_comboItems.clear();
+	m_comboItems.clear();
 }
 
 CNppCombox::~CNppCombox()
@@ -29,12 +31,11 @@ HWND CNppCombox::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 	{
 		COMBOBOXINFO	comboBoxInfo;
 		comboBoxInfo.cbSize = sizeof(COMBOBOXINFO);
-		::SendMessage(m_hSelf, CB_GETCOMBOBOXINFO, 0, (LPARAM)&comboBoxInfo);
+		::SendMessage(hWnd, CB_GETCOMBOBOXINFO, 0, (LPARAM)&comboBoxInfo);
 		CNppWnd::setWndProc(comboBoxInfo.hwndItem);
 	}
 	return hWnd;
 }
-using std::vector;
 
 LRESULT CNppCombox::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, OUT bool & bDone)
 {
@@ -64,25 +65,26 @@ LRESULT CNppCombox::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, OUT boo
 		}
 		case WM_DESTROY:
 		{
-			_comboItems.clear();
+			m_comboItems.clear();
 			break;
 		}
 		default :
 			bDone = false;
 			break;
 	}
+	return bDone;
 }
 
 void CNppCombox::addText(LPCTSTR pszText)
 {
 	/* find item */
-	INT		count		= _comboItems.size();
+	INT		count		= m_comboItems.size();
 	INT		i			= 0;
 	INT		hasFoundOn	= -1;
 
 	for (; i < count; i++)
 	{
-		if (_tcscmp(pszText, _comboItems[i].c_str()) == 0)
+		if (_tcscmp(pszText, m_comboItems[i].c_str()) == 0)
 		{
 			hasFoundOn = count - i - 1;
 		}
@@ -91,12 +93,12 @@ void CNppCombox::addText(LPCTSTR pszText)
 	/* item missed create new and select it correct */
 	if (hasFoundOn == -1)
 	{
-		_comboItems.push_back(pszText);
+		m_comboItems.push_back(pszText);
 
 		::SendMessage(getHSelf(), CB_RESETCONTENT, 0, 0);
 		for (i = count; i >= 0 ; --i)
 		{
-			::SendMessage( getHSelf(), CB_ADDSTRING, MAX_PATH, (LPARAM)_comboItems[i].c_str());
+			::SendMessage( getHSelf(), CB_ADDSTRING, MAX_PATH, (LPARAM)m_comboItems[i].c_str());
 		}
 	}
 	selectComboText(pszText);

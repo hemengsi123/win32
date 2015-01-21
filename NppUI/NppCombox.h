@@ -40,8 +40,8 @@ private:
 	void selectComboText(LPCTSTR pszText);
 
 private :
-	tstring					_currData;
-	std::vector<tstring>	_comboItems;
+	tstring					m_currData;
+	std::vector<tstring>	m_comboItems;
 };
 
 #endif // COMBOORGI_DEFINE_H

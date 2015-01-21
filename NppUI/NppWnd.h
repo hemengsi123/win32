@@ -1,6 +1,6 @@
 
-#ifndef WINDOW_CONTROL_H
-#define WINDOW_CONTROL_H
+#ifndef WINDOW_BASE_H
+#define WINDOW_BASE_H
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -20,7 +20,7 @@ public:
 	virtual HWND create(/*HWND hwndParent, */LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, const RECT rc, DWORD dwExStyle = 0);
 	virtual HWND create(/*HWND hwndParent, */LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu = NULL, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	bool registerWndClass();
-	virtual LRESULT runWndProc(/*HWND hwnd, */UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual void init(HINSTANCE hInst, HWND parent);
 	virtual void reSizeTo(RECT & rc); // should NEVER be const !!!
 	virtual void redraw() const;
@@ -80,12 +80,25 @@ public:
 	/*@retrn: if return true 是通过显示调用CreateWindow 创建, or 是通过MAKEINTRESOURCE(id) 创建*/
 	bool         isCreated()const;
 protected:
-	virtual LRESULT runWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 private:
 	static UINT m_nCtrlCount; // 控件总数量
 	UINT m_iCtrlID;
 	bool m_bIsCreated; 
 };
 
-#endif //WINDOW_CONTROL_H
+///////////////////////////////////////////////////////////////////
+//
+// CNppDlg 对话框基类
+//
+class CNppDlg: public CNppWnd
+{
+public:
+
+private:
+};
+
+
+
+#endif
 
