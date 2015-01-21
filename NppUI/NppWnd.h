@@ -11,7 +11,7 @@ class CNppWnd
 protected:
 	static LRESULT CALLBACK WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	// 替换系统默认窗口进程( 通过资源创建control )
-	WNDPROC setWndProc(WNDPROC userWndProc = WndProcWrap);
+	WNDPROC setWndProc(HWND hWnd = NULL, WNDPROC userWndProc = WndProcWrap);
 	virtual LPCTSTR getWndClassName()const = 0;
 	virtual void destroy() = 0;
 public:
@@ -67,6 +67,7 @@ class CNppCtrlWnd: public CNppWnd
 public:
 	CNppCtrlWnd();
 	~CNppCtrlWnd();
+	static UINT getCtrlCount();
 	virtual void init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
 	virtual HWND create(DWORD dwStyle = 0, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);

@@ -18,7 +18,6 @@ HWND CNppListView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 {
 	if( CNppCtrlWnd::create(dwStyle, 0, lpszCaption) )
 	{
-		CNppWnd::setWndProc();
 		setHeaderWndProc(headerWndProcWrap);
 		if(dwExStyle > 0)
 		{
@@ -38,11 +37,11 @@ int CNppListView::addColumn(LPTSTR pszText, int cWidth, int fmt)
 	lvColumn.pszText = pszText;
 	lvColumn.cchTextMax = _tcslen(pszText);
 //	::ListView_InsertColumn(m_hSelf, 2, &lvColumn);
-	int index = (int)::SendMessage(m_hSelf, LVM_INSERTCOLUMN, (WPARAM)(int)_iColumnCount, (LPARAM)(const LV_COLUMN *)&lvColumn);
+	int index = (int)::SendMessage(m_hSelf, LVM_INSERTCOLUMN, (WPARAM)(int)m_iColumnCount, (LPARAM)(const LV_COLUMN *)&lvColumn);
 //	int index = ListView_InsertColumn(m_hSelf, 1, &lvColumn);
 	if( index != -1)
 	{
-		++_iColumnCount;
+		++m_iColumnCount;
 	}
 	return index;
 }
@@ -80,7 +79,7 @@ bool CNppListView::setColumnWidth(int iCol, int cWidth)const
 int CNppListView::getheaderHight()const
 {
 	RECT rc = {0};
-	Header_GetItemRect(_hHeader, 0, &rc);
+	Header_GetItemRect(m_hHeader, 0, &rc);
 	return rc.bottom;
 }
 bool CNppListView::isSelect(int iItem) const
@@ -90,7 +89,7 @@ bool CNppListView::isSelect(int iItem) const
 void CNppListView::setFocusItem(int iItem)
 {
 	/* at first unselect all */
-	for (int i = 0; i < _iItemIndx+1; i++)
+	for (int i = 0; i < m_iItemIndx+1; i++)
 		ListView_SetItemState(m_hSelf, iItem, 0, 0xFF);
 	// to select the iItem
 	ListView_SetItemState(m_hSelf, iItem, LVIS_SELECTED|LVIS_FOCUSED, 0xFF);
@@ -101,7 +100,7 @@ void CNppListView::hiddenHeader()
 {
 	CNppWnd::setWndStyle(getWndStyle() | LVS_NOCOLUMNHEADER);
 }
-int CNppListView::addItem(LPCTSTR  lpszText, int iItem)
+int CNppListView::addItem(LPCTSTR  lpszText, int iItem, int iIcon)
 {
 	LVITEM item   = {0};
 	
@@ -109,14 +108,18 @@ int CNppListView::addItem(LPCTSTR  lpszText, int iItem)
 	item.iItem    = iItem;
 	item.iSubItem = 0;
 	item.pszText  = const_cast<LPTSTR>(lpszText);
-	_iItemIndx    = iItem;
-	
+	m_iItemIndx    = iItem;
+	if( iIcon >= 0 )
+	{
+		item.mask  |= LVIF_IMAGE;
+		item.iImage = iIcon;
+	}
 	return (int)::SendMessage(m_hSelf, LVM_INSERTITEM, 0, (LPARAM)&item);
 }
 bool CNppListView::addSubItem(LPCTSTR lpszText, int iCol, int iItem)
 {
 	if( iItem == -1 )
-		iItem = _iItemIndx;
+		iItem = m_iItemIndx;
 	
 	LVITEM item   = {0};
 	item.mask     = LVIF_TEXT;
@@ -303,12 +306,28 @@ LRESULT CNppListView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool 
 LRESULT CNppListView::runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	
-	return ::CallWindowProc(_sysHeaderWndProc, hwnd, Message, wParam, lParam);
+	return ::CallWindowProc(m_sysHeaderWndProc, hwnd, Message, wParam, lParam);
 }
 WNDPROC CNppListView::setHeaderWndProc(WNDPROC headerProc)
 {
-	_hHeader = ListView_GetHeader(m_hSelf);
-	::SetWindowLongPtr(_hHeader, GWLP_USERDATA, LONG_PTR(this));
-	_sysHeaderWndProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hHeader, GWL_WNDPROC, reinterpret_cast<LONG>(headerProc)));
-	return _sysHeaderWndProc;
+	m_hHeader = ListView_GetHeader(m_hSelf);
+	::SetWindowLongPtr(m_hHeader, GWLP_USERDATA, LONG_PTR(this));
+	m_sysHeaderWndProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(m_hHeader, GWL_WNDPROC, reinterpret_cast<LONG>(headerProc)));
+	return m_sysHeaderWndProc;
+}
+HIMAGELIST CNppListView::setItemImgList(HIMAGELIST himl, int iImgLstType)
+{
+	return ListView_SetImageList(m_hSelf, himl, iImgLstType);
+}
+HIMAGELIST CNppListView::getItemImgList(int iImgLstType)const
+{
+	return ListView_GetImageList(m_hSelf, iImgLstType);
+}
+HIMAGELIST CNppListView::setHeaderImgList(HIMAGELIST himl)
+{
+	return Header_SetImageList(m_hHeader, himl);
+}
+HIMAGELIST CNppListView::getHeaderImgList()const
+{
+	return Header_GetImageList(m_hHeader);
 }

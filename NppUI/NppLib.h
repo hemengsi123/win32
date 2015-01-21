@@ -13,6 +13,7 @@
 
 #include <windows.h>
 #include <string>
+#include <vector>
 
 #include "NppBase.h"
 #include "NppFile.h"
@@ -21,7 +22,9 @@
 #include "NppStaticDialog.h"
 #include "NppImageList.h"
 #include "NppListView.h"
-typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > tstring;
+#include "NppCombox.h"
+
+//typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > tstring;
 
 
 #endif

@@ -27,17 +27,20 @@ typedef struct {
 	// DEVT_FILE
 // } eDevType;
 typedef struct{
-		string	strName;
+		tstring	strName;
 		DWORD	dwAttributes;
 	}tItemList;
 
 struct ListViewItem
 {
+	tstring m_fullPath;
 	tstring m_currentDir;
 	tstring m_fileName;
 	tstring m_fileExt;
+	tstring m_szfilesize;
+	bool    m_bIsDir;
+	int     m_iIcon;
 	unsigned __int64 m_filesize;
-	TCHAR   m_strSize[20];
 };
 class CExplorerDlg: public CNppStaticDialog
 {
@@ -62,10 +65,12 @@ protected:
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;
 	//
-	ComboOrgi     m_comBoFilter;
+	CNppCombox    m_comBoFilter;
 	CNppTreeView  m_treeView2;
 	CNppListView  m_listViewAll;
 	CNppListView  m_listViewFiles;
+
+	CNppImageList m_imgLst;
 	
 	HIMAGELIST	m_hImageListSmall;
 	HANDLE	m_hExploreVolumeThread;

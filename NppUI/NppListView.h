@@ -5,7 +5,7 @@
 class NPPLIB_API CNppListView : public CNppCtrlWnd
 {
 public:
-	CNppListView() : _iColumnCount(0){};
+	CNppListView() : m_iColumnCount(0){};
 	virtual ~CNppListView() {};
 	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
@@ -25,7 +25,7 @@ public:
 	void  setFocusItem(int iItem);
 	void  hiddenHeader();
 	/*@retrn: if successful return index, or return -1*/
-	int   addItem(LPCTSTR lpszText, int iItem/*, int iCol*/);
+	int   addItem(LPCTSTR lpszText, int iItem, int iIcon = -1);
 	/*@retrn: if successful return true, or false*/
 	bool  addSubItem(LPCTSTR lpszText, int iCol, int iItem = -1);
 	bool  getItemText(int iItem, int iCol, LPTSTR lpszText, int cMaxLen);
@@ -33,17 +33,20 @@ public:
 	BOOL  clearItem();
 	BOOL  delItem(int iItem);
 	BOOL  delColumn(int iCol);
+	HIMAGELIST setItemImgList(HIMAGELIST himl, int iImgLstType = LVSIL_SMALL);
+	HIMAGELIST getItemImgList(int iImgLstType = LVSIL_SMALL)const;
+	HIMAGELIST setHeaderImgList(HIMAGELIST himl);
+	HIMAGELIST getHeaderImgList()const;
 //	void setValues(int codepage = 0);
 //	void resetValues(int codepage);
 
 //	generic_string getAscii(unsigned char value);
 
 protected:
-	int _iColumnCount;
-	int _iItemIndx;
-	CNppImageList _hImglst;
-	HWND _hHeader;
-	WNDPROC _sysHeaderWndProc;
+	int m_iColumnCount;
+	int m_iItemIndx;
+	HWND m_hHeader;
+	WNDPROC m_sysHeaderWndProc;
 protected:
 	WNDPROC setHeaderWndProc(WNDPROC headerProc = headerWndProcWrap);
 	static LRESULT CALLBACK headerWndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

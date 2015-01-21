@@ -4,7 +4,7 @@
 
 LPCTSTR CNppTreeView::getWndClassName()const
 {
-	return _T("SysTreeView32");// WC_TREEVIEW;
+	return _T("SysTreeView32"); WC_TREEVIEW;
 }
 void CNppTreeView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
 {
@@ -12,11 +12,7 @@ void CNppTreeView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
 }
 HWND CNppTreeView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 {
-	if( CNppCtrlWnd::create(dwStyle, dwExStyle, lpszCaption) )
-	{
-		CNppWnd::setWndProc();
-	}
-	return getHSelf();
+	return CNppCtrlWnd::create(dwStyle, dwExStyle, lpszCaption);
 }
 LRESULT CNppTreeView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
 {
@@ -24,44 +20,11 @@ LRESULT CNppTreeView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool 
 	
 	return CNppCtrlWnd::runCtrlProc(uMsg, wParam, lParam, bDone);
 }
-/*
- * @param: cInitial list初始化大小；cGrow 超过时增大
-*/
-void CNppTreeView::createImageList(int nWidth, int nHight, UINT flags, int cInitial, int cGrow)
-{
-	HIMAGELIST himl;
-	himl = ::ImageList_Create(nWidth, nHight, flags, cInitial, cGrow);
-	if (himl== NULL)
-	{
-		return;
-	}
-	_hImglst = himl;
-}
-/*@retrn: if failed return -1, success return imagelist index*/
 
-int CNppTreeView::addImageIcon(int iconId)
+HIMAGELIST CNppTreeView::setImageList(HIMAGELIST himl, int iImgLstType)
 {
-	if(_hImglst == NULL)
-	{
-		return -1;
-	}
-	HICON hIcon = ::LoadIcon(m_hInst, MAKEINTRESOURCE(iconId));
-	return ::ImageList_AddIcon(_hImglst, hIcon);
-}
-void CNppTreeView::setImageList(bool bIsSysImageList)
-{
-	HIMAGELIST himl = NULL;
-	if(bIsSysImageList || _hImglst == NULL)
-	{
-		SHFILEINFO		sfi		= {0};
-		himl = (HIMAGELIST)SHGetFileInfo(_T("C:\\"), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
-	}
-	else
-	{
-		himl = _hImglst;
-	}
-	::SendMessage(m_hSelf, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)himl);
-
+//	::SendMessage(m_hSelf, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)himl);
+	return TreeView_SetImageList(m_hSelf, himl, iImgLstType);
 }
 bool CNppTreeView::getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
 {

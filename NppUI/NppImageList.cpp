@@ -86,6 +86,36 @@ void CNppImageList::setImglst(HIMAGELIST hImglst, bool bDestroy)
 	}
 	_hImglst = hImglst;
 }
-
+void CNppImageList::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelected, LPINT iIconOverlayed)
+{
+	if( iIconNormal == NULL)
+		return;
+	SHFILEINFO		sfi	= {0};
+	bool isDir = false;
+	// TCHAR			TEMP[MAX_PATH];
+	CNppFile tmpFile(lpszFile);
+	if(tmpFile.isDir())
+	{
+		tmpFile.addBackslash();
+		isDir = true;
+		SHGetFileInfo(tmpFile.getFullPath(), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
+	}
+	else
+	{
+		::SHGetFileInfo(tmpFile.getFullPath(), FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX | SHGFI_USEFILEATTRIBUTES);
+	}
+	*iIconNormal	= sfi.iIcon & 0x000000ff;
+	if( isDir && iIconSelected)
+	{
+		*iIconSelected = sfi.iIcon;
+	}
+	else if(iIconSelected)
+	{
+		*iIconSelected = *iIconNormal;
+	}
+	if( iIconOverlayed )
+		*iIconOverlayed = sfi.iIcon >> 24;
+	::DestroyIcon(sfi.hIcon);
+}
 
 

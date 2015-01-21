@@ -52,72 +52,41 @@ void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 }
 void CExplorerDlg::initCtrl()
 {
-//	m_hTreeCtrl = ::GetDlgItem(m_hSelf, IDC_TREE_FOLDER);
+
 	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
 	m_treeView2.create();
-	//m_listCtrlAll  = ::GetDlgItem(m_hSelf, IDC_LIST_ALL);
 	m_listViewAll.init(m_hInst, m_hSelf, IDC_LIST_ALL);
 	m_listViewAll.create();
-//	m_listCtrlFiles = ::GetDlgItem(m_hSelf, IDC_LIST_FILES);
 	m_listViewFiles.init(m_hInst, m_hSelf, IDC_LIST_FILES);
 	m_listViewFiles.create();
 	
-	m_filterCtrl    = ::GetDlgItem(m_hSelf, IDC_CBO_FILTER);
+	m_comBoFilter.init(m_hInst, m_hSelf, IDC_CBO_FILTER);
+	m_comBoFilter.create(CBS_DROPDOWN);
 
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 	
-	m_comBoFilter.init(m_filterCtrl);
 	m_comBoFilter.addText(_T("*.*"));
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
 	
-//	m_treeView2.init(m_hInst, m_hSelf, m_hTreeCtrl);
-	m_treeView2.setImageList(true);
+	//m_treeView2.setImageList(true);
+	m_treeView2.setImageList(m_imgLst.getSysImgLst());
 	
     UpdateDevices();
 	UpdateFolders();
 	
-  	// list view
-//  	dbg_log(_T("list view"));
-
-//  	m_listViewAll.init(m_hInst, m_hSelf, m_listCtrlAll);
 	m_listViewAll.setExtStyle(m_listViewAll.getExtStyle() | LVS_EX_FULLROWSELECT);
 	int errRet = 0;
 //	m_listViewAll.setColumn(_T("name"), 100, 0);
 	m_listViewAll.addColumn(_T("Name"), 100, LVCFMT_LEFT);
 	m_listViewAll.addColumn(_T("Ext."), 100, LVCFMT_LEFT);
 	m_listViewAll.addColumn(_T("Size"), 100, LVCFMT_CENTER);
-	m_listViewAll.addItem(_T("test"), 0);
-//	m_listViewAll.setWndStyle(m_listViewAll.getWndStyle() & ~WS_HSCROLL);
-//	ListView_SetTextColor(m_listViewAll.getHSelf(), 255);
-//	errRet = m_listViewAll.addItem(_T("item0\0"), 0);
-//	errRet = m_listViewAll.addSubItem(_T("subitem0\0"), 1);
-//	m_listViewAll.setFocusItem(0);
-//	dbg_log(_T("errRet = %x\t %s"), errRet, GetLastErrStr());
-//	m_listViewAll.setItemText(_T("test.txt"), 0, 0);
-//	ListView_EnsureVisible(m_listViewAll.getHSelf(), 0, true);
-
-//	m_listViewFiles.init(m_hInst, m_hSelf, m_listCtrlFiles);
+	m_listViewAll.setItemImgList(m_imgLst.getSysImgLst());
+	
 	m_listViewFiles.hiddenHeader();
 	ListView_SetItemCountEx(m_listViewFiles.getHSelf(), 2, LVSICF_NOSCROLL);
 	m_listViewFiles.addColumn(_T("File"), 355);
 	m_listViewFiles.addItem(_T("test1.txt"), 0);
-	
-//	UpdateFileListAll(_T("C:\\"));
-//	m_listViewAll.setScroll(266, 0);
-//	CNppFile fileOp1;
-//	fileOp1.setFullPath(_T("D:\\新建文件夹"));
-//	int errNum = fileOp1.delFile();
-	
-	// m_treeView2.display();
-	//
-	// HIMAGELIST himlTmp = ::ImageList_Create(16, 16, ILC_COLOR32 | ILC_MASK, 6, 30);
-	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(m_hInst, MAKEINTRESOURCE(IDI_PARENTFOLDER)));
-	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(m_hInst, MAKEINTRESOURCE(IDI_FOLDER)));
-	// ::ImageList_AddIcon(himlTmp, ::LoadIcon(m_hInst, MAKEINTRESOURCE(IDI_FILE)));
-	
-	// m_hImageListSmall = GetSmallImageList(true);
-	// ::SendMessage(m_hTreeCtrl, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)m_hImageListSmall/*m_hImageListSmall*/);
 	
 }
 
@@ -128,6 +97,7 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 		case WM_INITDIALOG:
 		{
 			initCtrl();
+			dbg_log(_T("CtrlCount = %u"), CNppCtrlWnd::getCtrlCount());
 			DWORD			dwThreadId		= 0;
 			// for (int i = 0; i < EID_MAX; i++)
 				// g_hEvent[i] = ::CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -143,14 +113,15 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 				// dbg_log(_T("H: %04x"), HIWORD(wParam))
 				if(HIWORD(wParam) == CBN_EDITUPDATE)
 				{
-					dbg_log(_T("CBN_EDITUPDATE"));
+//					dbg_log(_T("CBN_EDITUPDATE"));
 				}
 				else if(HIWORD(wParam) == CBN_EDITCHANGE)
 				{
-					dbg_log(_T("CBN_EDITCHANGE."));
+//					dbg_log(_T("CBN_EDITCHANGE."));
 				}
 			}
-			return TRUE;
+			break;
+			// return TRUE;
 		}
 		case WM_KEYUP:
 		{
@@ -650,22 +621,47 @@ bool CExplorerDlg::HaveChildDir(LPCTSTR lpszPath)
 void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 {
 	LPWIN32_FIND_DATA lpfindData = NULL;
+	
 	ListViewItem lvItem;
 	m_vListViewAll.clear();
 	CNppFile searchFile(lpszSelDir);
 	lpfindData = searchFile.findFirstFile(NULL, lpszWildcard);
 	while( lpfindData != NULL)
 	{
-//		dbg_log(_T("name = %s"), searchFile.findGetName());
-		if(IsValidFile(lpfindData) || IsValidFolder(lpfindData) )
+		if( IsValidFile(lpfindData) )
 		{
-			
 			LPCTSTR lpszExt = NULL;
+			int iIconNormal  = 0;
+			TCHAR szTmpFile[MAX_PATH] = {0};
+			lvItem.m_bIsDir     = false;
 			lvItem.m_currentDir = tstring(lpszSelDir);
 			lvItem.m_fileName   = tstring(searchFile.findGetName());
+			_stprintf(szTmpFile, _T("%s%s"), lpszSelDir, lvItem.m_fileName.c_str());
+			//lvItem.m_fullPath   = szTmpFile;
 			lpszExt = searchFile.getExtension(lvItem.m_fileName.c_str());
 			lvItem.m_fileExt    = lpszExt;
 			lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
+			lvItem.m_szfilesize = Int2TStr(lvItem.m_filesize);
+			m_imgLst.getFileIcon(szTmpFile, &iIconNormal);
+			lvItem.m_iIcon      = iIconNormal;
+			m_vListViewAll.push_back(lvItem);
+		}
+		else if( IsValidFolder(lpfindData) )
+		{
+			TCHAR szTmpFile[MAX_PATH] = {0};
+			int iIconNormal  = 0;
+			lvItem.m_bIsDir     = true;
+			lvItem.m_fileExt.clear();
+			lvItem.m_fileExt    = _T("<DIR>");
+			lvItem.m_currentDir = tstring(lpszSelDir);
+			lvItem.m_fileName   = tstring(searchFile.findGetName());
+			lvItem.m_filesize   = 0;//searchFile.findGetSize(lpfindData);
+			lvItem.m_szfilesize = _T("");
+			_stprintf(szTmpFile, _T("%s%s\\"), lpszSelDir, lvItem.m_fileName.c_str());
+			lvItem.m_fullPath   = szTmpFile;
+			m_imgLst.getFileIcon(szTmpFile, &iIconNormal);
+			lvItem.m_iIcon      = iIconNormal;
+//			dbg_log(_T("%d"), iIconNormal);
 			m_vListViewAll.push_back(lvItem);
 		}
 		
@@ -675,11 +671,9 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 	std::vector<ListViewItem>::iterator iter = m_vListViewAll.begin();
 	for(int i=0; iter != m_vListViewAll.end(); ++iter,++i)
 	{
-		m_listViewAll.addItem(iter->m_fileName.c_str(), i);
+		m_listViewAll.addItem(iter->m_fileName.c_str(), i, iter->m_iIcon);
 		m_listViewAll.addSubItem(iter->m_fileExt.c_str(), 1);
-//		TCHAR strSize[20] = {0};
-		_stprintf(iter->m_strSize, _T("%u"), iter->m_filesize);
-		m_listViewAll.addSubItem(iter->m_strSize, 2);
+		m_listViewAll.addSubItem(iter->m_szfilesize.c_str(), 2);
 	}
 	
 }

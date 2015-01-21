@@ -12,7 +12,6 @@
 #include "resource.h"
 
 #include "../utils/winVersion.h"
-#include "../nppUI/ComboOrgi.h"
 #include "../nppUI/NppLib.h"
 
 #include "ExplorerDlg.h"

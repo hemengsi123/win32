@@ -18,6 +18,10 @@ void CNppWnd::destroy()
 LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	 CNppWnd* phSelf = NULL;
+	 if(WM_KEYUP == uMsg)
+	{
+		dbg_log(_T("uMsg = 0x%04X"), uMsg);
+	}
     if( uMsg == WM_NCCREATE && lParam != 0)
 	{
         LPCREATESTRUCT lpcs = reinterpret_cast<LPCREATESTRUCT>(lParam);
@@ -45,10 +49,13 @@ LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
         return ::DefWindowProc(hwnd, uMsg, wParam, lParam);
  
 }
-WNDPROC CNppWnd::setWndProc(WNDPROC userWndProc)
+WNDPROC CNppWnd::setWndProc(HWND hWnd, WNDPROC userWndProc)
 {
-	::SetWindowLongPtr(m_hSelf, GWLP_USERDATA, LONG_PTR(this));
-	m_sysWndProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(m_hSelf, GWLP_WNDPROC, (LONG_PTR)userWndProc));
+	if( !hWnd )
+		hWnd = m_hSelf;
+	
+	::SetWindowLongPtr(hWnd, GWLP_USERDATA, LONG_PTR(this));
+	m_sysWndProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)userWndProc));
 	ASSERT(m_sysWndProc != NULL);
 	return m_sysWndProc;
 }
@@ -231,6 +238,10 @@ CNppCtrlWnd::~CNppCtrlWnd()
 	ASSERT(m_nCtrlCount > 0);
 	--m_nCtrlCount;
 }
+UINT CNppCtrlWnd::getCtrlCount()
+{
+	return m_nCtrlCount;
+}
 void CNppCtrlWnd::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
 {
 	CNppWnd::init(hInst, hParent);
@@ -242,6 +253,7 @@ HWND CNppCtrlWnd::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 	if(hWnd)
 	{
 		setHSelf(hWnd);
+//		CNppWnd::setWndProc();
 		if(lpszCaption )
 		{
 			setWndText(lpszCaption);
@@ -277,6 +289,7 @@ LRESULT CNppCtrlWnd::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool &
 LRESULT CNppCtrlWnd::runWndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	bool bDone = false;
+	
 	LRESULT lres = runCtrlProc(uMsg, wParam, lParam, bDone);
 	if( bDone )
 		return lres;
