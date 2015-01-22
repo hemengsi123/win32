@@ -422,8 +422,10 @@ HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, i
 		short  fontSize;  //font size
 		WCHAR  wszFont;   // L"MS Sans Serif"
 	};
+	void *ptmp = new (std::nothrow)char[512];
+	memset(ptmp, 0, 512);
 	// create dialog template
-	DlgTemplate dlgTemp = {0};
+	DlgTemplate& dlgTemp = *(DlgTemplate*)ptmp;//{0};
 	dlgTemp.dlgTmp.style           = dwStyle;
 	dlgTemp.dlgTmp.dwExtendedStyle = dwExStyle;
 	dlgTemp.dlgTmp.cdit            = 0;
@@ -435,11 +437,11 @@ HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, i
 	dlgTemp.wndClass               = 0;      // default wndclass
 	dlgTemp.wszTitle               = L'\0';
 	dbg_log(_T("m_hSelf = 0x%08X"), m_hSelf);
-	m_hSelf= ::CreateDialogIndirectParam(m_hInst, (LPCDLGTEMPLATE)&dlgTemp, m_hParent, DlgProcWrap, (LPARAM)this);
+	m_hSelf= ::CreateDialogIndirectParam(m_hInst, (LPCDLGTEMPLATE)&ptmp, m_hParent, DlgProcWrap, (LPARAM)this);
 	ASSERT(m_hSelf != NULL);
 	CNppWnd::setWndText(lpszCaption);
 	display();
-
+	delete []ptmp;
 	return m_hSelf;
 }
 
