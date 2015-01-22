@@ -50,9 +50,13 @@ void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 	CNppWnd::init(hInst, NULL);
 	CNppStaticDialog::create(dialogId, false);
 }
+
 void CExplorerDlg::initCtrl()
 {
-
+	CNppDlg nppDlg;
+	nppDlg.init(m_hInst, m_hSelf);
+	nppDlg.create(_T("Hello"));
+	
 	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
 	m_treeView2.create();
 	m_listViewAll.init(m_hInst, m_hSelf, IDC_LIST_ALL);
@@ -64,7 +68,7 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter.create(CBS_DROPDOWN);
 
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
-	
+
 	m_comBoFilter.addText(_T("*.*"));
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);

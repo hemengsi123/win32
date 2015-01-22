@@ -312,3 +312,156 @@ bool CNppCtrlWnd::isCreated()const
 {
 	return m_bIsCreated;
 }
+////////////////////////////////////////////////////////////////////////////////
+// 
+// CNppDlg
+//
+CNppDlg::CNppDlg(): m_bIsModel(false), m_iDlgID(0)/*, m_sysDlgProc((DLGPROC)::DefDlgProc)*/
+{
+
+}
+CNppDlg::~CNppDlg()
+{
+	destroy();
+}
+void CNppDlg::destroy()
+{
+	if(m_hSelf)
+	{
+		::DestroyWindow(m_hSelf);
+		m_hSelf = NULL;
+	}
+}
+LPCTSTR CNppDlg::getWndClassName()const
+{
+	return _T("MyDialog");
+}
+INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch(uMsg)
+	{
+	case WM_INITDIALOG:
+	{
+		return true;
+	}
+	case WM_CLOSE:  
+        DestroyWindow(hDlg);  
+        return TRUE;  
+   
+    case WM_DESTROY:  
+        PostQuitMessage(0);  
+        return TRUE;
+	default:
+		break;
+	}
+	return FALSE;
+	/*
+	CNppDlg *pSelfDlg = NULL;
+	if( WM_INITDIALOG == uMsg && lParam != NULL)
+	{
+		pSelfDlg = reinterpret_cast<CNppDlg*>(lParam);
+		pSelfDlg->m_hSelf = hDlg;
+		::SetWindowLong(hDlg, GWL_USERDATA, (long)lParam);
+        pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
+		dbg_log(_T("done"));
+		return TRUE;
+	}
+	else
+	{
+		pSelfDlg = reinterpret_cast<CNppDlg *>(::GetWindowLong(hDlg, GWL_USERDATA));
+		if( pSelfDlg )
+		{
+			return pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
+		}
+		else
+			return ::DefDlgProc(hDlg, uMsg, wParam, lParam);
+	}
+	*/
+}
+BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return FALSE;//::DefDlgProc(hDlg, uMsg, wParam, lParam);//::CallWindowProc(m_sysDlgProc, hDlg, uMsg, wParam, lParam);
+}
+void CNppDlg::init(HINSTANCE hInst, HWND hParent)
+{
+	CNppWnd::init(hInst, hParent);
+	
+}
+HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
+{
+	m_iDlgID = iDlgID;
+	if( !bmakeRTL )
+	{
+		m_hSelf = ::CreateDialogParam(m_hInst,  MAKEINTRESOURCE(iDlgID), m_hParent, (DLGPROC)DlgProcWrap, (LPARAM)this);
+		if( !m_hSelf )
+		{
+			create(_T("CreateDialogParam failed"));
+		}
+		display(true);//::ShowWindow(m_hSelf, SW_SHOW);
+	}
+	else
+	{
+		DLGTEMPLATE *pMyDlgTemplate = NULL;
+		HGLOBAL hMyDlgTemplate = makeRTLResource(iDlgID, &pMyDlgTemplate);
+		m_hSelf = ::CreateDialogIndirectParam(m_hInst, pMyDlgTemplate, m_hParent, (DLGPROC)DlgProcWrap, (LPARAM)this);
+		::GlobalFree(hMyDlgTemplate);
+	}
+	
+	return m_hSelf;
+}
+HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
+{
+	struct DlgTemplate
+	{
+		// DLGTEMPLATE struct
+		DLGTEMPLATE dlgTmp;
+		// other
+		WORD   menu;      // menu resource
+		WORD   wndClass;  // window class
+		WCHAR  wszTitle;  // title string of the dialog box
+		short  fontSize;  //font size
+		WCHAR  wszFont;   // L"MS Sans Serif"
+	};
+	// create dialog template
+	DlgTemplate dlgTemp = {0};
+	dlgTemp.dlgTmp.style           = dwStyle;
+	dlgTemp.dlgTmp.dwExtendedStyle = dwExStyle;
+	dlgTemp.dlgTmp.cdit            = 0;
+	dlgTemp.dlgTmp.x               = x;
+	dlgTemp.dlgTmp.y               = y;
+	dlgTemp.dlgTmp.cx              = cx;
+	dlgTemp.dlgTmp.cy              = cy;
+	dlgTemp.menu                   = 0x0000; // no menu
+	dlgTemp.wndClass               = 0;      // default wndclass
+	dlgTemp.wszTitle               = L'\0';
+	dbg_log(_T("m_hSelf = 0x%08X"), m_hSelf);
+	m_hSelf= ::CreateDialogIndirectParam(m_hInst, (LPCDLGTEMPLATE)&dlgTemp, m_hParent, DlgProcWrap, (LPARAM)this);
+	ASSERT(m_hSelf != NULL);
+	CNppWnd::setWndText(lpszCaption);
+	display();
+
+	return m_hSelf;
+}
+
+HGLOBAL CNppDlg::makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplate)
+{
+	// Get Dlg Template resource
+	HRSRC  hDialogRC = ::FindResource(m_hInst, MAKEINTRESOURCE(dialogID), RT_DIALOG);
+	HGLOBAL  hDlgTemplate = ::LoadResource(m_hInst, hDialogRC);
+	DLGTEMPLATE *pDlgTemplate = (DLGTEMPLATE *)::LockResource(hDlgTemplate);
+	
+	// Duplicate Dlg Template resource
+	unsigned long sizeDlg = ::SizeofResource(m_hInst, hDialogRC);
+	HGLOBAL hMyDlgTemplate = ::GlobalAlloc(GPTR, sizeDlg);
+	*ppMyDlgTemplate = (DLGTEMPLATE *)::GlobalLock(hMyDlgTemplate);
+
+	::memcpy(*ppMyDlgTemplate, pDlgTemplate, sizeDlg);
+	
+	DLGTEMPLATEEX *pMyDlgTemplateEx = (DLGTEMPLATEEX *)*ppMyDlgTemplate;
+	if (pMyDlgTemplateEx->signature == 0xFFFF)
+		pMyDlgTemplateEx->exStyle |= WS_EX_LAYOUTRTL;
+	else
+		(*ppMyDlgTemplate)->dwExtendedStyle |= WS_EX_LAYOUTRTL;
+
+	return hMyDlgTemplate;
+}

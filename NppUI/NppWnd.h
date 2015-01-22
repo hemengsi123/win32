@@ -68,7 +68,7 @@ public:
 	CNppCtrlWnd();
 	~CNppCtrlWnd();
 	static UINT getCtrlCount();
-	virtual void init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
+	virtual void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID);
 	virtual HWND create(DWORD dwStyle = 0, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	virtual LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
@@ -91,11 +91,26 @@ private:
 //
 // CNppDlg 对话框基类
 //
+
 class CNppDlg: public CNppWnd
 {
 public:
-
+	CNppDlg();
+	virtual ~CNppDlg();
+	virtual void destroy();
+	virtual LPCTSTR getWndClassName()const;
+	virtual void init(HINSTANCE hInst, HWND hParent);
+	/*@param: bMakeRTL 通过资源模板创建对话框*/
+	virtual HWND create(UINT iDlgID, bool bMakeRTL = false);
+	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle = (WS_SYSMENU|WS_CAPTION|WS_BORDER), int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
+	virtual BOOL runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+protected:
+	static INT_PTR CALLBACK DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	HGLOBAL makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplate);
 private:
+	bool m_bIsModel;
+	UINT m_iDlgID;
+	//DLGPROC m_sysDlgProc;
 };
 
 
