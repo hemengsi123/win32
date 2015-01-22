@@ -6,12 +6,18 @@
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
 	CExplorerDlg expDlg;
+	//CNppStaticDialog dlg2;
+	CNppDlg nppDlg;
 	try
 	{
 		expDlg.create(hInstance, IDD_EXPLORER_DLG);
-		
 		expDlg.display();
 		expDlg.goToCenter();
+		
+		//nppDlg.init(hInstance, NULL);
+		//nppDlg.create(IDD_EXPLORER_DLG, true);
+		
+		//dlg2.create(IDD_EXPLORER_DLG);
 		MSG msg;
 		while(::GetMessage(&msg, NULL, NULL, NULL))  
 		{  

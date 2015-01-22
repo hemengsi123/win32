@@ -31,7 +31,7 @@ CFLAGS    = /c /nologo /Zi /W3 /Od /FD /Gm /EHsc /MTd /GS /fp:precise /Zc:wchar_
 # 生成 asm 文件
 # AFLAGS    = /Fa"$*.asm"
 
-DEFINE    = /D WIN32
+DEFINE    = /D WIN32 /D _WIN32
 # ENCODE    = /D UNICODE /D _UNICODE
 # DEFINE    = $(DEFINE) /D UNICODE /D _UNICODE
 LOGFILE   = >> $(OUTDIR)\make.log 2>&1

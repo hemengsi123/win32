@@ -56,7 +56,7 @@ void CExplorerDlg::initCtrl()
 	CNppDlg nppDlg;
 	nppDlg.init(m_hInst, m_hSelf);
 	nppDlg.create(_T("Hello"));
-	
+	//nppDlg.create(IDD_EXPLORER_DLG);
 	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
 	m_treeView2.create();
 	m_listViewAll.init(m_hInst, m_hSelf, IDC_LIST_ALL);
