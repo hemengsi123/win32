@@ -215,7 +215,73 @@ LRESULT CNppWnd::postMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	ASSERT(::IsWindow(m_hSelf));
     return ::PostMessage(m_hSelf, uMsg, wParam, lParam);
 }
+void CNppWnd::gotoCenter(HWND hParent)
+{
+    RECT rc;
+	if( hParent == NULL )
+	{
+		if( m_hParent == NULL)
+			hParent = ::GetDesktopWindow();
+		else
+			hParent = m_hParent;
+	}
+    ::GetClientRect(hParent, &rc);
+	
+    POINT center;
+    center.x = rc.left + (rc.right - rc.left)/2;
+    center.y = rc.top + (rc.bottom - rc.top)/2;
+    ::ClientToScreen(hParent, &center);
+	RECT rcSelf;
+	::GetClientRect(m_hSelf, &rcSelf);
+	int x = center.x - (rcSelf.right - rcSelf.left)/2;
+	int y = center.y - (rcSelf.bottom - rcSelf.top)/2;
 
+	::SetWindowPos(m_hSelf, HWND_TOP, x, y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, SWP_SHOWWINDOW);
+}
+void CNppWnd::alignTo(HWND hTag, AlignDirect alignDir, int cx, int cy)
+{
+	RECT rcTag, rcSelf;
+	POINT ptTo;
+
+	::GetWindowRect(hTag, &rcTag);
+	::GetWindowRect(m_hSelf, &rcSelf);
+	ptTo.x = rcTag.left;
+	ptTo.y = rcTag.top;
+	
+	switch(alignDir)
+	{
+		case LEFTALIGN:
+		{
+			::GetWindowRect(m_hSelf, &rcSelf);
+			ptTo.x -= (rcSelf.right - rcSelf.left + cx);
+			ptTo.y += cy;
+			break;
+		}
+		case RIGHTALIGN:
+		{
+			ptTo.x += (rcTag.right - rcTag.left + cx);
+			ptTo.y += cy;
+			break;
+		}
+		case TOPALIGN:
+		{
+			::GetWindowRect(m_hSelf, &rcSelf);
+			ptTo.y -= (rcSelf.bottom - rcSelf.top + cy);
+			ptTo.x += cx;
+			break;
+		}
+		default: // default bottom align
+		{
+			ptTo.y += (rcTag.bottom - rcTag.top + cy);
+			ptTo.x += cx;
+			break;
+		}
+	}
+	dbg_log(_T("rcTag.left = %d  rcTag.top = %d width = %d"), rcTag.left, rcTag.top, rcTag.right - rcTag.left);
+	dbg_log(_T("rcSelf.left = %d  rcSelf.top = %d width = %d"), rcSelf.left, rcSelf.top, rcSelf.right - rcSelf.left);
+	dbg_log(_T("ptTo.x = %d  ptTo.y = %d"), ptTo.x, ptTo.y);
+	::ScreenToClient(m_hSelf, &ptTo);
+}
 ////////////////////////////////////////////////////////////////////////////////
 // 
 // CNppCtrlWnd
@@ -465,4 +531,47 @@ HGLOBAL CNppDlg::makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplate)
 		(*ppMyDlgTemplate)->dwExtendedStyle |= WS_EX_LAYOUTRTL;
 
 	return hMyDlgTemplate;
+}
+
+UINT CNppDlg::doModal()
+{
+    if( !::IsWindow(m_hSelf) ) 
+    {
+		create(_T("haven't create Dailog before doModal"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 320, 240);
+		gotoCenter();
+    }
+    UINT nRet = 0;
+    ::ShowWindow(m_hSelf, SW_SHOWNORMAL);
+    ::EnableWindow(m_hParent, FALSE);
+    MSG msg = { 0 };
+    while( ::IsWindow(m_hSelf) && ::GetMessage(&msg, NULL, 0, 0) ) {
+        if( msg.message == WM_CLOSE && msg.hwnd == m_hSelf ) {
+            nRet = msg.wParam;
+            ::EnableWindow(m_hParent, TRUE);
+            ::SetFocus(m_hParent);
+        }
+        if( !::TranslateMessage(&msg) ) {
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
+        }
+        if( msg.message == WM_QUIT ) break;
+    }
+    ::EnableWindow(m_hParent, TRUE);
+    ::SetFocus(m_hParent);
+//	::SetActiveWindow(m_hParent);
+//	::SetForegroundWindow(m_hParent);
+    if( msg.message == WM_QUIT ) ::PostQuitMessage(msg.wParam);
+
+    return nRet;
+}
+
+int CNppDlg::doModal(UINT iDlgID)
+{
+	if(::IsWindow(m_hSelf))
+	{
+		::SetActiveWindow(m_hSelf);
+		doModal();
+		return 0;
+	}
+	return ::DialogBoxParam(m_hInst, MAKEINTRESOURCE(iDlgID), m_hParent, (DLGPROC)DlgProcWrap, (LPARAM)this);
 }

@@ -7,7 +7,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 {
 	CExplorerDlg expDlg;
 	//CNppStaticDialog dlg2;
-	CNppDlg          dlg3;
+//	CNppDlg          dlg3;
+//	dlg3.doModal();
 	try
 	{
 		expDlg.create(hInstance, IDD_EXPLORER_DLG);

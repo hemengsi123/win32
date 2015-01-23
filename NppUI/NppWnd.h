@@ -2,6 +2,13 @@
 #ifndef WINDOW_BASE_H
 #define WINDOW_BASE_H
 
+enum AlignDirect
+{
+	LEFTALIGN = 0,
+	RIGHTALIGN,
+	TOPALIGN,
+	BOTTOMALIGN
+};
 ///////////////////////////////////////////////////////////////////
 //
 // CNppWnd 窗口基类
@@ -52,6 +59,9 @@ public:
 	int          getWndText(LPTSTR OUT lpString, int IN nMaxCount);
 	LRESULT      sendMessage(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0L);
 	LRESULT      postMessage(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0L);
+	void         gotoCenter(HWND hParent = NULL);
+	/*@brief: 与hTag 窗口对齐*/
+	void         alignTo(HWND hTag, AlignDirect alignDir, int cx = 0, int cy = 0);
 protected:
 	HINSTANCE m_hInst;
 	HWND      m_hParent;
@@ -105,6 +115,8 @@ public:
 	virtual HWND create(UINT iDlgID, bool bMakeRTL = false);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle = (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	virtual BOOL runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	UINT    doModal();
+	int     doModal(UINT iDlgID);
 protected:
 	static INT_PTR CALLBACK DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	HGLOBAL makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplate);

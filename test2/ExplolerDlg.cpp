@@ -53,9 +53,6 @@ void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 
 void CExplorerDlg::initCtrl()
 {
-	static CNppDlg nppDlg;
-	nppDlg.init(m_hInst, m_hSelf);
-	nppDlg.create(_T("Hello"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 40, 32);
 //	nppDlg.create(IDD_EXPLORER_DLG);
 	
 	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
@@ -64,10 +61,11 @@ void CExplorerDlg::initCtrl()
 	m_listViewAll.create();
 	m_listViewFiles.init(m_hInst, m_hSelf, IDC_LIST_FILES);
 	m_listViewFiles.create();
-	
+
+//	m_listViewAll.alignTo(m_treeView2.getHSelf(), RIGHTALIGN);
 	m_comBoFilter.init(m_hInst, m_hSelf, IDC_CBO_FILTER);
 	m_comBoFilter.create(CBS_DROPDOWN);
-
+//	m_comBoFilter.alignTo(m_treeView2.getHSelf(), LEFTALIGN);
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 
 	m_comBoFilter.addText(_T("*.*"));
@@ -123,6 +121,19 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 				else if(HIWORD(wParam) == CBN_EDITCHANGE)
 				{
 //					dbg_log(_T("CBN_EDITCHANGE."));
+				}
+			}
+			else if(LOWORD(wParam) == IDC_BTN_ADD)
+			{
+			//	dbg_log(_T("BN_DBLCLK"));
+				if(HIWORD(wParam) == BN_CLICKED)
+				{
+					dbg_log(_T("BN_DBLCLK"));
+					static CNppDlg nppDlg;
+					nppDlg.init(m_hInst, m_hSelf);
+					nppDlg.create(_T("Hello"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 40, 32);
+					nppDlg.gotoCenter();
+					nppDlg.doModal();
 				}
 			}
 			break;
