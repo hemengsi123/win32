@@ -13,6 +13,7 @@ protected:
 	// 替换系统默认窗口进程( 通过资源创建control )
 	WNDPROC setWndProc(HWND hWnd = NULL, WNDPROC userWndProc = WndProcWrap);
 	virtual LPCTSTR getWndClassName()const = 0;
+	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
 	virtual void destroy() = 0;
 public:
 	CNppWnd();
@@ -102,7 +103,7 @@ public:
 	virtual void init(HINSTANCE hInst, HWND hParent);
 	/*@param: bMakeRTL 通过资源模板创建对话框*/
 	virtual HWND create(UINT iDlgID, bool bMakeRTL = false);
-	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle = (WS_SYSMENU|WS_CAPTION|WS_BORDER), int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
+	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle = (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	virtual BOOL runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 protected:
 	static INT_PTR CALLBACK DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);

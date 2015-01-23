@@ -54,8 +54,9 @@ void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 void CExplorerDlg::initCtrl()
 {
 	CNppDlg nppDlg;
-	nppDlg.init(m_hInst, m_hSelf);
-	nppDlg.create(_T("Hello"));
+	nppDlg.init(m_hInst, NULL);
+	nppDlg.create(_T("Hello"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 40, 32);
+//	nppDlg.create(IDD_EXPLORER_DLG);
 	
 	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
 	m_treeView2.create();

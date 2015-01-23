@@ -9,12 +9,9 @@ CNppWnd::CNppWnd(): m_hInst(NULL), m_hParent(NULL), m_hSelf(NULL), \
 }
 CNppWnd::~CNppWnd()
 {
-	destroy();
+	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
 }
-void CNppWnd::destroy()
-{
 
-}
 LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	 CNppWnd* phSelf = NULL;
@@ -74,7 +71,7 @@ bool CNppWnd::registerWndClass()
 }
 UINT CNppWnd::getClassStyle() const
 {
-    return 0;
+    return (CS_VREDRAW | CS_HREDRAW);
 }
 HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, const RECT rc, DWORD dwExStyle)
 {
@@ -322,7 +319,6 @@ CNppDlg::CNppDlg(): m_bIsModel(false), m_iDlgID(0)/*, m_sysDlgProc((DLGPROC)::De
 }
 CNppDlg::~CNppDlg()
 {
-	destroy();
 }
 void CNppDlg::destroy()
 {
@@ -338,24 +334,6 @@ LPCTSTR CNppDlg::getWndClassName()const
 }
 INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	switch(uMsg)
-	{
-	case WM_INITDIALOG:
-	{
-		return true;
-	}
-	case WM_CLOSE:  
-        DestroyWindow(hDlg);  
-        return TRUE;  
-   
-    case WM_DESTROY:  
-        PostQuitMessage(0);  
-        return TRUE;
-	default:
-		break;
-	}
-	return FALSE;
-	/*
 	CNppDlg *pSelfDlg = NULL;
 	if( WM_INITDIALOG == uMsg && lParam != NULL)
 	{
@@ -363,29 +341,44 @@ INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 		pSelfDlg->m_hSelf = hDlg;
 		::SetWindowLong(hDlg, GWL_USERDATA, (long)lParam);
         pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
-		dbg_log(_T("done"));
 		return TRUE;
 	}
 	else
 	{
 		pSelfDlg = reinterpret_cast<CNppDlg *>(::GetWindowLong(hDlg, GWL_USERDATA));
-		if( pSelfDlg )
+		if( pSelfDlg != NULL)
 		{
 			return pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
 		}
-		else
-			return ::DefDlgProc(hDlg, uMsg, wParam, lParam);
 	}
-	*/
+	return 	FALSE;
 }
 BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	return FALSE;//::DefDlgProc(hDlg, uMsg, wParam, lParam);//::CallWindowProc(m_sysDlgProc, hDlg, uMsg, wParam, lParam);
+	switch(uMsg)
+	{
+		case WM_CLOSE:
+		{
+			destroy();
+			dbg_log(_T("WM_CLOSE"));
+			return TRUE;
+		}
+		case WM_DESTROY:
+		{
+			::PostQuitMessage(0);
+			dbg_log(_T("WM_DESTROY"));
+			return TRUE;
+		}
+		default:
+			break;
+	}
+	return FALSE;
+	// 不可以用默认DefDlgProc 进程，对话框进程会陷入死循环(why?)
+	//return ::DefDlgProc(hDlg, uMsg, wParam, lParam);
 }
 void CNppDlg::init(HINSTANCE hInst, HWND hParent)
 {
 	CNppWnd::init(hInst, hParent);
-	
 }
 HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
 {
@@ -397,7 +390,6 @@ HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
 		{
 			create(_T("CreateDialogParam failed"));
 		}
-		display(true);//::ShowWindow(m_hSelf, SW_SHOW);
 	}
 	else
 	{
@@ -422,10 +414,11 @@ HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, i
 		short  fontSize;  //font size
 		WCHAR  wszFont;   // L"MS Sans Serif"
 	};
-	void *ptmp = new (std::nothrow)char[512];
-	memset(ptmp, 0, 512);
-	// create dialog template
-	DlgTemplate& dlgTemp = *(DlgTemplate*)ptmp;//{0};
+//	void *ptmp = new (std::nothrow)char[512];
+//	memset(ptmp, 0, 512);
+//	// create dialog template
+//	DlgTemplate& dlgTemp = *(DlgTemplate*)ptmp;//{0};
+	DlgTemplate dlgTemp = {0};
 	dlgTemp.dlgTmp.style           = dwStyle;
 	dlgTemp.dlgTmp.dwExtendedStyle = dwExStyle;
 	dlgTemp.dlgTmp.cdit            = 0;
@@ -436,12 +429,16 @@ HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, i
 	dlgTemp.menu                   = 0x0000; // no menu
 	dlgTemp.wndClass               = 0;      // default wndclass
 	dlgTemp.wszTitle               = L'\0';
-	dbg_log(_T("m_hSelf = 0x%08X"), m_hSelf);
-	m_hSelf= ::CreateDialogIndirectParam(m_hInst, (LPCDLGTEMPLATE)&ptmp, m_hParent, DlgProcWrap, (LPARAM)this);
+//#ifdef _UNICODE 
+//	memcpy(&dlgTemp.wszTitle[0], lpszCaption, (_tcslen(lpszCaption)+1)*2);
+//#else
+//	::MultiByteToWideChar(CP_ACP, 0, lpszCaption, -1, &dlgTemp.wszTitle[0], 512-sizeof(DlgTemplate));
+//#endif
+	m_hSelf= ::CreateDialogIndirectParam(m_hInst, (LPCDLGTEMPLATE)&dlgTemp, m_hParent, DlgProcWrap, (LPARAM)this);
 	ASSERT(m_hSelf != NULL);
 	CNppWnd::setWndText(lpszCaption);
 	display();
-	delete []ptmp;
+	//delete []ptmp;
 	return m_hSelf;
 }
 
