@@ -53,8 +53,8 @@ void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 
 void CExplorerDlg::initCtrl()
 {
-	CNppDlg nppDlg;
-	nppDlg.init(m_hInst, NULL);
+	static CNppDlg nppDlg;
+	nppDlg.init(m_hInst, m_hSelf);
 	nppDlg.create(_T("Hello"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 40, 32);
 //	nppDlg.create(IDD_EXPLORER_DLG);
 	
@@ -76,7 +76,7 @@ void CExplorerDlg::initCtrl()
 	
 	//m_treeView2.setImageList(true);
 	m_treeView2.setImageList(m_imgLst.getSysImgLst());
-	
+	dbg_log(_T("all = %08X file = %08X "), m_listViewAll.getHSelf(), m_listViewFiles.getHSelf());
     UpdateDevices();
 	UpdateFolders();
 	

@@ -319,6 +319,7 @@ CNppDlg::CNppDlg(): m_bIsModel(false), m_iDlgID(0)/*, m_sysDlgProc((DLGPROC)::De
 }
 CNppDlg::~CNppDlg()
 {
+	
 }
 void CNppDlg::destroy()
 {
@@ -346,9 +347,12 @@ INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 	else
 	{
 		pSelfDlg = reinterpret_cast<CNppDlg *>(::GetWindowLong(hDlg, GWL_USERDATA));
-		if( pSelfDlg != NULL)
+		if( pSelfDlg != NULL )
 		{
-			return pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
+			if( pSelfDlg->m_hSelf == hDlg )
+			{
+				return pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
+			}
 		}
 	}
 	return 	FALSE;
@@ -360,13 +364,11 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_CLOSE:
 		{
 			destroy();
-			dbg_log(_T("WM_CLOSE"));
 			return TRUE;
 		}
 		case WM_DESTROY:
 		{
-			::PostQuitMessage(0);
-			dbg_log(_T("WM_DESTROY"));
+			//::PostQuitMessage(0);
 			return TRUE;
 		}
 		default:
