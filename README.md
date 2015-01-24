@@ -88,5 +88,9 @@ key2=int
 TCHAR valStr[MAX_PATH] = {0};
 TCHAR const configFilePath = _T(".\\config.ini");
 GetPrivateProfileString(_T("sectionName"), _T("key1"), _T("defKey"), valStr, sizeof(valStr), configFilePath);
-
 ```
+#### error
+* r6025 pure virtual function call =>一般在构造析构函数中调用虚函数就可能出这个错误。
+搜索纯虚函数，看看有没有在构造析构函数中调用了 
+
+

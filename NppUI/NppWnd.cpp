@@ -9,12 +9,9 @@ CNppWnd::CNppWnd(): m_hInst(NULL), m_hParent(NULL), m_hSelf(NULL), \
 }
 CNppWnd::~CNppWnd()
 {
-	//destroy();
+	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
 }
-//void CNppWnd::destroy()
-//{
 
-//}
 LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	 CNppWnd* phSelf = NULL;
@@ -57,6 +54,12 @@ WNDPROC CNppWnd::setWndProc(HWND hWnd, WNDPROC userWndProc)
 }
 bool CNppWnd::registerWndClass()
 {
+//	if the wndClassName had exist return true, or to register it
+	WNDCLASSEX wndex;
+	wndex.cbSize = sizeof(WNDCLASSEX);
+	if(::GetClassInfoEx(m_hInst, getWndClassName(), &wndex) )
+		return TRUE;
+	
     WNDCLASS wc = { 0 };
     wc.style = getClassStyle();
     wc.cbClsExtra = 0;
@@ -69,12 +72,13 @@ bool CNppWnd::registerWndClass()
     wc.lpszMenuName  = NULL;
     wc.lpszClassName = getWndClassName();
     ATOM ret = ::RegisterClass(&wc);
+
     ASSERT(ret!=NULL || ::GetLastError()==ERROR_CLASS_ALREADY_EXISTS);
     return ret != NULL || ::GetLastError() == ERROR_CLASS_ALREADY_EXISTS;
 }
 UINT CNppWnd::getClassStyle() const
 {
-    return 0;
+    return (CS_VREDRAW | CS_HREDRAW);
 }
 HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, const RECT rc, DWORD dwExStyle)
 {
@@ -218,7 +222,74 @@ LRESULT CNppWnd::postMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	ASSERT(::IsWindow(m_hSelf));
     return ::PostMessage(m_hSelf, uMsg, wParam, lParam);
 }
+void CNppWnd::gotoCenter(HWND hParent)
+{
+    RECT rc;
+	if( hParent == NULL )
+	{
+		if( m_hParent == NULL)
+			hParent = ::GetDesktopWindow();
+		else
+			hParent = m_hParent;
+	}
+    ::GetClientRect(hParent, &rc);
+	
+    POINT center;
+    center.x = rc.left + (rc.right - rc.left)/2;
+    center.y = rc.top + (rc.bottom - rc.top)/2;
+    ::ClientToScreen(hParent, &center);
+	RECT rcSelf;
+	::GetClientRect(m_hSelf, &rcSelf);
+	int x = center.x - (rcSelf.right - rcSelf.left)/2;
+	int y = center.y - (rcSelf.bottom - rcSelf.top)/2;
 
+	::SetWindowPos(m_hSelf, HWND_TOP, x, y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, SWP_SHOWWINDOW);
+}
+void CNppWnd::alignTo(HWND hTag, AlignDirect alignDir, int cx, int cy)
+{
+	RECT rcTag, rcSelf;
+	POINT ptTo;
+
+	::GetWindowRect(hTag, &rcTag);
+	::GetWindowRect(m_hSelf, &rcSelf);
+	ptTo.x = rcTag.left;
+	ptTo.y = rcTag.top;
+	
+	switch(alignDir)
+	{
+		case LEFTALIGN:
+		{
+			::GetWindowRect(m_hSelf, &rcSelf);
+			ptTo.x -= (rcSelf.right - rcSelf.left + cx);
+			ptTo.y += cy;
+			break;
+		}
+		case RIGHTALIGN:
+		{
+			ptTo.x += (rcTag.right - rcTag.left + cx);
+			ptTo.y += cy;
+			break;
+		}
+		case TOPALIGN:
+		{
+			::GetWindowRect(m_hSelf, &rcSelf);
+			ptTo.y -= (rcSelf.bottom - rcSelf.top + cy);
+			ptTo.x += cx;
+			break;
+		}
+		default: // default bottom align
+		{
+			ptTo.y += (rcTag.bottom - rcTag.top + cy);
+			ptTo.x += cx;
+			break;
+		}
+	}
+	// 将屏幕坐标转成客户端坐标
+	::ScreenToClient(m_hSelf, &ptTo);
+	//::SetWindowPos(m_hSelf, NULL, ptTo.x, ptTo.y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, SWP_SHOWWINDOW);
+	::MoveWindow(m_hSelf, ptTo.x, ptTo.y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, TRUE);
+	
+}
 ////////////////////////////////////////////////////////////////////////////////
 // 
 // CNppCtrlWnd
@@ -322,7 +393,7 @@ CNppDlg::CNppDlg(): m_bIsModel(false), m_iDlgID(0)/*, m_sysDlgProc((DLGPROC)::De
 }
 CNppDlg::~CNppDlg()
 {
-	destroy();
+	
 }
 void CNppDlg::destroy()
 {
@@ -345,7 +416,6 @@ INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 		//pSelfDlg->m_hSelf = hDlg;
 		::SetWindowLongPtr(hDlg, GWL_USERDATA, reinterpret_cast<LPARAM>(pSelfDlg));
         pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
-		dbg_log(_T("done pSelfDlg = 0x%08X hDlg = %08X"), pSelfDlg, hDlg);
 		return TRUE;
 	}
 	else
@@ -353,20 +423,39 @@ INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 		pSelfDlg = reinterpret_cast<CNppDlg *>(::GetWindowLongPtr(hDlg, GWL_USERDATA));
 		if( pSelfDlg != NULL )
 		{
-			return pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
+			if( pSelfDlg->m_hSelf == hDlg )
+			{
+				return pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
+			}
 		}
 	}
-	return FALSE;
+	return 	FALSE;
 }
 BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	//dbg_log(_T("done uMsg = 0x%04X hDlg = %08X"), uMsg, hDlg);
-	return TRUE;//::DefDlgProc(hDlg, uMsg, wParam, lParam);//::CallWindowProc(m_sysDlgProc, hDlg, uMsg, wParam, lParam);
+	switch(uMsg)
+	{
+		case WM_CLOSE:
+		{
+			destroy();
+			return TRUE;
+		}
+		case WM_DESTROY:
+		{
+			//::PostQuitMessage(0);
+			return TRUE;
+		}
+		default:
+			break;
+	}
+	return FALSE;
+	// 不可以用默认DefDlgProc 进程，对话框进程会陷入死循环(why?)
+	//return ::DefDlgProc(hDlg, uMsg, wParam, lParam);
+
 }
 void CNppDlg::init(HINSTANCE hInst, HWND hParent)
 {
 	CNppWnd::init(hInst, hParent);
-	
 }
 HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
 {
@@ -379,8 +468,6 @@ HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
 		{
 			create(_T("CreateDialogParam failed"));
 		}
-		display(true);//::ShowWindow(m_hSelf, SW_SHOW);
-		//CNppWnd::setWndProc();
 	}
 	else
 	{
@@ -394,7 +481,6 @@ HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
 }
 HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
 {
-#pragma pack(4)
 	struct DlgTemplate
 	{
 		// DLGTEMPLATE struct
@@ -406,8 +492,12 @@ HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, i
 		short  fontSize;  //font size
 		WCHAR  wszFont;   // L"MS Sans Serif"
 	};
-#pragma pack(pop)
-	// create dialog template
+
+//	void *ptmp = new (std::nothrow)char[512];
+//	memset(ptmp, 0, 512);
+//	// create dialog template
+//	DlgTemplate& dlgTemp = *(DlgTemplate*)ptmp;//{0};
+
 	DlgTemplate dlgTemp = {0};
 	dlgTemp.dlgTmp.style           = dwStyle;
 	dlgTemp.dlgTmp.dwExtendedStyle = dwExStyle;
@@ -419,13 +509,16 @@ HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, i
 	dlgTemp.menu                   = 0x0000; // no menu
 	dlgTemp.wndClass               = 0;      // default wndclass
 	dlgTemp.wszTitle               = L'\0';
-
+//#ifdef _UNICODE 
+//	memcpy(&dlgTemp.wszTitle[0], lpszCaption, (_tcslen(lpszCaption)+1)*2);
+//#else
+//	::MultiByteToWideChar(CP_ACP, 0, lpszCaption, -1, &dlgTemp.wszTitle[0], 512-sizeof(DlgTemplate));
+//#endif
 	m_hSelf= ::CreateDialogIndirectParam(m_hInst, (LPCDLGTEMPLATE)&dlgTemp, m_hParent, DlgProcWrap, (LPARAM)this);
 	ASSERT(m_hSelf != NULL);
-	dbg_log(_T("m_hInst = 0x%08X m_hParent = %08X m_hSelf = %08X"), m_hInst, m_hParent, m_hSelf);
-	dbg_log(_T("this = 0x%08X"), this);
-	//CNppWnd::setWndText(lpszCaption);
+	CNppWnd::setWndText(lpszCaption);
 	display();
+	//delete []ptmp;
 	return m_hSelf;
 }
 
@@ -450,4 +543,47 @@ HGLOBAL CNppDlg::makeRTLResource(int dialogID, DLGTEMPLATE **ppMyDlgTemplate)
 		(*ppMyDlgTemplate)->dwExtendedStyle |= WS_EX_LAYOUTRTL;
 
 	return hMyDlgTemplate;
+}
+
+UINT CNppDlg::doModal()
+{
+    if( !::IsWindow(m_hSelf) ) 
+    {
+		create(_T("haven't create Dailog before doModal"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 320, 240);
+		gotoCenter();
+    }
+    UINT nRet = 0;
+    ::ShowWindow(m_hSelf, SW_SHOWNORMAL);
+    ::EnableWindow(m_hParent, FALSE);
+    MSG msg = { 0 };
+    while( ::IsWindow(m_hSelf) && ::GetMessage(&msg, NULL, 0, 0) ) {
+        if( msg.message == WM_CLOSE && msg.hwnd == m_hSelf ) {
+            nRet = msg.wParam;
+            ::EnableWindow(m_hParent, TRUE);
+            ::SetFocus(m_hParent);
+        }
+        if( !::TranslateMessage(&msg) ) {
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
+        }
+        if( msg.message == WM_QUIT ) break;
+    }
+    ::EnableWindow(m_hParent, TRUE);
+    ::SetFocus(m_hParent);
+//	::SetActiveWindow(m_hParent);
+//	::SetForegroundWindow(m_hParent);
+    if( msg.message == WM_QUIT ) ::PostQuitMessage(msg.wParam);
+
+    return nRet;
+}
+
+int CNppDlg::doModal(UINT iDlgID)
+{
+	if(::IsWindow(m_hSelf))
+	{
+		::SetActiveWindow(m_hSelf);
+		doModal();
+		return 0;
+	}
+	return ::DialogBoxParam(m_hInst, MAKEINTRESOURCE(iDlgID), m_hParent, (DLGPROC)DlgProcWrap, (LPARAM)this);
 }

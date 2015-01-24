@@ -14,9 +14,9 @@ void CNppListView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
 {
 	CNppCtrlWnd::init(hInst, hParent, iCtrlIDs);
 }
-HWND CNppListView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
+HWND CNppListView::create(DWORD dwStyle, DWORD dwExStyle)
 {
-	if( CNppCtrlWnd::create(dwStyle, 0, lpszCaption) )
+	if( CNppCtrlWnd::create(dwStyle, 0, NULL) )
 	{
 		setWndProc();
 		setHeaderWndProc(headerWndProcWrap);
@@ -27,7 +27,19 @@ HWND CNppListView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 	}
 	return m_hSelf;//getHSelf();
 }
-
+HWND CNppListView::create(DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
+{
+	if( CNppCtrlWnd::create(NULL, dwStyle, x, y, cx, cy, 0) )
+	{
+		setWndProc();
+		setHeaderWndProc(headerWndProcWrap);
+		if(dwExStyle > 0)
+		{
+			setExtStyle(dwExStyle);
+		}
+	}
+	return m_hSelf;
+}
 int CNppListView::addColumn(LPTSTR pszText, int cWidth, int fmt)
 {
 	LVCOLUMN lvColumn;

@@ -66,6 +66,7 @@ protected:
 	HWND m_splitterCtrl;
 	//
 	CNppCombox    m_comBoFilter;
+	CNppCombox    m_comBoFilter2;
 	CNppTreeView  m_treeView2;
 	CNppListView  m_listViewAll;
 	CNppListView  m_listViewFiles;

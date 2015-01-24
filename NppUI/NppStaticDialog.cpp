@@ -98,7 +98,10 @@ BOOL CALLBACK CNppStaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 		}
 	}
 }
-
+BOOL CALLBACK CNppStaticDialog::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	return FALSE;
+}
 void CNppStaticDialog::alignWith(HWND handle, HWND handle2Align, PosAlign pos, POINT & point)
 {
     RECT rc, rc2;

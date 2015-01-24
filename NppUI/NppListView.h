@@ -10,7 +10,8 @@ public:
 	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
 	void     init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
-	HWND     create(DWORD dwStyle =  LVS_REPORT, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
+	HWND     create(DWORD dwStyle = 0, DWORD dwExStyle = 0);
+	HWND     create(DWORD dwStyle /*=  LVS_REPORT*/, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	LRESULT  runListProc(UINT Message, WPARAM wParam, LPARAM lParam, bool & bDone);
 	int   addColumn(LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
 	bool  setColumn(int iCol, LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);

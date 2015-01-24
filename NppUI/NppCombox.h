@@ -26,7 +26,8 @@ public :
     ~CNppCombox();
 	LPCTSTR getWndClassName()const;
 	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
-	HWND create(DWORD dwStyle =  CBS_DROPDOWN, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
+	HWND create(DWORD dwStyle =  CBS_DROPDOWN, DWORD dwExStyle = 0);
+	HWND create(DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	void addText(LPCTSTR pszText);
 	void setText(LPCTSTR pszText, UINT size = MAX_PATH);
 	void getText(LPTSTR pszText, UINT size = MAX_PATH);

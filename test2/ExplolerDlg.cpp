@@ -53,20 +53,20 @@ void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
 
 void CExplorerDlg::initCtrl()
 {
-	CNppDlg nppDlg;
-	nppDlg.init(m_hInst, m_hSelf);
-	nppDlg.create(_T("Hello"));
-	//nppDlg.create(IDD_EXPLORER_DLG);
+
 	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
 	m_treeView2.create();
 	m_listViewAll.init(m_hInst, m_hSelf, IDC_LIST_ALL);
 	m_listViewAll.create();
 	m_listViewFiles.init(m_hInst, m_hSelf, IDC_LIST_FILES);
 	m_listViewFiles.create();
-	
-	m_comBoFilter.init(m_hInst, m_hSelf, IDC_CBO_FILTER);
-	m_comBoFilter.create(CBS_DROPDOWN);
 
+//	m_listViewAll.alignTo(m_treeView2.getHSelf(), RIGHTALIGN);
+	m_comBoFilter.init(m_hInst, m_hSelf, IDC_CBO_FILTER);
+	m_comBoFilter.create();
+	m_comBoFilter2.init(m_hInst, m_hSelf, IDC_CBO_FILTER +30);
+	m_comBoFilter2.create(CBS_DROPDOWN | CBS_AUTOHSCROLL, 0, 0, 200, 30);
+	m_comBoFilter2.alignTo(m_comBoFilter.getHSelf(), LEFTALIGN, 50);
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 
 	m_comBoFilter.addText(_T("*.*"));
@@ -75,7 +75,7 @@ void CExplorerDlg::initCtrl()
 	
 	//m_treeView2.setImageList(true);
 	m_treeView2.setImageList(m_imgLst.getSysImgLst());
-	
+	dbg_log(_T("all = %08X file = %08X "), m_listViewAll.getHSelf(), m_listViewFiles.getHSelf());
     UpdateDevices();
 	UpdateFolders();
 	
@@ -122,6 +122,19 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 				else if(HIWORD(wParam) == CBN_EDITCHANGE)
 				{
 //					dbg_log(_T("CBN_EDITCHANGE."));
+				}
+			}
+			else if(LOWORD(wParam) == IDC_BTN_ADD)
+			{
+			//	dbg_log(_T("BN_DBLCLK"));
+				if(HIWORD(wParam) == BN_CLICKED)
+				{
+					dbg_log(_T("BN_DBLCLK"));
+					static CNppDlg nppDlg;
+					nppDlg.init(m_hInst, m_hSelf);
+					nppDlg.create(_T("Hello"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 40, 32);
+					nppDlg.gotoCenter();
+					nppDlg.doModal();
 				}
 			}
 			break;
@@ -645,7 +658,7 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			lpszExt = searchFile.getExtension(lvItem.m_fileName.c_str());
 			lvItem.m_fileExt    = lpszExt;
 			lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
-			lvItem.m_szfilesize = Int2TStr(lvItem.m_filesize);
+			//lvItem.m_szfilesize = Int2TStr(lvItem.m_filesize);
 			m_imgLst.getFileIcon(szTmpFile, &iIconNormal);
 			lvItem.m_iIcon      = iIconNormal;
 			m_vListViewAll.push_back(lvItem);

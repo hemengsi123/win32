@@ -20,7 +20,8 @@ public :
 	virtual LPCTSTR getWndClassName()const;
 	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
 	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
-	HWND create(DWORD dwStyle =  TVS_HASLINES, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
+	HWND create(DWORD dwStyle =  TVS_HASLINES, DWORD dwExStyle = 0);
+	HWND create(DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	bool getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize = MAX_PATH);
 	BOOL getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, LPINT piOverlay);
 	void getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelected = NULL, LPINT iIconOverlayed = NULL);

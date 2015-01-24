@@ -4,17 +4,21 @@
 
 LPCTSTR CNppTreeView::getWndClassName()const
 {
-	return _T("SysTreeView32"); WC_TREEVIEW;
+	return _T("SysTreeView32");// WC_TREEVIEW;
 }
 void CNppTreeView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
 {
 	CNppCtrlWnd::init(hInst, hParent, iCtrlIDs);
 }
-HWND CNppTreeView::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
+HWND CNppTreeView::create(DWORD dwStyle, DWORD dwExStyle)
 {
-	CNppCtrlWnd::create(dwStyle, dwExStyle, lpszCaption);
+	CNppCtrlWnd::create(dwStyle, dwExStyle, NULL);
 	setWndProc();
 	return m_hSelf;
+}
+HWND CNppTreeView::create(DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
+{
+	return CNppCtrlWnd::create(NULL, dwStyle, x, y, cx, cy, dwExStyle);
 }
 LRESULT CNppTreeView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
 {
