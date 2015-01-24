@@ -245,50 +245,135 @@ void CNppWnd::gotoCenter(HWND hParent)
 
 	::SetWindowPos(m_hSelf, HWND_TOP, x, y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, SWP_SHOWWINDOW);
 }
-void CNppWnd::alignTo(HWND hTag, AlignDirect alignDir, int cx, int cy)
+void CNppWnd::alignTo(HWND hTag, AlignDirect alignFlags1, AlignDirect alignFlags2, int cx, int cy)
 {
 	RECT rcTag, rcSelf;
-	POINT ptTo;
+	POINT ptTo = {0};
 
-	::GetWindowRect(hTag, &rcTag);
 	::GetWindowRect(m_hSelf, &rcSelf);
-	ptTo.x = rcTag.left;
-	ptTo.y = rcTag.top;
-	
-	switch(alignDir)
+	if(hTag == m_hParent)
 	{
-		case LEFTALIGN:
+		::GetClientRect(hTag, &rcTag);
+		if( alignFlags1 & LEFTALIGN )
 		{
-			::GetWindowRect(m_hSelf, &rcSelf);
+			ptTo.x  = rcTag.left + cx;
+			if(alignFlags2 & BOTTOMALIGN )
+			{
+				ptTo.y  = rcTag.bottom;
+				ptTo.y -= (rcSelf.bottom -rcSelf.top  + cy);
+			}
+			else
+			{
+				ptTo.y  = rcTag.top + cy;
+			}
+		}
+		else if(alignFlags1 & RIGHTALIGN)
+		{
+			ptTo.x  = rcTag.right;
 			ptTo.x -= (rcSelf.right - rcSelf.left + cx);
-			ptTo.y += cy;
-			break;
+			if(alignFlags2 & BOTTOMALIGN)
+			{
+				ptTo.y  = rcTag.bottom;
+				ptTo.y -= (rcSelf.bottom -rcSelf.top  + cy);
+			}
+			else
+			{
+				ptTo.y  = rcTag.top + cy;
+			}
 		}
-		case RIGHTALIGN:
+		else if(alignFlags1 & TOPALIGN)
 		{
-			ptTo.x += (rcTag.right - rcTag.left + cx);
-			ptTo.y += cy;
-			break;
+			ptTo.y = rcTag.top + cy;
+			if(alignFlags2 & RIGHTALIGN)
+			{
+				ptTo.x  = rcTag.right;
+				ptTo.x -= (rcSelf.right - rcSelf.left + cx);
+			}
+			else
+			{
+				ptTo.x = rcTag.left + cx;
+			}
 		}
-		case TOPALIGN:
+		else // bottom
 		{
-			::GetWindowRect(m_hSelf, &rcSelf);
-			ptTo.y -= (rcSelf.bottom - rcSelf.top + cy);
-			ptTo.x += cx;
-			break;
+			ptTo.y  = rcTag.bottom;
+			ptTo.y -= (rcSelf.bottom -rcSelf.top  + cy);
+			if(alignFlags2 & RIGHTALIGN)
+			{
+				ptTo.x  = rcTag.right;
+				ptTo.x -= (rcSelf.right - rcSelf.left + cx);
+			}
+			else
+			{
+				ptTo.x = rcTag.left + cx;
+			}
 		}
-		default: // default bottom align
-		{
-			ptTo.y += (rcTag.bottom - rcTag.top + cy);
-			ptTo.x += cx;
-			break;
-		}
+
 	}
-	// 将屏幕坐标转成客户端坐标
-	::ScreenToClient(m_hSelf, &ptTo);
-	//::SetWindowPos(m_hSelf, NULL, ptTo.x, ptTo.y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, SWP_SHOWWINDOW);
+	else
+	{
+		::GetWindowRect(hTag, &rcTag);
+		if( alignFlags1 & LEFTALIGN )
+		{
+			ptTo.x  = rcTag.left;
+			ptTo.x -= (rcSelf.right - rcSelf.left + cx);
+			if(alignFlags2 & TOPALIGN)
+			{
+				ptTo.y = rcTag.top + cy;
+			}
+			else
+			{
+				ptTo.y  = rcTag.bottom;
+				ptTo.y -= (rcSelf.bottom -rcSelf.top  + cy);
+			}
+		}
+		else if(alignFlags1 & RIGHTALIGN)
+		{
+			//ptTo.x = rcTag.left;
+			//ptTo.x += (rcTag.right - rcTag.left + cx);
+			ptTo.x = rcTag.right + cx;
+			if(alignFlags2 & TOPALIGN)
+			{
+				ptTo.y = rcTag.top + cy;
+			}
+			else
+			{
+				ptTo.y = rcTag.bottom;
+				ptTo.y -= (rcSelf.bottom -rcSelf.top + cy);
+			}
+		}
+		else if(alignFlags1 & TOPALIGN)
+		{
+			ptTo.y  = rcTag.top;
+			ptTo.y -= (rcSelf.bottom - rcSelf.top + cy);
+			if(alignFlags2 & RIGHTALIGN)
+			{
+				ptTo.x = rcTag.right;
+				ptTo.x -= (rcSelf.right - rcSelf.left + cx);
+			}
+			else
+			{
+				ptTo.x = rcTag.left + cx;
+			}
+		}
+		else // BOTTOMALIGN
+		{
+			ptTo.y  = rcTag.bottom;
+			ptTo.y += cy;
+			if(alignFlags2 & RIGHTALIGN)
+			{
+				ptTo.x = rcTag.right;
+				ptTo.x -= (rcSelf.right - rcSelf.left + cx);
+			}
+			else
+			{
+				ptTo.x = rcTag.left + cx;
+			}
+		}
+		// 将屏幕坐标转成客户端坐标
+		::ScreenToClient(m_hSelf, &ptTo);
+	}
 	::MoveWindow(m_hSelf, ptTo.x, ptTo.y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, TRUE);
-	
 }
 ////////////////////////////////////////////////////////////////////////////////
 // 
@@ -402,6 +487,10 @@ void CNppDlg::destroy()
 		::DestroyWindow(m_hSelf);
 		m_hSelf = NULL;
 	}
+}
+BOOL CNppDlg::isControl()const
+{
+	return FALSE;
 }
 LPCTSTR CNppDlg::getWndClassName()const
 {

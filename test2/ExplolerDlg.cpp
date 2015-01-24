@@ -66,7 +66,7 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter.create();
 	m_comBoFilter2.init(m_hInst, m_hSelf, IDC_CBO_FILTER +30);
 	m_comBoFilter2.create(CBS_DROPDOWN | CBS_AUTOHSCROLL, 0, 0, 200, 30);
-	m_comBoFilter2.alignTo(m_comBoFilter.getHSelf(), LEFTALIGN, 50);
+	m_comBoFilter2.alignTo(m_treeView2.getHSelf(), TOPALIGN, LEFTALIGN, 0, 10);
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 
 	m_comBoFilter.addText(_T("*.*"));

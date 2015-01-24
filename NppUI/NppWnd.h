@@ -1,13 +1,19 @@
 
 #ifndef WINDOW_BASE_H
 #define WINDOW_BASE_H
-
+/*
+#define LEFTALIGN   0x01
+#define RIGHTALIGN  0x02
+#define TOPALIGN    0x10
+#define BOTTOMALIGN 0x20
+*/
 enum AlignDirect
 {
-	LEFTALIGN = 0,
-	RIGHTALIGN,
-	TOPALIGN,
-	BOTTOMALIGN
+	NOALIGN     = 0x00,
+	LEFTALIGN   = 0x01,
+	RIGHTALIGN  = 0x02,
+	TOPALIGN    = 0x04,
+	BOTTOMALIGN = 0x08,
 };
 ///////////////////////////////////////////////////////////////////
 //
@@ -60,8 +66,11 @@ public:
 	LRESULT      sendMessage(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0L);
 	LRESULT      postMessage(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0L);
 	void         gotoCenter(HWND hParent = NULL);
-	/*@brief: 与hTag 窗口对齐*/
-	void         alignTo(HWND hTag, AlignDirect alignDir, int cx = 0, int cy = 0);
+	/* @brief: 与hTag 窗口对齐
+	 * @usage: 1)alignTo(hParent, TOPALIGN, LEFTALIGN, 20, -20); cx 和 cy 可以为负
+	 * 2) alignTo(hControl, TOPALIGN, LEFTALIGN, 20, 20);
+	*/
+	void         alignTo(HWND hTag, AlignDirect alignFlags1, AlignDirect alignFlags2 = NOALIGN, int cx = 0, int cy = 0);
 protected:
 	HINSTANCE m_hInst;
 	HWND      m_hParent;
@@ -109,6 +118,7 @@ public:
 	CNppDlg();
 	virtual ~CNppDlg();
 	virtual void destroy();
+	virtual BOOL isControl()const;
 	virtual LPCTSTR getWndClassName()const;
 	virtual void init(HINSTANCE hInst, HWND hParent);
 	/*@param: bMakeRTL 通过资源模板创建对话框*/
