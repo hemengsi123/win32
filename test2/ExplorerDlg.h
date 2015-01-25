@@ -72,7 +72,7 @@ protected:
 	CNppListView  m_listViewFiles;
 
 	CNppImageList m_imgLst;
-	
+	CNppButton    m_btnAdd;
 	HIMAGELIST	m_hImageListSmall;
 	HANDLE	m_hExploreVolumeThread;
 	std::vector<ListViewItem> m_vListViewAll;

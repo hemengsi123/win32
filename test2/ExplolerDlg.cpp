@@ -69,6 +69,10 @@ void CExplorerDlg::initCtrl()
 	m_comBoFilter2.alignTo(m_treeView2.getHSelf(), TOPALIGN, LEFTALIGN, 0, 10);
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 
+	m_btnAdd.init(m_hInst, m_hSelf, IDC_CBO_FILTER +31);
+	m_btnAdd.create(_T("Add"), BS_FLAT, 0, 0, 40, 20);
+	m_btnAdd.alignTo(m_hSelf, TOPALIGN, RIGHTALIGN, 10, 10);
+	m_btnAdd.display();
 	m_comBoFilter.addText(_T("*.*"));
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);

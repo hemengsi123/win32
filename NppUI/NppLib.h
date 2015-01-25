@@ -23,6 +23,7 @@
 #include "NppImageList.h"
 #include "NppListView.h"
 #include "NppCombox.h"
+#include "NppButton.h"
 
 //typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > tstring;
 

@@ -431,7 +431,7 @@ HWND CNppCtrlWnd::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 HWND CNppCtrlWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
 {
 	m_bIsCreated = true;
-	dwStyle |= (WS_CHILD | WS_VISIBLE | WS_BORDER);
+	dwStyle |= (WS_CHILD | WS_VISIBLE);
 	return CNppWnd::create(lpszCaption, dwStyle, (HMENU)m_iCtrlID, x, y, cx, cy, dwExStyle);
 }
 LRESULT CNppCtrlWnd::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
@@ -454,7 +454,11 @@ BOOL CNppCtrlWnd::isControl()const
 }
 void CNppCtrlWnd::destroy()
 {
-
+	if(m_hSelf)
+	{
+		::DestroyWindow(m_hSelf);
+		m_hSelf = NULL;
+	}
 }
 UINT CNppCtrlWnd::getCtrlID()const
 {
@@ -570,6 +574,7 @@ HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
 }
 HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
 {
+	dwStyle |= (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER);
 	struct DlgTemplate
 	{
 		// DLGTEMPLATE struct
@@ -586,7 +591,6 @@ HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, i
 //	memset(ptmp, 0, 512);
 //	// create dialog template
 //	DlgTemplate& dlgTemp = *(DlgTemplate*)ptmp;//{0};
-
 	DlgTemplate dlgTemp = {0};
 	dlgTemp.dlgTmp.style           = dwStyle;
 	dlgTemp.dlgTmp.dwExtendedStyle = dwExStyle;
