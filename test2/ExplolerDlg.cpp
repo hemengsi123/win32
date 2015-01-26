@@ -60,22 +60,33 @@ void CExplorerDlg::initCtrl()
 	m_listViewAll.create();
 	m_listViewFiles.init(m_hInst, m_hSelf, IDC_LIST_FILES);
 	m_listViewFiles.create();
-
 //	m_listViewAll.alignTo(m_treeView2.getHSelf(), RIGHTALIGN);
+	// filter combox
 	m_comBoFilter.init(m_hInst, m_hSelf, IDC_CBO_FILTER);
 	m_comBoFilter.create();
-	m_comBoFilter2.init(m_hInst, m_hSelf, IDC_CBO_FILTER +30);
-	m_comBoFilter2.create(CBS_DROPDOWN | CBS_AUTOHSCROLL, 0, 0, 200, 30);
-	m_comBoFilter2.alignTo(m_treeView2.getHSelf(), TOPALIGN, LEFTALIGN, 0, 10);
-	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
-
-	m_btnAdd.init(m_hInst, m_hSelf, IDC_CBO_FILTER +31);
-	m_btnAdd.create(_T("Add"), BS_FLAT, 0, 0, 40, 20);
-	m_btnAdd.alignTo(m_hSelf, TOPALIGN, RIGHTALIGN, 10, 10);
-	m_btnAdd.display();
 	m_comBoFilter.addText(_T("*.*"));
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
+	
+	m_comBoFilter2.init(m_hInst, m_hSelf, IDC_CBO_FILTER +30);
+	m_comBoFilter2.create(CBS_DROPDOWN | CBS_AUTOHSCROLL, 0, 0, 200, 30);
+	m_comBoFilter2.alignTo(m_treeView2.getHSelf(), TOPALIGN, LEFTALIGN, 0, 10);
+	// spliter
+	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
+
+	// button
+	m_btnAdd.init(m_hInst, m_hSelf, IDC_BTN_ADD);
+	m_btnAdd.create();
+	m_btnAddAll.init(m_hInst, m_hSelf, IDC_BTN_ADDALL);
+	m_btnAddAll.create();
+	m_btnDel.init(m_hInst, m_hSelf, IDC_BTN_DEL);
+	m_btnDel.create();
+	m_btnDelAll.init(m_hInst, m_hSelf, IDC_BTN_DELALL);
+	
+	//m_btnAdd.alignTo(m_hSelf, TOPALIGN, RIGHTALIGN, 10, 10);
+	
+	CNppFont nppFont;
+	nppFont.setFont(m_btnAdd.getHSelf(), m_btnAddAll.getHSelf());
 	
 	//m_treeView2.setImageList(true);
 	m_treeView2.setImageList(m_imgLst.getSysImgLst());

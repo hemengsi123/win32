@@ -13,7 +13,7 @@ MAKEDEP = true
 # OBJS    = $(OUTDIR)\main.obj
 RESRCS  = $(OUTDIR)\ExplorerDlg.res
 
-LIBS    = user32.lib kernel32.lib Shlwapi.lib Shell32.lib comctl32.lib ole32.lib
+LIBS    = user32.lib kernel32.lib Shlwapi.lib Shell32.lib comctl32.lib ole32.lib Gdi32.lib
 
 INCDIRS = /I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include" /I"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include" \
 			/I"D:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\atlmfc\include" /I.

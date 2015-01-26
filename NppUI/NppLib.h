@@ -11,10 +11,6 @@
 #define NPPLIB_API 
 #endif
 
-#include <windows.h>
-#include <string>
-#include <vector>
-
 #include "NppBase.h"
 #include "NppFile.h"
 #include "NppWnd.h"
@@ -24,6 +20,7 @@
 #include "NppListView.h"
 #include "NppCombox.h"
 #include "NppButton.h"
+#include "NppFont.h"
 
 //typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > tstring;
 

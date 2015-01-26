@@ -5,6 +5,8 @@
 #include <Shlwapi.h>
 #include <windows.h>
 #include <string>
+#include <vector>
+#include <Wingdi.h>
 /////////////////////////////
 // syserror
 

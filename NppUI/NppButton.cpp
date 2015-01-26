@@ -9,6 +9,10 @@ LPCTSTR CNppButton::getWndClassName()const
 {
 	return WC_BUTTON;
 }
+void CNppButton::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
+{
+	CNppCtrlWnd::init(hInst, hParent, iCtrlIDs);
+}
 HWND CNppButton::create(LPCTSTR lpszText, DWORD dwStyle, DWORD dwExStyle)
 {
 	dwStyle |= (WS_CHILDWINDOW | WS_TABSTOP);

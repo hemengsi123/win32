@@ -9,7 +9,7 @@
 */
 enum AlignDirect
 {
-	NOALIGN     = 0x00,
+	DEFALIGN    = 0x00,
 	LEFTALIGN   = 0x01,
 	RIGHTALIGN  = 0x02,
 	TOPALIGN    = 0x04,
@@ -70,7 +70,7 @@ public:
 	 * @usage: 1)alignTo(hParent, TOPALIGN, LEFTALIGN, 20, -20); cx 和 cy 可以为负
 	 * 2) alignTo(hControl, TOPALIGN, LEFTALIGN, 20, 20);
 	*/
-	void         alignTo(HWND hTag, AlignDirect alignFlags1, AlignDirect alignFlags2 = NOALIGN, int cx = 0, int cy = 0);
+	void         alignTo(HWND hTag, AlignDirect alignFlags1, AlignDirect alignFlags2 = DEFALIGN, int cx = 0, int cy = 0);
 protected:
 	HINSTANCE m_hInst;
 	HWND      m_hParent;
