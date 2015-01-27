@@ -18,25 +18,25 @@ public:
 	void     init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
 	HWND     create(DWORD dwStyle = 0, DWORD dwExStyle = 0);
 	HWND     create(DWORD dwStyle /*=  LVS_REPORT*/, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
-	LRESULT  runListProc(UINT Message, WPARAM wParam, LPARAM lParam, bool & bDone);
+	LRESULT  runListProc(UINT Message, WPARAM wParam, LPARAM lParam, BOOL & bDone);
 	int   addColumn(LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
-	bool  setColumn(int iCol, LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
-	bool  setScroll(int cWidth, int cHight);
+	BOOL  setColumn(int iCol, LPTSTR pszText, int cWidth, int fmt = LVCFMT_CENTER);
+	BOOL  setScroll(int cWidth, int cHight);
 	void  setExtStyle(DWORD dwExStyle);
 	DWORD getExtStyle()const;
 	int   addItem();
-	bool  setColumnWidth(int iCol, int cWidth)const;
+	BOOL  setColumnWidth(int iCol, int cWidth)const;
 	int   getColumnWidth(int iCol)const;
 	int   getheaderHight()const;
-	bool  isSelect(int iItem)const;
+	BOOL  isSelect(int iItem)const;
 	void  setFocusItem(int iItem);
 	void  hiddenHeader();
 	/*@retrn: if successful return index, or return -1*/
 	int   addItem(LPCTSTR lpszText, int iItem, int iIcon = -1);
 	/*@retrn: if successful return true, or false*/
-	bool  addSubItem(LPCTSTR lpszText, int iCol, int iItem = -1);
-	bool  getItemText(int iItem, int iCol, LPTSTR lpszText, int cMaxLen);
-	bool  setItemText(LPTSTR lpszText, int iItem, int iCol);
+	BOOL  addSubItem(LPCTSTR lpszText, int iCol, int iItem = -1);
+	BOOL  getItemText(int iItem, int iCol, LPTSTR lpszText, int cMaxLen);
+	BOOL  setItemText(LPTSTR lpszText, int iItem, int iCol);
 	BOOL  clearItem();
 	BOOL  delItem(int iItem);
 	BOOL  delColumn(int iCol);
@@ -58,7 +58,7 @@ protected:
 	WNDPROC setHeaderWndProc(WNDPROC headerProc = headerWndProcWrap);
 	static LRESULT CALLBACK headerWndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	LRESULT runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
+	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bDone);
 };
 
 

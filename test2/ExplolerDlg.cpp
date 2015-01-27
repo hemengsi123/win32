@@ -98,8 +98,8 @@ void CExplorerDlg::initCtrl()
 	int errRet = 0;
 //	m_listViewAll.setColumn(_T("name"), 100, 0);
 	m_listViewAll.addColumn(_T("Name"), 100);
-	m_listViewAll.addColumn(_T("Ext."), 50, CNppListView::ColTextLeft);
-	m_listViewAll.addColumn(_T("Size"), 80, LVCFMT_LEFT);
+	m_listViewAll.addColumn(_T("Ext."), 50, CNppListView::ColTextCenter);
+	m_listViewAll.addColumn(_T("Size"), 80, CNppListView::ColTextCenter);
 	m_listViewAll.setItemImgList(m_imgLst.getSysImgLst());
 	
 	m_listViewFiles.hiddenHeader();
