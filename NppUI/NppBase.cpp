@@ -96,4 +96,221 @@ int GetScrollDirection(HWND hWnd, UINT offTop, UINT offBottom)
 		
 	return -1; //SCR_OUTSIDE;
 }
+tstring GetFileSizeFmtStr(unsigned __int64 size, eSizeFmt sizeFmt)
+{
+	TCHAR	TEMP[MAX_PATH];
+	tstring str;
+	
+	switch (sizeFmt)
+	{
+		case SFMT_BYTES:
+		{
+			_stprintf(TEMP, _T("%03I64d"), size % 1000);
+			size /= 1000;
+			str = TEMP;
 
+			while (size)
+			{
+				_stprintf(TEMP, _T("%03I64d."), size % 1000);
+				size /= 1000;
+				str = TEMP + str;
+			}
+
+			break;
+		}
+		case SFMT_KBYTE:
+		{
+			size /= 1024;
+			_stprintf(TEMP, _T("%03I64d"), size % 1000);
+			size /= 1000;
+			str = TEMP;
+
+			while (size)
+			{
+				_stprintf(TEMP, _T("%03I64d."), size % 1000);
+				size /= 1000;
+				str = TEMP + str;
+			}
+
+			str = str + _T(" kB");
+
+			break;
+		}
+		case SFMT_DYNAMIC:
+		{
+			INT i	= 0;
+
+			str	= _T("000");
+
+			for (i = 0; (i < 3) && (size != 0); i++)
+			{
+				_stprintf(TEMP, _T("%03I64d"), size % 1024);
+				size /= 1024;
+				str = TEMP;
+			}
+
+			while (size)
+			{
+				_stprintf(TEMP, _T("%03I64d."), size % 1000);
+				size /= 1000;
+				str = TEMP + str;
+			}
+
+			switch (i)
+			{
+				case 0:
+				case 1: str = str + _T(" b"); break;
+				case 2: str = str + _T(" k"); break;
+				default: str = str + _T(" M"); break;
+			}
+			break;
+		}
+		case SFMT_DYNAMIC_EX:
+		{
+			INT		i		= 0;
+			__int64 komma	= 0;
+
+			str = _T("000");
+
+			for (i = 0; (i < 3) && (size != 0); i++)
+			{
+				if (i < 1)
+					_stprintf(TEMP, _T("%03I64d"), size);
+				else
+					_stprintf(TEMP, _T("%03I64d,%I64d"), size % 1024, komma);
+				komma = (size % 1024) / 100;
+				size /= 1024;
+				str = TEMP;
+			}
+
+			while (size)
+			{
+				_stprintf(TEMP, _T("%03I64d."), size % 1000);
+				size /= 1000;
+				str = TEMP + str;
+			}
+
+			switch (i)
+			{
+				case 0:
+				case 1: str = str + _T(" b"); break;
+				case 2: str = str + _T(" k"); break;
+				default: str = str + _T(" M"); break;
+			}
+			break;
+		}
+		default:
+			break;
+	}
+
+	for (INT i = 0; i < 2; i++)
+	{
+		if (str[i] == '0')
+			str[i] = ' ';
+		else
+			break;
+	}
+	return str;
+}
+BOOL GetSpecialFolderPath(int nFolder, LPTSTR lpszPath, int lpszMaxLen)
+{
+	HRESULT       hr;  
+    LPITEMIDLIST  ppidl;
+	BOOL bret = FALSE;
+	::CoInitialize(NULL);
+	hr = ::SHGetSpecialFolderLocation(NULL, nFolder, &ppidl);   
+    if (hr == S_OK)  
+    {  
+ 		bret = ::SHGetPathFromIDList(ppidl, lpszPath);
+		::CoTaskMemFree(ppidl);
+    }
+	::CoUninitialize();
+	return bret;
+}
+BOOL CreateShortCut(LPCSTR lpszPathObj,LPSTR lpszParam,LPSTR lpszPath,LPSTR lpszPathLink,LPSTR lpszDesc)
+{
+	HRESULT hRes = S_FALSE;
+    CComPtr<IShellLink> ipShellLink;
+	// Get a pointer to the IShellLink interface
+	hRes = ::CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void**)&ipShellLink);
+    if (hRes == S_OK) 
+    {
+		// Set the path to the shortcut target and add the description. 
+        ipShellLink->SetPath(lpszPathObj); 
+        ipShellLink->SetDescription(lpszDesc); 
+		ipShellLink->SetArguments(lpszParam) ;
+	    ipShellLink->SetWorkingDirectory(lpszPath);
+		// Get a pointer to the IPersistFile interface
+        CComQIPtr<IPersistFile> ipPersistFile;
+		// query IShellLink for the IPersistFile interface for saving the shortcut in persistent storage
+		hRes = (HRESULT)(ipShellLink->QueryInterface( IID_IPersistFile, (void**)&ipPersistFile)) ;
+		if( FAILED( hRes))
+	    {
+			::CoUninitialize();
+	    	return FALSE ;
+	    }
+	#ifndef UNICODE
+		WCHAR wszPath[MAX_PATH] = {0};
+		::MultiByteToWideChar( CP_ACP, 0, lpszPathLink, -1, (LPWSTR)wszPath, MAX_PATH) ;
+	#else
+		WCHAR * wszPath = lpszPathLink;
+	#endif
+		 // save the link by calling IPersistFile::Save
+    	hRes = ipPersistFile->Save((LPWSTR)wszPath, STGM_READWRITE);
+    	return TRUE;
+    }
+	::CoUninitialize();
+	return FALSE;
+}
+
+HRESULT ResolveShortCut(LPCTSTR lpszShortcutPath, LPTSTR lpszFilePath, int maxBuf)
+{
+	HRESULT hRes = S_FALSE;
+    CComPtr<IShellLink> ipShellLink;
+        // buffer that receives the null-terminated string for the drive and path
+    TCHAR szPath[MAX_PATH];     
+        // structure that receives the information about the shortcut
+    WIN32_FIND_DATA wfd;    
+    WCHAR wszTemp[MAX_PATH];
+
+    lpszFilePath[0] = '\0';
+
+    // Get a pointer to the IShellLink interface
+    hRes = CoCreateInstance(CLSID_ShellLink,
+                            NULL, 
+                            CLSCTX_INPROC_SERVER,
+                            IID_IShellLink,
+                            (void**)&ipShellLink); 
+
+    if (hRes == S_OK) 
+    { 
+        // Get a pointer to the IPersistFile interface
+        CComQIPtr<IPersistFile> ipPersistFile(ipShellLink);
+
+        // IPersistFile is using LPCOLESTR, so make sure that the string is Unicode
+#if !defined UNICODE
+        MultiByteToWideChar(CP_ACP, 0, lpszShortcutPath, -1, wszTemp, MAX_PATH);
+#else
+        wcsncpy(wszTemp, lpszShortcutPath, MAX_PATH);
+#endif
+
+        // Open the shortcut file and initialize it from its contents
+        hRes = ipPersistFile->Load(wszTemp, STGM_READ); 
+        if (hRes == S_OK) 
+        {
+            // Try to find the target of a shortcut, even if it has been moved or renamed
+            hRes = ipShellLink->Resolve(NULL, SLR_UPDATE); 
+            if (hRes == S_OK) 
+            {
+                // Get the path to the shortcut target
+                hRes = ipShellLink->GetPath(szPath, MAX_PATH, &wfd, SLGP_RAWPATH); 
+				if (hRes == S_OK) 
+				{
+	                _tcsncpy(lpszFilePath, szPath, maxBuf);
+				}
+            } 
+        } 
+    } 
+
+    return hRes;
+}

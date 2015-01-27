@@ -441,13 +441,23 @@ void CExplorerDlg::NotifyEvent(DWORD event)
 	// ::SetCursorPos(pt.x, pt.y);
 }
 
-struct StringCompare
+struct FunctoriString
 {
-    bool operator()(const tstring &lhs, const tstring &rhs)const
+    bool operator()(const tstring& lhs, const tstring& rhs)const
     {
-        return _tcsicmp(lhs.c_str(), rhs.c_str());
+		if(_tcsicmp(lhs.c_str(), rhs.c_str()) < 0)
+			return true;
+		else
+			return false;
     }
-} compareFunctor;
+};
+struct FunctorLVItem
+{
+	bool operator()(const ListViewItem& lhs, const ListViewItem& rhs )
+	{
+		return FunctoriString()(lhs.m_fileName, rhs.m_fileName);
+	}
+};
 void CExplorerDlg::UpdateFolders(void)
 {
 	LPTSTR			pszPath			= (LPTSTR)new TCHAR[MAX_PATH];
@@ -498,7 +508,7 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
         }while(lpfindData != NULL);
     }
     searchPath.findClose();
-    std::sort(vFolderList.begin(), vFolderList.end()/*, compareFunctor*/);
+    std::sort(vFolderList.begin(), vFolderList.end(), FunctoriString());
     // get child item
     HTREEITEM hCurrItem = m_treeView2.getChild(hParentItem);
     TCHAR lpszItem[MAX_PATH] = {0};
@@ -655,7 +665,9 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 	LPWIN32_FIND_DATA lpfindData = NULL;
 	
 	ListViewItem lvItem;
-	m_vListViewAll.clear();
+	std::vector<ListViewItem> vTmpFolders;
+	std::vector<ListViewItem> vTmpFiles;
+	
 	CNppFile searchFile(lpszSelDir);
 	lpfindData = searchFile.findFirstFile(NULL, lpszWildcard);
 	while( lpfindData != NULL)
@@ -667,16 +679,20 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			TCHAR szTmpFile[MAX_PATH] = {0};
 			lvItem.m_bIsDir     = false;
 			lvItem.m_currentDir = tstring(lpszSelDir);
-			lvItem.m_fileName   = tstring(searchFile.findGetName());
-			_stprintf(szTmpFile, _T("%s%s"), lpszSelDir, lvItem.m_fileName.c_str());
-			//lvItem.m_fullPath   = szTmpFile;
-			lpszExt = searchFile.getExtension(lvItem.m_fileName.c_str());
-			lvItem.m_fileExt    = lpszExt;
+			lvItem.m_fileName   = searchFile.rmExtension(searchFile.findGetName());
+			_stprintf(szTmpFile, _T("%s%s"), lpszSelDir, searchFile.findGetName());
+			lvItem.m_fullPath  = szTmpFile;
+			lpszExt = searchFile.getExtension(searchFile.findGetName());
+			if( lpszExt != NULL)
+			{
+				lvItem.m_fileExt = ++lpszExt;
+			}
 			lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
-			//lvItem.m_szfilesize = Int2TStr(lvItem.m_filesize);
 			m_imgLst.getFileIcon(szTmpFile, &iIconNormal);
 			lvItem.m_iIcon      = iIconNormal;
-			m_vListViewAll.push_back(lvItem);
+			lvItem.m_szfilesize = GetFileSizeFmtStr(lvItem.m_filesize, eSizeFmt::SFMT_DYNAMIC);
+			dbg_log(_T("size = %s"), lvItem.m_szfilesize.c_str());
+			vTmpFiles.push_back(lvItem);
 		}
 		else if( IsValidFolder(lpfindData) )
 		{
@@ -693,14 +709,27 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			lvItem.m_fullPath   = szTmpFile;
 			m_imgLst.getFileIcon(szTmpFile, &iIconNormal);
 			lvItem.m_iIcon      = iIconNormal;
-//			dbg_log(_T("%d"), iIconNormal);
-			m_vListViewAll.push_back(lvItem);
+
+			vTmpFolders.push_back(lvItem);
+		}
+		if(lpfindData->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+		{
+			dbg_log(_T("%s"), searchFile.findGetName());
 		}
 		
 		lpfindData = searchFile.findNextFile();
 	}
+	std::sort(vTmpFiles.begin(), vTmpFiles.end(), FunctorLVItem());
+	std::sort(vTmpFolders.begin(), vTmpFolders.end(), FunctorLVItem());
+	m_vListViewAll.clear();
+	m_vListViewAll.assign(vTmpFolders.begin(), vTmpFolders.end());
+	std::vector<ListViewItem>::iterator iter = vTmpFiles.begin();
+	for(; iter != vTmpFiles.end(); ++iter)
+	{
+		m_vListViewAll.push_back(*iter);
+	}
 	m_listViewAll.clearItem();
-	std::vector<ListViewItem>::iterator iter = m_vListViewAll.begin();
+	iter = m_vListViewAll.begin();
 	for(int i=0; iter != m_vListViewAll.end(); ++iter,++i)
 	{
 		m_listViewAll.addItem(iter->m_fileName.c_str(), i, iter->m_iIcon);

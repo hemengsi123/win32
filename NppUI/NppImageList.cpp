@@ -4,8 +4,8 @@
 
 bool CNppImageList::create(int nWidth, int nHight, UINT flags, int cInitial, int cGrow)
 {
-	_hImglst = ::ImageList_Create(nWidth, nHight, flags, cInitial, cGrow);
-	if (!_hImglst)
+	m_hImglst = ::ImageList_Create(nWidth, nHight, flags, cInitial, cGrow);
+	if (!m_hImglst)
 		return false;
 	else
 		return true;
@@ -17,7 +17,7 @@ int CNppImageList::addIcon(HINSTANCE hInst, int iconID)
 	int index = -1;
 	if( hIcon )
 	{
-		index = ::ImageList_AddIcon(_hImglst, hIcon);
+		index = ::ImageList_AddIcon(m_hImglst, hIcon);
 		::DestroyIcon(hIcon);
 	}
 	return index;
@@ -25,30 +25,30 @@ int CNppImageList::addIcon(HINSTANCE hInst, int iconID)
 bool CNppImageList::delIcon(int iconID)
 {
 	bool bSuccuss = true;
-	if(_hImglst)
+	if(m_hImglst)
 	{
-		bSuccuss = ::ImageList_Remove(_hImglst, iconID);
+		bSuccuss = ::ImageList_Remove(m_hImglst, iconID);
 	}
 	return bSuccuss;
 }
 int CNppImageList::addImage(HBITMAP hbmImage,HBITMAP hbmMask)
 {
 	int index = -1;
-	if(_hImglst)
-		index = ::ImageList_Add(_hImglst, hbmImage, hbmMask);
+	if(m_hImglst)
+		index = ::ImageList_Add(m_hImglst, hbmImage, hbmMask);
 	return index;
 }
 int CNppImageList::getCount()const
 {
-	return ::ImageList_GetImageCount(_hImglst);
+	return ::ImageList_GetImageCount(m_hImglst);
 }
 void CNppImageList::clear()
 {
-	::ImageList_RemoveAll(_hImglst);
+	::ImageList_RemoveAll(m_hImglst);
 }
 HICON CNppImageList::getHIcon(int indx,UINT uFlags)
 {
-	return ::ImageList_GetIcon(_hImglst,indx, uFlags);
+	return ::ImageList_GetIcon(m_hImglst,indx, uFlags);
 }
 HIMAGELIST CNppImageList::getSysImgLst(UINT uFlags)
 {
@@ -66,17 +66,17 @@ HIMAGELIST CNppImageList::getSysImgLst(UINT uFlags)
 bool CNppImageList::destroy() 
 {
 	bool bSuccess = true;
-	if(_hImglst )
+	if(m_hImglst )
 	{
-		bSuccess = ::ImageList_Destroy(_hImglst);
-		_hImglst = NULL;
+		bSuccess = ::ImageList_Destroy(m_hImglst);
+		m_hImglst = NULL;
 	}
 	return bSuccess;
 }
 
 HIMAGELIST CNppImageList::getImglst()const
 {
-	return _hImglst;
+	return m_hImglst;
 }
 void CNppImageList::setImglst(HIMAGELIST hImglst, bool bDestroy)
 {
@@ -84,7 +84,7 @@ void CNppImageList::setImglst(HIMAGELIST hImglst, bool bDestroy)
 	{
 		destroy();
 	}
-	_hImglst = hImglst;
+	m_hImglst = hImglst;
 }
 void CNppImageList::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelected, LPINT iIconOverlayed)
 {
@@ -98,7 +98,7 @@ void CNppImageList::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIcon
 	{
 		tmpFile.addBackslash();
 		isDir = true;
-		SHGetFileInfo(tmpFile.getFullPath(), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
+		::SHGetFileInfo(tmpFile.getFullPath(), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
 	}
 	else
 	{
@@ -118,4 +118,8 @@ void CNppImageList::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIcon
 	::DestroyIcon(sfi.hIcon);
 }
 
+int CNppImageList::replaceIcon(int iIcon, HICON hicon)
+{
+	return ::ImageList_ReplaceIcon(m_hImglst, iIcon, hicon);
+}
 

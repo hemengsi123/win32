@@ -21,8 +21,9 @@ public:
 	LPCTSTR getExtension(LPCTSTR lpszFilePath = NULL) const;
 	LPTSTR addBackslash(LPTSTR lpszFilePath = NULL);
 	LPCTSTR setName(LPCTSTR lpszName);
-	LPCTSTR setPath(LPCTSTR lpszPath);
-	void rmExtension(LPTSTR lpszFilePath = NULL);
+	LPTSTR setPath(LPCTSTR lpszPath);
+	LPCTSTR rmExtension(LPCTSTR lpszFilePath = NULL);
+	LPCTSTR rmExtension(LPTSTR lpszFilePath = NULL);
 	LPCTSTR append(LPCTSTR  pszMore=NULL, LPTSTR pszPath =NULL);
 	//
 	bool isValidFolder(const LPWIN32_FIND_DATA lpfindData)const;
@@ -43,7 +44,6 @@ public:
 	int renameFile(LPCTSTR lpszTo, LPCTSTR lpszFrom = NULL, int fFlags = FOF_NOCONFIRMATION, HWND hwnd = NULL);
 private:
 	TCHAR m_szFilePath[MAX_PATH];
-	//TCHAR m_szPath[MAX_PATH];
 	LPTSTR m_lpszPath;
 	LPTSTR m_lpszName;
 	LPTSTR m_lpszExtension;

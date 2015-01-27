@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <Wingdi.h>
+#include <shlobj.h>
+#include <atlbase.h>
 /////////////////////////////
 // syserror
 
@@ -53,6 +55,27 @@ LPCTSTR GetLastErrStr();
  * @retrn: if up return 1, down return 2, outside return -1
  */
 int GetScrollDirection(HWND hWnd, UINT offTop, UINT offBottom);
+// 文件大小格式
+typedef enum {
+	SFMT_BYTES,
+	SFMT_KBYTE,
+	SFMT_DYNAMIC,
+	SFMT_DYNAMIC_EX,
+	SFMT_MAX
+} eSizeFmt;
+tstring GetFileSizeFmtStr(unsigned __int64 size, eSizeFmt sizeFmt = SFMT_KBYTE);
+//============================== shell function ===============================
+/*
+    CSIDL_BITBUCKET, CSIDL_CONTROLS, CSIDL_DESKTOP, CSIDL_DESKTOPDIRECTORY,   
+    CSIDL_DRIVES, CSIDL_FONTS, CSIDL_NETHOOD, CSIDL_NETWORK, CSIDL_PERSONAL,   
+    CSIDL_PRINTERS, CSIDL_PROGRAMS, CSIDL_RECENT, CSIDL_SENDTO, CSIDL_STARTMENU,   
+    CSIDL_STARTUP, CSIDL_TEMPLATES, ENDNUMBER  
+*/
+BOOL GetSpecialFolderPath(int nFolder, LPTSTR lpszPath, int lpMaxLen = MAX_PATH);
+// 
+BOOL CreateShortCut(LPCSTR pszPathObj,LPSTR pszParam,LPSTR pszPath,LPSTR pszPathLink,LPSTR pszDesc);
 
+// Resolve files if they are shortcuts
+HRESULT ResolveShortCut(LPCTSTR lpszShortcutPath, LPTSTR lpszFilePath, int maxBuf);
 #endif
 

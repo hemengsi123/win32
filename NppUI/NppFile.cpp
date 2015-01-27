@@ -101,7 +101,7 @@ LPCTSTR CNppFile::getPath(LPCTSTR lpszFilePath)
 	}
 	return NULL;
 }
-LPCTSTR CNppFile::setPath(LPCTSTR lpszPath)
+LPTSTR CNppFile::setPath(LPCTSTR lpszPath)
 {
 	if( m_lpszPath == NULL)
 		m_lpszPath = new TCHAR[MAX_PATH];
@@ -121,26 +121,38 @@ LPCTSTR CNppFile::getExtension(LPCTSTR lpszFilePath)const
 {
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
-		
-	return ::PathFindExtension(lpszFilePath);
+    return _tcsrchr(lpszFilePath, _T('.'));
+	//return ::PathFindExtension(lpszFilePath);
 }
 // add '\'
 LPTSTR CNppFile::addBackslash(LPTSTR lpszFilePath)
 {
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
-		
+	
 	return ::PathAddBackslash(lpszFilePath);
 }
 
-void CNppFile::rmExtension(LPTSTR lpszFilePath)
+LPCTSTR CNppFile::rmExtension(LPCTSTR lpszFilePath)
 {
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
 	
-	::PathRemoveExtension(lpszFilePath);
+	LPTSTR lpDotPos = _tcsrchr(setPath(lpszFilePath), _T('.'));
+	if(lpDotPos != NULL)
+	{
+		*lpDotPos = _T('\0');
+		return m_lpszPath;
+	}
+	return NULL;
 }
-
+LPCTSTR CNppFile::rmExtension(LPTSTR lpszFilePath)
+{
+	if( !lpszFilePath )
+		lpszFilePath = m_szFilePath;
+	::PathRemoveExtension(lpszFilePath);
+	return lpszFilePath;
+}
 LPCTSTR CNppFile::append(LPCTSTR pszMore, LPTSTR  pszPath)
 {
 	if( !pszPath )

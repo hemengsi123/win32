@@ -7,7 +7,7 @@
 class NPPLIB_API CNppImageList
 {
 public :
-	CNppImageList() : _hImglst(NULL){};
+	CNppImageList() : m_hImglst(NULL){};
 	virtual ~CNppImageList() 
 	{
 		destroy();
@@ -24,9 +24,10 @@ public :
 	int          getCount()const;
 	void         clear();
 	HICON        getHIcon(int indx,UINT uFlags);
+	int          replaceIcon(int iIcon, HICON hicon);
 	void getFileIcon(IN LPCTSTR lpszFile, OUT LPINT iIconNormal, OUT LPINT iIconSelected = NULL, OUT LPINT iIconOverlayed = NULL);
 private :
-	HIMAGELIST _hImglst;
+	HIMAGELIST m_hImglst;
 };
 
 #endif //IMAGE_LIST_H
