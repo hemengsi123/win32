@@ -100,15 +100,17 @@ tstring GetFileSizeFmtStr(unsigned __int64 size, eSizeFmt sizeFmt)
 {
 	TCHAR	TEMP[MAX_PATH];
 	tstring str;
+	unsigned __int64 subsize = 0;
 	
 	switch (sizeFmt)
 	{
 		case SFMT_BYTES:
 		{
+			// long long x; printf("%I64d", x);
 			_stprintf(TEMP, _T("%03I64d"), size % 1000);
 			size /= 1000;
 			str = TEMP;
-
+			
 			while (size)
 			{
 				_stprintf(TEMP, _T("%03I64d."), size % 1000);
@@ -127,7 +129,7 @@ tstring GetFileSizeFmtStr(unsigned __int64 size, eSizeFmt sizeFmt)
 
 			while (size)
 			{
-				_stprintf(TEMP, _T("%03I64d."), size % 1000);
+				_stprintf(TEMP, _T("%03I64d,"), size % 1000);
 				size /= 1000;
 				str = TEMP + str;
 			}
@@ -142,26 +144,39 @@ tstring GetFileSizeFmtStr(unsigned __int64 size, eSizeFmt sizeFmt)
 
 			str	= _T("000");
 
-			for (i = 0; (i < 3) && (size != 0); i++)
+			for (i = 0; (i < 4) && (size != 0); i++)
 			{
-				_stprintf(TEMP, _T("%03I64d"), size % 1024);
-				size /= 1024;
-				str = TEMP;
+				unsigned __int64 modsize = size & (1024-1);
+				_stprintf(TEMP, _T("%03I64d"), modsize);
+				size  >>= 10; // 2^10 == 1024
+				str     = TEMP;
+				if( size != 0)
+					subsize = modsize;
 			}
-
+			
 			while (size)
 			{
-				_stprintf(TEMP, _T("%03I64d."), size % 1000);
+				_stprintf(TEMP, _T("%03I64d,"), size % 1000);
 				size /= 1000;
 				str = TEMP + str;
+				subsize = 0;
 			}
-
+			// 扩大一千倍，确保商是整数
+			subsize = (subsize*1000)>>10;
+			if( subsize != 0)
+			{
+				_stprintf(TEMP, _T(".%02d"), subsize);
+				TEMP[3] = _T('\0');
+				str = str + TEMP;
+			}
 			switch (i)
 			{
 				case 0:
 				case 1: str = str + _T(" b"); break;
-				case 2: str = str + _T(" k"); break;
-				default: str = str + _T(" M"); break;
+				case 2:	str = str + _T(" k"); break;
+				case 3: str = str + _T(" M"); break;
+				case 4: str = str + _T(" G"); break;
+				default: str = str + _T(" T"); break;
 			}
 			break;
 		}
@@ -185,7 +200,7 @@ tstring GetFileSizeFmtStr(unsigned __int64 size, eSizeFmt sizeFmt)
 
 			while (size)
 			{
-				_stprintf(TEMP, _T("%03I64d."), size % 1000);
+				_stprintf(TEMP, _T("%03I64d,"), size % 1000);
 				size /= 1000;
 				str = TEMP + str;
 			}

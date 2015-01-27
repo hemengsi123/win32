@@ -90,16 +90,16 @@ void CExplorerDlg::initCtrl()
 	
 	//m_treeView2.setImageList(true);
 	m_treeView2.setImageList(m_imgLst.getSysImgLst());
-	dbg_log(_T("all = %08X file = %08X "), m_listViewAll.getHSelf(), m_listViewFiles.getHSelf());
+
     UpdateDevices();
 	UpdateFolders();
 	
 	m_listViewAll.setExtStyle(m_listViewAll.getExtStyle() | LVS_EX_FULLROWSELECT);
 	int errRet = 0;
 //	m_listViewAll.setColumn(_T("name"), 100, 0);
-	m_listViewAll.addColumn(_T("Name"), 100, LVCFMT_LEFT);
-	m_listViewAll.addColumn(_T("Ext."), 100, LVCFMT_LEFT);
-	m_listViewAll.addColumn(_T("Size"), 100, LVCFMT_CENTER);
+	m_listViewAll.addColumn(_T("Name"), 100);
+	m_listViewAll.addColumn(_T("Ext."), 50, CNppListView::ColTextLeft);
+	m_listViewAll.addColumn(_T("Size"), 80, LVCFMT_LEFT);
 	m_listViewAll.setItemImgList(m_imgLst.getSysImgLst());
 	
 	m_listViewFiles.hiddenHeader();
@@ -691,7 +691,6 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			m_imgLst.getFileIcon(szTmpFile, &iIconNormal);
 			lvItem.m_iIcon      = iIconNormal;
 			lvItem.m_szfilesize = GetFileSizeFmtStr(lvItem.m_filesize, eSizeFmt::SFMT_DYNAMIC);
-			dbg_log(_T("size = %s"), lvItem.m_szfilesize.c_str());
 			vTmpFiles.push_back(lvItem);
 		}
 		else if( IsValidFolder(lpfindData) )
@@ -721,6 +720,8 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 	}
 	std::sort(vTmpFiles.begin(), vTmpFiles.end(), FunctorLVItem());
 	std::sort(vTmpFolders.begin(), vTmpFolders.end(), FunctorLVItem());
+	m_nlvAllFolders = vTmpFolders.size();
+	m_nlvAllItems   = m_nlvAllFolders + vTmpFiles.size();
 	m_vListViewAll.clear();
 	m_vListViewAll.assign(vTmpFolders.begin(), vTmpFolders.end());
 	std::vector<ListViewItem>::iterator iter = vTmpFiles.begin();
@@ -728,6 +729,8 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 	{
 		m_vListViewAll.push_back(*iter);
 	}
+	vTmpFiles.clear();
+	vTmpFolders.clear();
 	m_listViewAll.clearItem();
 	iter = m_vListViewAll.begin();
 	for(int i=0; iter != m_vListViewAll.end(); ++iter,++i)

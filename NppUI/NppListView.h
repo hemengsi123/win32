@@ -5,6 +5,12 @@
 class NPPLIB_API CNppListView : public CNppCtrlWnd
 {
 public:
+	typedef enum {
+		ColTextLeft   = LVCFMT_LEFT, // column
+		ColTextRight  = LVCFMT_RIGHT,
+		ColTextCenter = LVCFMT_CENTER,
+	}eColumnAlign;
+public:
 	CNppListView() : m_iColumnCount(0){};
 	virtual ~CNppListView() {};
 	virtual void destroy();

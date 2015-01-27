@@ -316,10 +316,16 @@ LRESULT CNppListView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool 
 	return runListProc(uMsg, wParam, lParam, bDone);
 }
 
-LRESULT CNppListView::runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CNppListView::runHeaderProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	
-	return ::CallWindowProc(m_sysHeaderWndProc, hwnd, Message, wParam, lParam);
+	switch(uMsg)
+	{
+		case WM_GETDLGCODE:
+		{
+			return DLGC_WANTALLKEYS | ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
+		}
+	}
+	return ::CallWindowProc(m_sysHeaderWndProc, hwnd, uMsg, wParam, lParam);
 }
 WNDPROC CNppListView::setHeaderWndProc(WNDPROC headerProc)
 {
