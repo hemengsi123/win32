@@ -96,16 +96,16 @@ void CExplorerDlg::initCtrl()
 	
 	m_listViewAll.setExtStyle(m_listViewAll.getExtStyle() | LVS_EX_FULLROWSELECT);
 	int errRet = 0;
-//	m_listViewAll.setColumn(_T("name"), 100, 0);
 	m_listViewAll.addColumn(_T("Name"), 100);
 	m_listViewAll.addColumn(_T("Ext."), 50, CNppListView::ColTextCenter);
 	m_listViewAll.addColumn(_T("Size"), 80, CNppListView::ColTextCenter);
 	m_listViewAll.setItemImgList(m_imgLst.getSysImgLst());
 	
 	m_listViewFiles.hiddenHeader();
-	ListView_SetItemCountEx(m_listViewFiles.getHSelf(), 2, LVSICF_NOSCROLL);
+	//ListView_SetItemCountEx(m_listViewFiles.getHSelf(), 2, LVSICF_NOSCROLL);
 	m_listViewFiles.addColumn(_T("File"), 355);
 	m_listViewFiles.addItem(_T("test1.txt"), 0);
+	m_listViewFiles.addItem(_T("test2.txt"), 1);
 	
 }
 

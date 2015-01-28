@@ -64,13 +64,11 @@ void CNppToolTip::show(RECT rectTitle, LPTSTR pszTitle, int iXOff, int iWidthOff
 }
 LRESULT CNppToolTip::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
 {
-	bDone = false;
-	
+	bDone = true;
 	 switch (uMsg)
     {
 		case WM_MOUSEACTIVATE:
 		{
-			bDone = true;
 			return MA_NOACTIVATE;
 		}
 		case WM_CREATE:
@@ -81,21 +79,18 @@ LRESULT CNppToolTip::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool &
 			tme.dwFlags = TME_LEAVE | TME_HOVER;
 			tme.dwHoverTime = 5000;
 			m_bTrackMouse = ::_TrackMouseEvent(&tme);
-			bDone = true;
 			break;
 		}
     	case WM_LBUTTONDOWN:
 		{
 			m_bLeftBtnDown = TRUE;
 			//SendMessageToParent(WM_LBUTTONDOWN);
-			bDone = true;
 			return TRUE;
 		}
 		case WM_LBUTTONUP:
 		{
 			m_bLeftBtnDown = FALSE;
 			//SendMessageToParent(message);
-			bDone = true;
 			return TRUE;
 		}    	
 		case WM_RBUTTONUP:
@@ -103,7 +98,6 @@ LRESULT CNppToolTip::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool &
 		case WM_LBUTTONDBLCLK:
 		{
 			//SendMessageToParent(message);
-			bDone = true;
 			return TRUE;
 		}
 		case WM_MOUSEMOVE:
@@ -123,13 +117,11 @@ LRESULT CNppToolTip::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool &
 			}
 			else
 				m_bTrackMouse = FALSE;
-			bDone = true;
 			return TRUE;
 		}
  		case WM_MOUSEHOVER:
 		{
 			destroy();
-			bDone = true;
 			return TRUE;
 		}
 		case WM_MOUSELEAVE:
@@ -139,9 +131,10 @@ LRESULT CNppToolTip::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool &
 			} else {
 				m_bLeftBtnDown = FALSE;
 			}
-			bDone = true;
 			return TRUE;
 		}
+		default:
+			bDone = false;
 	}
 	return FALSE;
 }
