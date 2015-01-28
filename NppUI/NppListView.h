@@ -44,6 +44,8 @@ public:
 	HIMAGELIST getItemImgList(int iImgLstType = LVSIL_SMALL)const;
 	HIMAGELIST setHeaderImgList(HIMAGELIST himl);
 	HIMAGELIST getHeaderImgList()const;
+	BOOL  getSubItemRect(int iItem, int iSubItem, LPRECT lpRect, int tCode = LVIR_LABEL);
+	int   getStringWidth(LPCTSTR lpszItemText);
 //	void setValues(int codepage = 0);
 //	void resetValues(int codepage);
 

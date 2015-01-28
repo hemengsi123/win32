@@ -9,6 +9,7 @@
 #include <Wingdi.h>
 #include <shlobj.h>
 #include <atlbase.h>
+#include <commctrl.h>
 /////////////////////////////
 // syserror
 

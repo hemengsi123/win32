@@ -553,11 +553,10 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
 				{
 					m_treeView2.delChildren(hfindItem);
 					m_treeView2.delItem(hfindItem);
-					dbg_log(_T("test done"))
 				}
 				_stprintf(szItemPath, _T("%s%s"), searchPath.getPath(), lpszItem);
 				bool haveChildren = HaveChildDir(szItemPath);
-				m_treeView2.getFileIcon(szItemPath, &iIconNormal);
+				m_treeView2.getFileIcon(szItemPath, &iIconNormal, &iIconSelect);
 				hCurrItem = m_treeView2.addLast(hCurrItem, vFolderList[i].c_str(), iIconNormal, haveChildren);
             }
             /* update recursive */
@@ -570,7 +569,7 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
         else
         {
             GetFolderFullPath(hParentItem, szItemPath, vFolderList[i].c_str());
-            m_treeView2.getFileIcon(szItemPath, &iIconNormal);
+            m_treeView2.getFileIcon(szItemPath, &iIconNormal, &iIconSelect);
             bool haveChildren = HaveChildDir(szItemPath);
             hCurrItem = m_treeView2.addLast(hParentItem, vFolderList[i].c_str(), iIconNormal, haveChildren);
             hCurrItem = m_treeView2.getNext(hCurrItem);
@@ -675,7 +674,9 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 		if( IsValidFile(lpfindData) )
 		{
 			LPCTSTR lpszExt = NULL;
-			int iIconNormal  = 0;
+			int iIconNormal    = 0;
+			int iIconSelected  = 0;
+			int iIconOverlayed = 0;
 			TCHAR szTmpFile[MAX_PATH] = {0};
 			lvItem.m_bIsDir     = false;
 			lvItem.m_currentDir = tstring(lpszSelDir);
@@ -688,15 +689,18 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 				lvItem.m_fileExt = ++lpszExt;
 			}
 			lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
-			m_imgLst.getFileIcon(szTmpFile, &iIconNormal);
+			m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
 			lvItem.m_iIcon      = iIconNormal;
+			lvItem.m_iIconOverlay = iIconOverlayed;
 			lvItem.m_szfilesize = GetFileSizeFmtStr(lvItem.m_filesize, eSizeFmt::SFMT_DYNAMIC);
 			vTmpFiles.push_back(lvItem);
 		}
 		else if( IsValidFolder(lpfindData) )
 		{
 			TCHAR szTmpFile[MAX_PATH] = {0};
-			int iIconNormal  = 0;
+			int iIconNormal   = 0;
+			int iIconSelected = 0;
+			int iIconOverlayed = 0;
 			lvItem.m_bIsDir     = true;
 			lvItem.m_fileExt.clear();
 			lvItem.m_fileExt    = _T("<DIR>");
@@ -706,14 +710,11 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			lvItem.m_szfilesize = _T("");
 			_stprintf(szTmpFile, _T("%s%s\\"), lpszSelDir, lvItem.m_fileName.c_str());
 			lvItem.m_fullPath   = szTmpFile;
-			m_imgLst.getFileIcon(szTmpFile, &iIconNormal);
+			m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
 			lvItem.m_iIcon      = iIconNormal;
-
+			lvItem.m_iIconOverlay = iIconOverlayed;
+			
 			vTmpFolders.push_back(lvItem);
-		}
-		if(lpfindData->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
-		{
-			dbg_log(_T("%s"), searchFile.findGetName());
 		}
 		
 		lpfindData = searchFile.findNextFile();

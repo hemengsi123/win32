@@ -350,3 +350,11 @@ HIMAGELIST CNppListView::getHeaderImgList()const
 {
 	return Header_GetImageList(m_hHeader);
 }
+BOOL  CNppListView::getSubItemRect(int iItem, int iSubItem, LPRECT lpRect, int tCode)
+{
+	return ListView_GetSubItemRect(m_hSelf, iItem, iSubItem, tCode, lpRect);
+}
+int CNppListView::getStringWidth(LPCTSTR lpszItemText)
+{
+	return ListView_GetStringWidth(m_hSelf, lpszItemText);
+}

@@ -26,6 +26,7 @@ public :
 	HICON        getHIcon(int indx,UINT uFlags);
 	int          replaceIcon(int iIcon, HICON hicon);
 	void getFileIcon(IN LPCTSTR lpszFile, OUT LPINT iIconNormal, OUT LPINT iIconSelected = NULL, OUT LPINT iIconOverlayed = NULL);
+	BOOL  drawTo(int indx, HDC hdcDst, int x, int y, UINT fStyle = ILD_NORMAL);
 private :
 	HIMAGELIST m_hImglst;
 };

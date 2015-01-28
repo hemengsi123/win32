@@ -153,32 +153,37 @@ void CNppTreeView::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconS
 {
 	if( iIconNormal == NULL)
 		return;
-	SHFILEINFO		sfi	= {0};
-	bool isDir = false;
+	SHFILEINFO sfi = {0};
+	bool isDir     = false;
+	int tmpIconOverlayed = iIconOverlayed ? SHGFI_OVERLAYINDEX : 0;
 	// TCHAR			TEMP[MAX_PATH];
 	CNppFile tmpFile(lpszFile);
+	
 	if(tmpFile.isDir())
 	{
 		tmpFile.addBackslash();
 		isDir = true;
-		SHGetFileInfo(tmpFile.getFullPath(), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
+		::SHGetFileInfo(tmpFile.getFullPath(), -1, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | tmpIconOverlayed);
 	}
 	else
 	{
-		::SHGetFileInfo(tmpFile.getFullPath(), FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OVERLAYINDEX | SHGFI_USEFILEATTRIBUTES);
+		::SHGetFileInfo(tmpFile.getFullPath(), FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), SHGFI_ICON | SHGFI_SMALLICON | tmpIconOverlayed | SHGFI_USEFILEATTRIBUTES);
 	}
 	*iIconNormal	= sfi.iIcon & 0x000000ff;
+	if( iIconOverlayed )
+		*iIconOverlayed = sfi.iIcon >> 24;
+	::DestroyIcon(sfi.hIcon);
 	if( isDir && iIconSelected)
 	{
+		::ZeroMemory(&sfi, sizeof(SHFILEINFO));
+		::SHGetFileInfo(lpszFile, 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
+		::DestroyIcon(sfi.hIcon);
 		*iIconSelected = sfi.iIcon;
 	}
 	else if(iIconSelected)
 	{
 		*iIconSelected = *iIconNormal;
 	}
-	if( iIconOverlayed )
-		*iIconOverlayed = sfi.iIcon >> 24;
-	::DestroyIcon(sfi.hIcon);
 }
 
 HTREEITEM CNppTreeView::addRoot(LPCTSTR lpszName, int nImage, int haveChildren)

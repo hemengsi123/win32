@@ -40,6 +40,8 @@ struct ListViewItem
 	tstring m_szfilesize;
 	bool    m_bIsDir;
 	int     m_iIcon;
+	int     m_iIconOverlay;
+	
 	unsigned __int64 m_filesize;
 };
 class CExplorerDlg: public CNppStaticDialog
