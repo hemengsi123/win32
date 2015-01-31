@@ -19,7 +19,7 @@ public :
 	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
 	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
-	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
+	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	HWND create(DWORD dwStyle =  TVS_HASLINES, DWORD dwExStyle = 0);
 	HWND create(DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	bool getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize = MAX_PATH);

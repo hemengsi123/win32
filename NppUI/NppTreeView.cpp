@@ -6,9 +6,9 @@ LPCTSTR CNppTreeView::getWndClassName()const
 {
 	return _T("SysTreeView32");// WC_TREEVIEW;
 }
-void CNppTreeView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
+void CNppTreeView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName)
 {
-	CNppCtrlWnd::init(hInst, hParent, iCtrlIDs);
+	CNppCtrlWnd::init(hInst, hParent, iCtrlID, sCtrlName);
 }
 HWND CNppTreeView::create(DWORD dwStyle, DWORD dwExStyle)
 {

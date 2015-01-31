@@ -12,6 +12,7 @@
 #endif
 
 #include "NppBase.h"
+#include "NppString.h"
 #include "NppFile.h"
 #include "NppWnd.h"
 #include "NppTreeView.h"
@@ -21,6 +22,7 @@
 #include "NppCombox.h"
 #include "NppButton.h"
 #include "NppFont.h"
+
 
 //typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > tstring;
 

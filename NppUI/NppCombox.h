@@ -25,7 +25,7 @@ public :
 	CNppCombox();
     ~CNppCombox();
 	LPCTSTR getWndClassName()const;
-	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
+	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	HWND create(DWORD dwStyle =  CBS_DROPDOWN, DWORD dwExStyle = 0);
 	HWND create(DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	void addText(LPCTSTR pszText);
@@ -37,6 +37,7 @@ public :
 	void getComboList(std::vector<tstring> & vStrList);
 	
 	virtual LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, OUT bool & bDone);
+	virtual LRESULT handleMessage(struct NPP_MSGPARAMS & msgParams);
 private:
 	void selectComboText(LPCTSTR pszText);
 

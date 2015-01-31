@@ -4,6 +4,11 @@
 HANDLE g_hEvent[EID_MAX]	= {NULL};
 HANDLE g_hThread			= NULL;
 
+NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
+//NPP_ON_MSGMAP(WM_KEYUP, OnClick)
+NPP_ON_MSGMAP_ID(IDC_CBO_FILTER, WM_KEYUP, OnClick)
+NPP_ON_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
+NPP_END_MESSAGE_MAP()
 
 DWORD WINAPI UpdateThread(LPVOID lpParam)
 {
@@ -64,6 +69,7 @@ void CExplorerDlg::initCtrl()
 	// filter combox
 	m_comBoFilter.init(m_hInst, m_hSelf, IDC_CBO_FILTER);
 	m_comBoFilter.create();
+	
 	m_comBoFilter.addText(_T("*.*"));
 	m_comBoFilter.addText(_T("*.txt"));
 	m_comBoFilter.setText(_T("*.*"), 1);
@@ -75,9 +81,9 @@ void CExplorerDlg::initCtrl()
 	m_splitterCtrl  = ::GetDlgItem(m_hSelf, IDC_BUTTON_SPLITTER);
 
 	// button
-	m_btnAdd.init(m_hInst, m_hSelf, IDC_BTN_ADD);
+	m_btnAdd.init(m_hInst, m_hSelf, IDC_BTN_ADD, _T("btnAdd"));
 	m_btnAdd.create();
-	m_btnAddAll.init(m_hInst, m_hSelf, IDC_BTN_ADDALL);
+	m_btnAddAll.init(m_hInst, m_hSelf, IDC_BTN_ADDALL, _T("btnAddAll"));
 	m_btnAddAll.create();
 	m_btnDel.init(m_hInst, m_hSelf, IDC_BTN_DEL);
 	m_btnDel.create();
@@ -741,4 +747,23 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 		m_listViewAll.addSubItem(iter->m_szfilesize.c_str(), 2);
 	}
 	
+}
+BOOL CExplorerDlg::OnClick(NPP_MSGPARAMS & msg)
+{
+	//bg_log("m_com = %p, sender = %p, this= %p", &m_comBoFilter, msg.pSender, this);
+	//dbg_log("msg.hwnd = %p, m_self = %p", msg.hWnd, m_comBoFilter.getHSelf());
+	if(msg.iCtrlID == IDC_CBO_FILTER)
+	{
+		
+	}
+	dbg_log(_T("good done %s"), msg.sCtrlName.getData());
+	msg.lResult = TRUE;
+	return msg.lResult;
+}
+
+BOOL CExplorerDlg::OnBtnAddAll(NPP_MSGPARAMS & msg)
+{
+	dbg_log("uMsg = %04X, ctrlName = %s, id = %d", msg.uMsg, msg.sCtrlName.getData(), msg.iCtrlID);
+	msg.lResult = TRUE;
+	return msg.lResult;
 }

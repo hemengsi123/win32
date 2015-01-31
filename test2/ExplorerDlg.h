@@ -63,6 +63,8 @@ public:
     void GetFolderFullPath(HTREEITEM hItem, LPTSTR lpszFolderFullPath, LPCTSTR lpszChildName);
     bool HaveChildDir(LPCTSTR lpszPath);
 	void UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard = _T("*")/*HTREEITEM hSelectItem*/);
+	BOOL OnClick(NPP_MSGPARAMS & msg);
+	BOOL OnBtnAddAll(NPP_MSGPARAMS & msg);
 protected:
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;

@@ -20,9 +20,9 @@ LPCTSTR CNppCombox::getWndClassName()const
 {
 	return WC_COMBOBOX;
 }
-void CNppCombox::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
+void CNppCombox::init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName)
 {
-	CNppCtrlWnd::init(hInst, hParent, iCtrlIDs);
+	CNppCtrlWnd::init(hInst, hParent, iCtrlID, sCtrlName);
 }
 HWND CNppCombox::create(DWORD dwStyle, DWORD dwExStyle)
 {
@@ -50,7 +50,7 @@ HWND CNppCombox::create(DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExS
 LRESULT CNppCombox::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, OUT bool & bDone)
 {
 	bDone = false;
-	
+	dbg_log("bad done");
 	switch( uMsg )
 	{
 		case WM_KEYUP:
@@ -83,6 +83,38 @@ LRESULT CNppCombox::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, OUT boo
 			break;
 	}
 	return bDone;
+}
+LRESULT CNppCombox::handleMessage(struct NPP_MSGPARAMS & msgParams)
+{
+/*
+	switch( msgParams.uMsg )
+	{
+		case WM_KEYUP:
+		{
+			// 13 ENTER
+			if (msgParams.wParam == 13)
+			{
+				LPTSTR	pszText	= (LPTSTR)new TCHAR[MAX_PATH];
+				dbg_log(_T("uMsg = %04x, ctrlID = %d"), msgParams.uMsg, msgParams.ctrlID);
+				getText(pszText);
+				addText(pszText);
+				::SendMessage(::GetParent(getHSelf()), EXM_CHANGECOMBO, 0, 0);
+				delete [] pszText;
+				return TRUE;
+			}
+//			dbg_log(_T("combo hwnd = 0x%08X"), getHSelf());
+//			::SendMessage(::GetParent(getHSelf()), uMsg, wParam, lParam);
+			break;
+		}
+		case WM_DESTROY:
+		{
+			m_comboItems.clear();
+			break;
+		}
+		default :
+			break;
+	}*/
+	return CNppCtrlWnd::handleMessage(msgParams);
 }
 
 void CNppCombox::addText(LPCTSTR pszText)

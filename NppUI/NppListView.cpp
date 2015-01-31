@@ -10,9 +10,9 @@ LPCTSTR CNppListView::getWndClassName()const
 {
 	return _T("SysListView32");
 }
-void CNppListView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs)
+void CNppListView::init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName)
 {
-	CNppCtrlWnd::init(hInst, hParent, iCtrlIDs);
+	CNppCtrlWnd::init(hInst, hParent, iCtrlID, sCtrlName);
 }
 HWND CNppListView::create(DWORD dwStyle, DWORD dwExStyle)
 {

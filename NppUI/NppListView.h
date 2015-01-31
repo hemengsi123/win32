@@ -15,7 +15,7 @@ public:
 	virtual ~CNppListView() {};
 	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
-	void     init(HINSTANCE hInst, HWND hParent, UINT iCtrlIDs);
+	void    init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	HWND     create(DWORD dwStyle = 0, DWORD dwExStyle = 0);
 	HWND     create(DWORD dwStyle /*=  LVS_REPORT*/, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	LRESULT  runListProc(UINT Message, WPARAM wParam, LPARAM lParam, BOOL & bDone);

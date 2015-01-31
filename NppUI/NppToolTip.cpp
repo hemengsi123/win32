@@ -24,9 +24,9 @@ LPCTSTR CNppToolTip::getWndClassName()const
 {
 	return TOOLTIPS_CLASS;
 }
-void CNppToolTip::init(HINSTANCE hInst, HWND hParent, UINT iCtrlID)
+void CNppToolTip::init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName)
 {
-	CNppCtrlWnd::init(hInst, hParent, iCtrlID);
+	CNppCtrlWnd::init(hInst, hParent, iCtrlID, sCtrlName);
 }
 HWND CNppToolTip::create(int x, int y, int cx, int cy)
 {
