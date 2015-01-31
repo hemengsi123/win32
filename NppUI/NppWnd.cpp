@@ -138,7 +138,7 @@ HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, int x, int
 LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	m_msgParams.uMsg     = uMsg;
-	m_msgParams.hWnd     = hwnd;
+	m_msgParams.hwndFrom = hwnd;
 	m_msgParams.iCtrlID  = 0;
 	//m_msgParams.sCtrlName = _T('\0')
 	m_msgParams.pSender  = this;
@@ -171,7 +171,7 @@ LRESULT CNppWnd::handleMessage(struct NPP_MSGPARAMS & msgParams)
 {
 	msgParams.lResult = 0;
 	
-	return ::CallWindowProc(m_sysWndProc, msgParams.hWnd, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
+	return ::CallWindowProc(m_sysWndProc, msgParams.hwndFrom, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
 }
 BOOL CNppWnd::handleCommand(struct NPP_MSGPARAMS & msgParams)
 {
@@ -533,7 +533,7 @@ LRESULT CNppCtrlWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	m_msgParams.uMsg      = uMsg;
 	m_msgParams.iCtrlID   = m_iCtrlID;
 	m_msgParams.pSender   = this;
-	m_msgParams.hWnd      = hwnd;
+	m_msgParams.hwndFrom  = hwnd;
 	m_msgParams.wParam    = wParam;
 	m_msgParams.lParam    = lParam;
 	m_msgParams.lResult   = 0;
@@ -548,7 +548,7 @@ LRESULT CNppCtrlWnd::handleMessage(struct NPP_MSGPARAMS & msgParams)
 		return msgParams.lResult;
 	}
 	
-	return ::CallWindowProc(m_sysWndProc, msgParams.hWnd, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
+	return ::CallWindowProc(m_sysWndProc, msgParams.hwndFrom, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
 }
 BOOL CNppCtrlWnd::handleCommand(struct NPP_MSGPARAMS & msgParams)
 {
@@ -649,7 +649,7 @@ INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	m_msgParams.uMsg     = uMsg;
-	m_msgParams.hWnd     = hDlg;
+	m_msgParams.hwndFrom = hDlg;
 	m_msgParams.iCtrlID  = m_iDlgID;
 	//m_msgParams.sCtrlName = _T('\0')
 	m_msgParams.pSender  = this;

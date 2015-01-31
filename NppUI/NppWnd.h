@@ -22,7 +22,7 @@ typedef struct NPP_MSGPARAMS
 	CNppWnd *  pSender;
 	UINT       iCtrlID;
 	CNppString sCtrlName;
-	HWND       hWnd;
+	HWND       hwndFrom;
 	LRESULT    lResult;
 	union
 	{
@@ -100,7 +100,7 @@ const NPP_MSGMAP_ENTRY theClass::m_messageEntries[] =        \
 	{msgtype, ctrlID, _T('\0'), PfnSig_imm, (NPP_MSGPROC)&memberpFn},  \
 
 #define NPP_ON_MSGMAP_NAME(ctrlName, msgtype, memberpFn)          \
-	{msgtype, 0, ctrlName, PfnSig_nmm, (NPP_MSGPROC)&memberpFn},  \
+	{msgtype, 0, _T(ctrlName), PfnSig_nmm, (NPP_MSGPROC)&memberpFn},  \
 ///////////////////////////////////////////////////////////////////
 //
 // CNppWnd ´°¿Ú»ùÀà
