@@ -150,12 +150,25 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_COMMAND:
 	{
+		m_msgParams.hwndFrom = (HWND)lParam;   // handle to control (HWND)
+		// The low-order word specifies the identifier of the menu item, control, or accelerator
+		m_msgParams.iCtrlID  = LOWORD(wParam); 
+		// The high-order word specifies the notification code if the message is 
+		// from a control. If the message is from an accelerator, this value is 1. 
+		// If the message is from a menu, this value is zero. 
+		m_msgParams.uMsg     = HIWORD(wParam);
+		//If an application processes this message, it should return zero. 
 		if( handleCommand(m_msgParams) )
-			return m_msgParams.lResult;
+			return 0;
 		break;
 	}
 	case WM_NOTIFY:
 	{
+		LPNMHDR lpnmhdr      = (LPNMHDR)lParam;
+		m_msgParams.uMsg     = lpnmhdr->code;
+		m_msgParams.hwndFrom = lpnmhdr->hwndFrom;
+		m_msgParams.iCtrlID  = lpnmhdr->idFrom;
+		// The return value is ignored except for notification messages that specify otherwise. 
 		if( handleNotify(m_msgParams) )
 			return m_msgParams.lResult;
 		break;
@@ -543,10 +556,7 @@ LRESULT CNppCtrlWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 LRESULT CNppCtrlWnd::handleMessage(struct NPP_MSGPARAMS & msgParams)
 {
-	if( loopDispath(msgParams) )
-	{
-		return msgParams.lResult;
-	}
+	loopDispath(msgParams);
 	
 	return ::CallWindowProc(m_sysWndProc, msgParams.hwndFrom, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
 }
@@ -628,7 +638,10 @@ INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 	if( WM_INITDIALOG == uMsg && lParam != NULL)
 	{
 		pSelfDlg = reinterpret_cast<CNppDlg*>(lParam);
-		//pSelfDlg->m_hSelf = hDlg;
+		// @brief: 一定要将 pSelfDlg->m_hSelf = hDlg，因为通过CreateDialogParam 
+		// 触发WM_INITDIALOG消息时，该函数还没有返回，故m_hSelf 未被赋值，这样在该消息
+		// 中，把m_hSelf作为hParent父窗口初始化其他控件会出错
+		pSelfDlg->m_hSelf = hDlg;
 		::SetWindowLongPtr(hDlg, GWL_USERDATA, reinterpret_cast<LPARAM>(pSelfDlg));
         pSelfDlg->runDlgProc(hDlg, uMsg, wParam, lParam);
 		return TRUE;
@@ -657,18 +670,31 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	m_msgParams.lParam   = lParam;
 	m_msgParams.lResult  = 0;
 	
-	switch(uMsg)
+switch(uMsg)
 	{
 	case WM_COMMAND:
 	{
-		//if( handleCommand(m_msgParams) )
-		return handleCommand(m_msgParams);
+		m_msgParams.hwndFrom = (HWND)lParam;   // handle to control (HWND)
+		// The low-order word specifies the identifier of the menu item, control, or accelerator
+		m_msgParams.iCtrlID  = LOWORD(wParam); 
+		// The high-order word specifies the notification code if the message is 
+		// from a control. If the message is from an accelerator, this value is 1. 
+		// If the message is from a menu, this value is zero. 
+		m_msgParams.uMsg     = HIWORD(wParam);
+		//If an application processes this message, it should return zero. 
+		if( handleCommand(m_msgParams) )
+			return 0;
 		break;
 	}
 	case WM_NOTIFY:
 	{
-		//if( handleNotify(m_msgParams) )
-		return handleNotify(m_msgParams);
+		LPNMHDR lpnmhdr      = (LPNMHDR)lParam;
+		m_msgParams.uMsg     = lpnmhdr->code;
+		m_msgParams.hwndFrom = lpnmhdr->hwndFrom;
+		m_msgParams.iCtrlID  = lpnmhdr->idFrom;
+		// The return value is ignored except for notification messages that specify otherwise. 
+		if( handleNotify(m_msgParams) )
+			return m_msgParams.lResult;
 		break;
 	}
 	default:
@@ -723,7 +749,6 @@ HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
 	if( !bmakeRTL )
 	{
 		m_hSelf = ::CreateDialogParam(m_hInst,  MAKEINTRESOURCE(iDlgID), m_hParent, (DLGPROC)DlgProcWrap, (LPARAM)this);
-		dbg_log(_T("m_hSelf = %08X"), m_hSelf);
 		if( !m_hSelf )
 		{
 			create(_T("CreateDialogParam failed"));

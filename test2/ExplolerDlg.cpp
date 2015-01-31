@@ -6,8 +6,8 @@ HANDLE g_hThread			= NULL;
 
 NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
 //NPP_ON_MSGMAP(WM_KEYUP, OnClick)
-NPP_ON_MSGMAP_ID(IDC_CBO_FILTER, WM_KEYUP, OnClick)
-NPP_ON_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
+//NPP_ON_MSGMAP_ID(IDC_CBO_FILTER, WM_KEYUP, OnClick)
+//NPP_ON_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
 NPP_END_MESSAGE_MAP()
 
 DWORD WINAPI UpdateThread(LPVOID lpParam)
@@ -48,12 +48,6 @@ DWORD WINAPI GetVolumeInformationTimeoutThread(LPVOID lpParam)
 	::SetEvent(g_hEvent[EID_GET_VOLINFO]);
 	::ExitThread(0);
 	return 0;
-}
-
-void CExplorerDlg::create(HINSTANCE hInst, int dialogId)
-{
-	CNppWnd::init(hInst, NULL);
-	CNppStaticDialog::create(dialogId, false);
 }
 
 void CExplorerDlg::initCtrl()
@@ -114,7 +108,151 @@ void CExplorerDlg::initCtrl()
 	m_listViewFiles.addItem(_T("test2.txt"), 1);
 	
 }
+LRESULT CExplorerDlg::handleMessage( struct NPP_MSGPARAMS & msgParams)
+{
+	msgParams.lResult = TRUE;
+	switch(msgParams.uMsg)
+	{
+	case WM_INITDIALOG:
+	{
+		initCtrl();
+		dbg_log(_T("CtrlCount = %u"), CNppCtrlWnd::getCtrlCount());
+		DWORD			dwThreadId		= 0;
+		// for (int i = 0; i < EID_MAX; i++)
+			// g_hEvent[i] = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 
+		/* create thread */
+		// g_hThread = ::CreateThread(NULL, 0, UpdateThread, this, 0, &dwThreadId);
+		return TRUE;
+	}
+	case EXM_CHANGECOMBO:
+	{
+		TCHAR	temp[MAX_PATH];
+		m_comBoFilter.getSelText(temp);
+		dbg_log(_T("combo input: %s"), temp);
+		return TRUE;
+	}
+	// 关闭窗口
+	case WM_CLOSE:
+	{
+		destroy();
+		// dbg_log(_T("wm_close"));
+		return TRUE;
+	}
+	// 关闭应用程序
+	case WM_DESTROY:
+	{
+		::PostQuitMessage(0);
+		return TRUE;
+	}
+	default:
+		msgParams.lResult = FALSE;
+		break;
+	}
+	return CNppDlg::handleMessage(msgParams);
+}
+
+BOOL CExplorerDlg::handleCommand( struct NPP_MSGPARAMS & msg)
+{
+	msg.lResult = TRUE;
+	
+	if(msg.cmdCtrl.iID == IDC_BTN_ADD )
+	{
+		if(msg.cmdCtrl.uCode == BN_CLICKED)
+		{
+			dbg_log(_T("BN_DBLCLK"));
+			/*
+			static CNppDlg nppDlg;
+			nppDlg.init(m_hInst, m_hSelf);
+			nppDlg.create(_T("Hello"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 40, 32);
+			nppDlg.gotoCenter();
+			nppDlg.doModal();*/
+		}
+	}
+	else if(msg.cmdCtrl.iID == IDC_CBO_FILTER)
+	{
+		if( msg.cmdCtrl.uCode == CBN_EDITUPDATE)
+		{
+
+		}
+		else if(msg.cmdCtrl.uCode == CBN_EDITCHANGE)
+		{
+
+		}
+	
+	}
+	
+	return msg.lResult;
+}
+BOOL CExplorerDlg::handleNotify( struct NPP_MSGPARAMS & msgParams)
+{
+	msgParams.lResult = TRUE;
+	LPNMHDR		nmhdr = (LPNMHDR)msgParams.lParam;
+	
+	if (nmhdr->hwndFrom == m_treeView2.getHSelf())
+	{
+		switch (nmhdr->code)
+		{
+			case NM_RCLICK:
+			{
+				dbg_log(_T("NM_RCLICK"));
+				return TRUE;
+			}
+			case TVN_SELCHANGED:
+			{
+				dbg_log(_T("TVN_SELCHANGED"));
+				TVITEM	tvi	= (TVITEM)((LPNMTREEVIEW)msgParams.lParam)->itemNew;
+				TCHAR szItemPath[MAX_PATH] = {0};
+				if( m_treeView2.isSelected(tvi.hItem) )
+				{
+					m_treeView2.getItemPath(tvi.hItem, szItemPath);
+					GetFolderFullPath(tvi.hItem, szItemPath, _T(""));
+					UpdateFileListAll(szItemPath);
+				}
+				break;
+			}
+			case TVN_ITEMEXPANDING:
+			{
+				
+				TVITEM	tvi	= (TVITEM)((LPNMTREEVIEW)msgParams.lParam)->itemNew;
+				if (!(tvi.state & TVIS_EXPANDED))
+				{
+					dbg_log(_T("TVN_ITEMEXPANDING not "));
+					TCHAR szItemPath[MAX_PATH] = {0};
+					m_treeView2.getItemPath(tvi.hItem, szItemPath);
+//							dbg_log("ItemPath = %s", szItemPath);				
+					GetFolderFullPath(tvi.hItem, szItemPath, _T(""));
+//							dbg_log("ItemPath = %s", szItemPath);
+					UpDateChildren(szItemPath, tvi.hItem, true);
+
+					//UpdateFileListAll(szItemPath);
+				}
+				else
+				{
+					dbg_log(_T("TVN_ITEMEXPANDING"));
+				}
+				//UpdateFolders();
+				break;
+			}
+			case TVN_KEYDOWN:
+			{
+				if (((LPNMTVKEYDOWN)msgParams.lParam)->wVKey == VK_RIGHT)
+				{
+					dbg_log(_T("TVN_KEYDOWN"));
+				}
+				
+				return TRUE;
+			}
+			default:
+				break;
+		}
+	}
+	else if(nmhdr->hwndFrom == m_filterCtrl)
+	{
+		dbg_log(_T("m_filterCtrl NM_RCLICK"));
+	}
+	return msgParams.lResult;
+}
 BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch(message)

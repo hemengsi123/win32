@@ -44,11 +44,13 @@ struct ListViewItem
 	
 	unsigned __int64 m_filesize;
 };
-class CExplorerDlg: public CNppStaticDialog
+class CExplorerDlg: public CNppDlg//public CNppStaticDialog
 {
 public:
-	void create(HINSTANCE hInst, int dialogId);
 	BOOL CALLBACK run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT handleMessage( struct NPP_MSGPARAMS & msgParams);
+	virtual BOOL    handleCommand( struct NPP_MSGPARAMS & msgParams);
+	virtual BOOL    handleNotify( struct NPP_MSGPARAMS & msgParams);
 	void initCtrl();
 	void UpdateDevices();
 	void UpdateFolders(void);

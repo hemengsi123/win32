@@ -31,6 +31,11 @@ typedef struct NPP_MSGPARAMS
 			WORD low;		//wParam
 			WORD high;		//wParam
 		}shortVal;			//wParam
+		struct
+		{
+			WORD iID;       // ¿Ø¼þid LOWORD(wParam)
+			WORD uCode;     // Í¨ÖªÂë HIWORD(wParam)
+		}cmdCtrl;
 		HDC hdc;			//wParam
 		HRGN hrgn;			//WM_NCPAINT,etc.
 		WPARAM wParam;
@@ -127,6 +132,8 @@ public:
 	virtual LRESULT handleMessage( struct NPP_MSGPARAMS & msgParams);
 	virtual BOOL    handleCommand( struct NPP_MSGPARAMS & msgParams);
 	virtual BOOL    handleNotify( struct NPP_MSGPARAMS & msgParams);
+	//virtual BOOL    handleCommand(WPARAM wParam, LPARAM lParam);
+	//virtual BOOL    handleNotify(WPARAM wParam, LPARAM lParam);
 	virtual void init(HINSTANCE hInst, HWND parent);
 	virtual void reSizeTo(RECT & rc); // should NEVER be const !!!
 	virtual void redraw() const;

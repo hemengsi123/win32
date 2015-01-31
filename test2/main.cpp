@@ -15,15 +15,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 
 	try
 	{
-		expDlg.create(hInstance, IDD_EXPLORER_DLG);
+		expDlg.init(hInstance, NULL);
+		//expDlg.create(hInstance, IDD_EXPLORER_DLG);
+		expDlg.create(IDD_EXPLORER_DLG);
 		expDlg.display();
-		expDlg.goToCenter();
-
+		expDlg.gotoCenter();
+		expDlg.doModal();
 //		//dlg2.create(IDD_EXPLORER_DLG);
 //		dlg3.init(hInstance, NULL);
 //		dlg3.create(IDD_EXPLORER_DLG);
 //		dlg3.create(_T("Hello"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 480, 320);
-
+/*
 		MSG msg;
 		while(::GetMessage(&msg, NULL, NULL, NULL))  
 		{  
@@ -38,11 +40,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 				DispatchMessage(&msg);  
 			// }
 		}
+		*/
 	}
 	catch( std::exception excep)
 	{
 		dbg_log(_T("throw error"));
 		dbg_log(_T("error: %s"), excep.what());
 	}
+	
 	return 0;
 }
