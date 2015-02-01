@@ -2,15 +2,13 @@
 #include "NppBase.h"
 #include "NppFile.h"
 
-CNppFile::CNppFile(LPCTSTR lpszFilePath): m_lpszPath(NULL), m_lpszName(NULL), m_lpszExtension(NULL), m_hFind(NULL)
+CNppFile::CNppFile(LPCTSTR lpszFilePath): m_hFind(NULL)
 {
 	setFullPath(lpszFilePath);
 }
 CNppFile::~CNppFile()
 {
-	SAFE_DELETE_ARRAY(m_lpszName);
-	SAFE_DELETE_ARRAY(m_lpszPath);
-	SAFE_DELETE_ARRAY(m_lpszExtension);
+	findClose();
 }
 
 void CNppFile::setFullPath(LPCTSTR lpszFilePath)
@@ -26,35 +24,35 @@ LPCTSTR CNppFile::getFullPath() const
 {
 	return m_szFilePath;
 }
-bool CNppFile::isExist(LPCTSTR lpszFilePath) const
+BOOL CNppFile::isExist(LPCTSTR lpszFilePath) const
 {
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
 		
-	return (bool)::PathFileExists(lpszFilePath);
+	return ::PathFileExists(lpszFilePath);
 }
-bool CNppFile::isFile(LPCTSTR lpszFilePath) const
+BOOL CNppFile::isFile(LPCTSTR lpszFilePath) const
 {
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
 		
-	return (bool)!::PathIsDirectory(lpszFilePath);
+	return !::PathIsDirectory(lpszFilePath);
 }
-bool CNppFile::isDir(LPCTSTR lpszFilePath) const
+BOOL CNppFile::isDir(LPCTSTR lpszFilePath) const
 {
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
 		
-	return (bool)::PathIsDirectory(lpszFilePath);
+	return ::PathIsDirectory(lpszFilePath);
 }
-bool CNppFile::isEmptyDir(LPCTSTR lpszFilePath) const
+BOOL CNppFile::isEmptyDir(LPCTSTR lpszFilePath) const
 {
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
 	
 	if( isDir(lpszFilePath) )
 	{
-		return (bool)::PathIsDirectoryEmpty(lpszFilePath);
+		return ::PathIsDirectoryEmpty(lpszFilePath);
 	}
 	return true;
 }
@@ -66,20 +64,14 @@ LPCTSTR CNppFile::getName(LPCTSTR lpszFilePath)
 	}
 	else
 	{
-		return setName(::PathFindFileName(m_szFilePath));
+		return ::PathFindFileName(m_szFilePath);
 	}
 }
 LPCTSTR CNppFile::setName(LPCTSTR lpszName)
 {
-	// if( lpszName == NULL)
-		// return NULL;
-	// m_strName = lpszName;
-	if( m_lpszName == NULL)
-		m_lpszName = new TCHAR[MAX_PATH];
-
-	_tcscpy(m_lpszName, lpszName);
+	_tcscpy(m_szBuff, lpszName);
 	
-	return m_lpszName;
+	return m_szBuff;
 }
 
 LPCTSTR CNppFile::getPath(LPCTSTR lpszFilePath)
@@ -94,20 +86,18 @@ LPCTSTR CNppFile::getPath(LPCTSTR lpszFilePath)
 	else
 	{
 		setPath(lpszFilePath);
-		if(::PathRemoveFileSpec(m_lpszPath) )
+		if(::PathRemoveFileSpec(m_szBuff) )
 		{
-			return m_lpszPath;
+			return m_szBuff;
 		}
 	}
 	return NULL;
 }
 LPTSTR CNppFile::setPath(LPCTSTR lpszPath)
 {
-	if( m_lpszPath == NULL)
-		m_lpszPath = new TCHAR[MAX_PATH];
-	
-	_tcscpy(m_lpszPath, lpszPath);
-	return m_lpszPath;
+
+	_tcscpy(m_szBuff, lpszPath);
+	return m_szBuff;
 }
 LPCTSTR CNppFile::getNameExt(LPCTSTR lpszFilePath)const
 {
@@ -122,7 +112,6 @@ LPCTSTR CNppFile::getExtension(LPCTSTR lpszFilePath)const
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
     return _tcsrchr(lpszFilePath, _T('.'));
-	//return ::PathFindExtension(lpszFilePath);
 }
 // add '\'
 LPTSTR CNppFile::addBackslash(LPTSTR lpszFilePath)
@@ -142,17 +131,15 @@ LPCTSTR CNppFile::rmExtension(LPCTSTR lpszFilePath)
 	if(lpDotPos != NULL)
 	{
 		*lpDotPos = _T('\0');
-		return m_lpszPath;
+		// ееЁЩ .gitconfig
+		if(_tcslen(m_szBuff) == 0)
+			return lpszFilePath;
+		else
+			return m_szBuff;
 	}
-	return NULL;
-}
-LPCTSTR CNppFile::rmExtension(LPTSTR lpszFilePath)
-{
-	if( !lpszFilePath )
-		lpszFilePath = m_szFilePath;
-	::PathRemoveExtension(lpszFilePath);
 	return lpszFilePath;
 }
+
 LPCTSTR CNppFile::append(LPCTSTR pszMore, LPTSTR  pszPath)
 {
 	if( !pszPath )
@@ -163,7 +150,7 @@ LPCTSTR CNppFile::append(LPCTSTR pszMore, LPTSTR  pszPath)
 	}
 	return pszPath;
 }
-bool CNppFile::isValidFolder(const LPWIN32_FIND_DATA lpfindData) const
+BOOL CNppFile::isValidFolder(const LPWIN32_FIND_DATA lpfindData) const
 {
 	if ((lpfindData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
 		(!(lpfindData->dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ) &&
@@ -218,7 +205,7 @@ void CNppFile::findClose()
 		::ZeroMemory(&m_findData, sizeof(WIN32_FIND_DATA));
 	}
 }
-bool CNppFile::findIsHidden(const WIN32_FIND_DATA * lpfindData) const
+BOOL CNppFile::findIsHidden(const WIN32_FIND_DATA * lpfindData) const
 {
 	if( !lpfindData )
 		lpfindData = &m_findData;
@@ -262,13 +249,13 @@ unsigned __int64 CNppFile::findGetSize(const WIN32_FIND_DATA* lpfindData)const
 	
 	return lFilesize;
 }
-bool CNppFile::findIsDir(const WIN32_FIND_DATA* lpfindData) const
+BOOL CNppFile::findIsDir(const WIN32_FIND_DATA* lpfindData) const
 {
 	if( !lpfindData )
 		lpfindData = &m_findData;
 	return (lpfindData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 }
-bool CNppFile::findIsFile(const WIN32_FIND_DATA* lpfindData) const
+BOOL CNppFile::findIsFile(const WIN32_FIND_DATA* lpfindData) const
 {
 	if( !lpfindData )
 		lpfindData = &m_findData;

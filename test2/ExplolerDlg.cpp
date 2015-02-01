@@ -828,7 +828,7 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			TCHAR szTmpFile[MAX_PATH] = {0};
 			lvItem.m_bIsDir     = false;
 			lvItem.m_currentDir = tstring(lpszSelDir);
-			lvItem.m_fileName   = searchFile.rmExtension(searchFile.findGetName());
+			lvItem.m_fileName  = searchFile.rmExtension(searchFile.findGetName());
 			_stprintf(szTmpFile, _T("%s%s"), lpszSelDir, searchFile.findGetName());
 			lvItem.m_fullPath  = szTmpFile;
 			lpszExt = searchFile.getExtension(searchFile.findGetName());
@@ -836,6 +836,9 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			{
 				lvItem.m_fileExt = ++lpszExt;
 			}
+			else
+				lvItem.m_fileExt = _T("");
+			
 			lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
 			m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
 			lvItem.m_iIcon      = iIconNormal;
