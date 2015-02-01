@@ -11,56 +11,273 @@ CNppWnd::~CNppWnd()
 {
 	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
 }
+// @brief: 如果多个消息映射有冲突，则只会选择第一次匹配成功的映射，后面的映射会忽略
 const NPP_MSGMAP_ENTRY * CNppWnd::FindMessageEntry(const NPP_MSGMAP_ENTRY * lpMsgMapEntries, const NPP_MSGPARAMS &msgParams)
 {
 //	if(lpMsgMapEntries == NULL)
 //		return NULL;
 	ASSERT(lpMsgMapEntries != NULL);
-	//CNppWnd * caller = msgParams.pSender;
-	UINT      ctrlID = msgParams.iCtrlID;
-	UINT      uMsg   = msgParams.uMsg;
-	const NPP_MSGMAP_ENTRY * lpMsgMapEntry = NULL;
-	while( lpMsgMapEntries->pfnSig != PfnSig_end )
+	UINT uMsg    = msgParams.uMsg;
+	UINT iCtrlID = msgParams.iCtrlID;
+	//const NPP_MSGMAP_ENTRY * lpMsgMapEntry = NULL;
+	int index = 0;
+	while( lpMsgMapEntries->pfnSig != pFnSig_end )
 	{
-		if(lpMsgMapEntries->pfnSig == PfnSig_mm )
+		if(lpMsgMapEntries->pfnSig == pFnSig_msg_cmd)
 		{
-			if(uMsg == lpMsgMapEntries->uMsg && lpMsgMapEntries->pfn)
-			{
-				return lpMsgMapEntries;
-			}
+			uMsg    = HIWORD(msgParams.wParam);
+			iCtrlID = LOWORD(msgParams.wParam);
 		}
-		else if(lpMsgMapEntries->pfnSig == PfnSig_imm)
+		else if(lpMsgMapEntries->pfnSig == pFnSig_msg_notify)
 		{
-			if(ctrlID ==lpMsgMapEntries->iCtrlID && uMsg == lpMsgMapEntries->uMsg && lpMsgMapEntries->pfn)
-				return lpMsgMapEntries;
+			uMsg    = msgParams.lpnmhdr->code;
+			iCtrlID = msgParams.lpnmhdr->idFrom;
 		}
-		else if(lpMsgMapEntries->pfnSig == PfnSig_nmm)
+		else
 		{
-			if(msgParams.sCtrlName == lpMsgMapEntries->sCtrlName && uMsg == lpMsgMapEntries->uMsg && lpMsgMapEntries->pfn)
-				return lpMsgMapEntries;
+			uMsg    = msgParams.uMsg;
+			iCtrlID = msgParams.iCtrlID;
 		}
+		
+		if( ( lpMsgMapEntries->uMsg == uMsg && lpMsgMapEntries->iCtrlID == -1 )
+		 && ( lpMsgMapEntries->pfn != NULL) )
+		{
+			return lpMsgMapEntries;
+		}
+		else if( (lpMsgMapEntries->iCtrlID == iCtrlID )
+			  && (lpMsgMapEntries->uMsg == uMsg || lpMsgMapEntries->uMsg == -1)
+			  && (lpMsgMapEntries->pfn != NULL) )
+		{
+			return lpMsgMapEntries;
+		}
+		else if((!lpMsgMapEntries->sCtrlName.isEmpty() && lpMsgMapEntries->sCtrlName == msgParams.sCtrlName)
+			&& (lpMsgMapEntries->uMsg == uMsg || lpMsgMapEntries->uMsg == -1)
+			&& (lpMsgMapEntries->pfn != NULL) )
+		{
+			return lpMsgMapEntries;
+		}
+	
 		++lpMsgMapEntries;
 	}
-	
-	return lpMsgMapEntry;
+	return NULL;
+	//return lpMsgMapEntry;
 }
 BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 {
 	const NPP_MSGMAP_ENTRY * lpMsgMapEntry = FindMessageEntry(m_messageEntries, msgParams);
 	if( lpMsgMapEntry != NULL)
 	{
-		// 得到父窗口this指针
-		if(m_hParent != NULL)
+		// 控件消息映射
+		if(lpMsgMapEntry->pfnSig < pFnSig_msg )
 		{
-			CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
-			if( phSelf != NULL)
+			// 得到父窗口this指针
+			if(m_hParent != NULL)
 			{
-				return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+				CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+				if( phSelf != NULL)
+				{
+					return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+				}
+			}
+			// @brief: this 指向控件地址，所以在函数 => lpMsgMapEntry->pfn(this, msgParams)
+			// 所以在pfn中使用this指针指向的是对应控件地址
+			return (this->*(lpMsgMapEntry->pfn))(msgParams);
+		/*
+			switch(lpMsgMapEntry->pfnSig)
+			{
+			case pFnSig_ctrl:
+			{
+				// 得到父窗口this指针
+				if(m_hParent != NULL)
+				{
+					CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+					if( phSelf != NULL)
+					{
+						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+					}
+				}
+				// @brief: this 指向控件地址，所以在函数 => lpMsgMapEntry->pfn(this, msgParams)
+				// 所以在pfn中使用this指针指向的是对应控件地址
+				return (this->*(lpMsgMapEntry->pfn))(msgParams);
+				break;
+			}
+			case pFnSig_ctrl_id:
+			{
+				if( (lpMsgMapEntry->iCtrlID == msgParams.iCtrlID ) && 
+					(lpMsgMapEntry->uMsg == msgParams.uMsg || lpMsgMapEntry->uMsg == -1) )
+				{
+					if(m_hParent != NULL)
+					{
+						CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+						if( phSelf != NULL)
+						{
+							return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+						}
+					}
+					return (this->*(lpMsgMapEntry->pfn))(msgParams);
+				}
+				break;
+			}
+			case pFnSig_ctrl_name:
+			{
+				if( (lpMsgMapEntry->sCtrlName == msgParams.sCtrlName ) && 
+					( lpMsgMapEntry->uMsg == msgParams.uMsg || lpMsgMapEntry->uMsg == -1) )
+				{
+					if(m_hParent != NULL)
+					{
+						CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+						if( phSelf != NULL)
+						{
+							dbg_log("good jobs");
+							return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+						}
+					}
+					return (this->*(lpMsgMapEntry->pfn))(msgParams);
+				}
+				break;
+			}
+			default:
+				break;
+			}
+		*/
+		}
+		else  // 主框架消息映射
+		{
+			switch(lpMsgMapEntry->pfnSig)
+			{
+			case pFnSig_msg:
+			{
+				return (this->*(lpMsgMapEntry->pfn))(msgParams);
+				break;
+			}
+			case pFnSig_msg_cmd:
+			{
+				if(msgParams.uMsg == WM_COMMAND)
+				{
+					msgParams.iCtrlID  = LOWORD(msgParams.wParam);
+					msgParams.uMsg     = HIWORD(msgParams.wParam);
+					msgParams.hwndFrom = (HWND)msgParams.lParam; 
+					if(msgParams.uMsg == lpMsgMapEntry->uMsg 
+						&& msgParams.iCtrlID == lpMsgMapEntry->iCtrlID)
+					{
+						return (this->*(lpMsgMapEntry->pfn))(msgParams);
+					}
+					else if(msgParams.iCtrlID == lpMsgMapEntry->iCtrlID
+						&& lpMsgMapEntry->uMsg == -1)
+					{
+						return (this->*(lpMsgMapEntry->pfn))(msgParams);
+					}
+				}
+				break;
+			}
+			case pFnSig_msg_notify:
+			{
+				if(msgParams.uMsg == WM_NOTIFY)
+				{
+					LPNMHDR lpnmhdr    = (LPNMHDR)msgParams.lParam;
+					msgParams.uMsg     = lpnmhdr->code;
+					msgParams.hwndFrom = lpnmhdr->hwndFrom;
+					msgParams.iCtrlID  = lpnmhdr->idFrom;
+					if(msgParams.uMsg == lpMsgMapEntry->uMsg 
+						&& msgParams.iCtrlID == lpMsgMapEntry->iCtrlID)
+					{
+						return (this->*(lpMsgMapEntry->pfn))(msgParams);
+					}
+					else if(msgParams.iCtrlID == lpMsgMapEntry->iCtrlID
+						&& lpMsgMapEntry->uMsg == -1)
+					{
+						return (this->*(lpMsgMapEntry->pfn))(msgParams);
+					}
+				}
+				break;
+			}
+			default:
+				break;
 			}
 		}
-		// @brief: this 指向控件地址，所以在函数 => lpMsgMapEntry->pfn(this, msgParams)
-		// 所以在pfn中使用this指针指向的是对应控件地址
-		return (this->*(lpMsgMapEntry->pfn))(msgParams);
+		/*
+		switch(lpMsgMapEntry->pfnSig)
+		{
+		case pFnSig_ctrl:
+		{
+			// 得到父窗口this指针
+			if(m_hParent != NULL)
+			{
+				CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+				if( phSelf != NULL)
+				{
+					return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+				}
+			}
+			// @brief: this 指向控件地址，所以在函数 => lpMsgMapEntry->pfn(this, msgParams)
+			// 所以在pfn中使用this指针指向的是对应控件地址
+			return (this->*(lpMsgMapEntry->pfn))(msgParams);
+			break;
+		}
+		case pFnSig_ctrl_id:
+		{
+			if(lpMsgMapEntry->iCtrlID == msgParams.iCtrlID)
+			{
+				if(m_hParent != NULL)
+				{
+					CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+					if( phSelf != NULL)
+					{
+						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+					}
+				}
+				return (this->*(lpMsgMapEntry->pfn))(msgParams);
+			}
+			break;
+		}
+		case pFnSig_ctrl_name:
+		{
+			if(lpMsgMapEntry->sCtrlName == msgParams.sCtrlName)
+			{
+				if(m_hParent != NULL)
+				{
+					CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+					if( phSelf != NULL)
+					{
+						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+					}
+				}
+				return (this->*(lpMsgMapEntry->pfn))(msgParams);
+			}
+			break;
+		}
+		case pFnSig_msg:
+		{
+			return (this->*(lpMsgMapEntry->pfn))(msgParams);
+			break;
+		}
+		case pFnSig_msg_cmd:
+		{
+			if(msgParams.uMsg == WM_COMMAND)
+			{
+				msgParams.iCtrlID  = LOWORD(msgParams.wParam);
+				msgParams.uMsg     = HIWORD(msgParams.wParam);
+				msgParams.hwndFrom = (HWND)msgParams.lParam; 
+				return (this->*(lpMsgMapEntry->pfn))(msgParams);
+			}
+			break;
+		}
+		case pFnSig_msg_notify:
+		{
+			if(msgParams.uMsg == WM_NOTIFY)
+			{
+				LPNMHDR lpnmhdr    = (LPNMHDR)msgParams.lParam;
+				msgParams.uMsg     = lpnmhdr->code;
+				msgParams.hwndFrom = lpnmhdr->hwndFrom;
+				msgParams.iCtrlID  = lpnmhdr->idFrom;
+				return (this->*(lpMsgMapEntry->pfn))(msgParams);
+			}
+			break;
+		}
+		default:
+			break;
+		}
+		*/
 	}
 	return FALSE;
 }
@@ -154,6 +371,8 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	m_msgParams.wParam   = wParam;
 	m_msgParams.lParam   = lParam;
 	m_msgParams.lResult  = 0;
+	
+	loopDispath(m_msgParams);
 	
 	switch(uMsg)
 	{
@@ -561,12 +780,13 @@ LRESULT CNppCtrlWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	m_msgParams.lResult   = 0;
 	m_msgParams.sCtrlName = m_sCtrlName;
 	
+	loopDispath(m_msgParams);
+	
 	return this->handleMessage(m_msgParams);
 }
 LRESULT CNppCtrlWnd::handleMessage(struct NPP_MSGPARAMS & msgParams)
 {
-	loopDispath(msgParams);
-	
+
 	return ::CallWindowProc(m_sysWndProc, msgParams.hwndFrom, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
 }
 BOOL CNppCtrlWnd::handleCommand(struct NPP_MSGPARAMS & msgParams)
@@ -678,8 +898,10 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	m_msgParams.wParam   = wParam;
 	m_msgParams.lParam   = lParam;
 	m_msgParams.lResult  = 0;
+
+	loopDispath(m_msgParams);
 	
-switch(uMsg)
+	switch(uMsg)
 	{
 	case WM_COMMAND:
 	{

@@ -65,10 +65,13 @@ typedef struct NPP_MSGPARAMS
 //
 enum NppPfnSig
 {
-	PfnSig_end,
-	PfnSig_mm,  // NPP_ON_MSGMAP(msgtype, memberpFn)
-	PfnSig_imm, // NPP_ON_MSGMAP_ID(ctrlID, msgtype, memberpFn) 
-	PfnSig_nmm, // NPP_ON_MSGMAP_NAME
+	pFnSig_end,
+	pFnSig_ctrl,  // NPP_ON_MSGMAP(msgtype, memberpFn)
+	pFnSig_ctrl_id, // NPP_ON_MSGMAP_ID(ctrlID, msgtype, memberpFn) 
+	pFnSig_ctrl_name, // NPP_ON_MSGMAP_NAME
+	pFnSig_msg,
+	pFnSig_msg_cmd,
+	pFnSig_msg_notify,
 };
 typedef BOOL (CNppWnd::*NPP_MSGPROC)(NPP_MSGPARAMS & msgParams); // 
 struct NPP_MSGMAP_ENTRY
@@ -81,9 +84,11 @@ struct NPP_MSGMAP_ENTRY
 };
 /*************** how to use **************************************************
 	NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
-	NPP_ON_MSGMAP(WM_KEYUP, OnClick)
-	NPP_ON_MSGMAP_ID(IDC_CBO_FILTER, WM_LBUTTONDOWN, OnBtnAdd)
-	NPP_ON_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
+	NPP_ON_CTRL_MSGMAP(WM_KEYUP, OnClick)
+	NPP_ON_CTRL_MSGMAP_ID(IDC_CBO_FILTER, WM_LBUTTONDOWN, OnBtnAdd)
+	NPP_ON_CTRL_MSGMAP_NAME(_T("btnAddAll"), -1, OnBtnAddAll)
+	NPP_ON_MSGMAP_CMD(IDC_BTN_DEL, BN_CLICKED, OnBtnAddAll)
+	NPP_ON_MSGMAP_CMD(IDC_BTN_DEL, -1, OnBtnAddAll)
 	NPP_END_MESSAGE_MAP()
 *******************************************************************************/
 #define NPP_BEGIN_MESSAGE_MAP(theClass)                      \
@@ -91,21 +96,32 @@ const NPP_MSGMAP_ENTRY theClass::m_messageEntries[] =        \
 {                                                            \
 
 #define NPP_END_MESSAGE_MAP()                                \
-	{0, 0, _T('\0'), PfnSig_end, (NPP_MSGPROC)0 }            \
+	{0, -1, _T('\0'), pFnSig_end, (NPP_MSGPROC)0 }            \
 };
+/************************ 控件消息 ****************************/
+#define NPP_ON_CTRL_MSGMAP(msgCode, memberpFn)                        \
+	{msgCode, -1, _T('\0'), pFnSig_ctrl, (NPP_MSGPROC)&memberpFn},     \
 
-// @brief: 消息映射是来处理控件中的消息，在成员函数中不要使用this指针
-// (this 指针可能是指向控件对象，而不是指向定义成员函数memberpFn 的变量，
-// 因为(this->*(lpMsgMapEntry->pfn))(msgParams)，this是指向控件对象地址)
-#define NPP_ON_MSGMAP(msgtype, memberpFn)                        \
-	{msgtype, 0, _T('\0'), PfnSig_mm, (NPP_MSGPROC)&memberpFn},  \
+// if msgCode == -1 处理所有消息码, or 处理指定消息码
+#define NPP_ON_CTRL_MSGMAP_ID(ctrlID, msgCode, memberpFn)                   \
+	{msgCode, ctrlID, _T('\0'), pFnSig_ctrl_id, (NPP_MSGPROC)&memberpFn},   \
 
+// if msgCode == -1 处理所有消息码, or 处理指定消息码
+#define NPP_ON_CTRL_MSGMAP_NAME(ctrlName, msgCode, memberpFn)               \
+	{msgCode, -1, _T(ctrlName), pFnSig_ctrl_name, (NPP_MSGPROC)&memberpFn},  \
 
-#define NPP_ON_MSGMAP_ID(ctrlID, msgtype, memberpFn)                   \
-	{msgtype, ctrlID, _T('\0'), PfnSig_imm, (NPP_MSGPROC)&memberpFn},  \
+/********************* 窗口消息 或对话框消息 **********************/
+#define NPP_ON_MSGMAP(msgCode, memberpFn)                          \
+	{msgCode, -1, _T('\0'), pFnSig_msg, (NPP_MSGPROC)&memberpFn},   \
 
-#define NPP_ON_MSGMAP_NAME(ctrlName, msgtype, memberpFn)          \
-	{msgtype, 0, _T(ctrlName), PfnSig_nmm, (NPP_MSGPROC)&memberpFn},  \
+// if NotifyCode == -1 处理所有通知码, or 处理指定通知码
+#define NPP_ON_MSGMAP_CMD(ctrlID, notifyCode, memberpFn)                       \
+	{notifyCode, ctrlID, _T('\0'), pFnSig_msg_cmd, (NPP_MSGPROC)&memberpFn},   \
+
+// if NotifyCode == -1 处理所有通知码, or 处理指定通知码
+#define NPP_ON_MSGMAP_NOTIFY(ctrlID, notifyCode, memberpFn)                       \
+	{notifyCode, ctrlID, _T('\0'), pFnSig_msg_notify, (NPP_MSGPROC)&memberpFn},   \
+
 ///////////////////////////////////////////////////////////////////
 //
 // CNppWnd 窗口基类
