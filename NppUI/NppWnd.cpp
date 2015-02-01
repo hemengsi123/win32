@@ -16,6 +16,7 @@ const NPP_MSGMAP_ENTRY * CNppWnd::FindMessageEntry(const NPP_MSGMAP_ENTRY * lpMs
 {
 //	if(lpMsgMapEntries == NULL)
 //		return NULL;
+
 	ASSERT(lpMsgMapEntries != NULL);
 	UINT uMsg    = msgParams.uMsg;
 	UINT iCtrlID = msgParams.iCtrlID;
@@ -23,12 +24,12 @@ const NPP_MSGMAP_ENTRY * CNppWnd::FindMessageEntry(const NPP_MSGMAP_ENTRY * lpMs
 	int index = 0;
 	while( lpMsgMapEntries->pfnSig != pFnSig_end )
 	{
-		if(lpMsgMapEntries->pfnSig == pFnSig_msg_cmd)
+		if(msgParams.uMsg == WM_COMMAND && lpMsgMapEntries->pfnSig == pFnSig_msg_cmd)
 		{
 			uMsg    = HIWORD(msgParams.wParam);
 			iCtrlID = LOWORD(msgParams.wParam);
 		}
-		else if(lpMsgMapEntries->pfnSig == pFnSig_msg_notify)
+		else if(msgParams.uMsg == WM_NOTIFY && lpMsgMapEntries->pfnSig == pFnSig_msg_notify)
 		{
 			uMsg    = msgParams.lpnmhdr->code;
 			iCtrlID = msgParams.lpnmhdr->idFrom;
@@ -152,21 +153,25 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 			}
 			case pFnSig_msg_cmd:
 			{
+				
 				if(msgParams.uMsg == WM_COMMAND)
 				{
 					msgParams.iCtrlID  = LOWORD(msgParams.wParam);
 					msgParams.uMsg     = HIWORD(msgParams.wParam);
-					msgParams.hwndFrom = (HWND)msgParams.lParam; 
-					if(msgParams.uMsg == lpMsgMapEntry->uMsg 
-						&& msgParams.iCtrlID == lpMsgMapEntry->iCtrlID)
+					msgParams.hwndFrom = (HWND)msgParams.lParam;
+					// Ð§ÂÊ??
+					CNppCtrlWnd * phSelf = reinterpret_cast<CNppCtrlWnd*>(::GetWindowLongPtr(msgParams.hwndFrom, GWLP_USERDATA));
+					if(phSelf != NULL)
 					{
-						return (this->*(lpMsgMapEntry->pfn))(msgParams);
+						msgParams.sCtrlName = phSelf->getCtrlName();
+						msgParams.pSender   = phSelf;
 					}
-					else if(msgParams.iCtrlID == lpMsgMapEntry->iCtrlID
-						&& lpMsgMapEntry->uMsg == -1)
+					else
 					{
-						return (this->*(lpMsgMapEntry->pfn))(msgParams);
+						msgParams.sCtrlName = _T("warning button");
 					}
+					
+					return (this->*(lpMsgMapEntry->pfn))(msgParams);
 				}
 				break;
 			}
@@ -178,16 +183,18 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 					msgParams.uMsg     = lpnmhdr->code;
 					msgParams.hwndFrom = lpnmhdr->hwndFrom;
 					msgParams.iCtrlID  = lpnmhdr->idFrom;
-					if(msgParams.uMsg == lpMsgMapEntry->uMsg 
-						&& msgParams.iCtrlID == lpMsgMapEntry->iCtrlID)
+					
+					CNppCtrlWnd * phSelf = reinterpret_cast<CNppCtrlWnd*>(::GetWindowLongPtr(msgParams.hwndFrom, GWLP_USERDATA));
+					if(phSelf != NULL)
 					{
-						return (this->*(lpMsgMapEntry->pfn))(msgParams);
+						msgParams.sCtrlName = phSelf->getCtrlName();
+						msgParams.pSender   = phSelf;
 					}
-					else if(msgParams.iCtrlID == lpMsgMapEntry->iCtrlID
-						&& lpMsgMapEntry->uMsg == -1)
+					else
 					{
-						return (this->*(lpMsgMapEntry->pfn))(msgParams);
-					}
+						msgParams.sCtrlName = _T("warning button");
+					}	
+					return (this->*(lpMsgMapEntry->pfn))(msgParams);
 				}
 				break;
 			}
@@ -371,7 +378,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	m_msgParams.wParam   = wParam;
 	m_msgParams.lParam   = lParam;
 	m_msgParams.lResult  = 0;
-	
+
 	loopDispath(m_msgParams);
 	
 	switch(uMsg)

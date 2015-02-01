@@ -84,11 +84,19 @@ struct NPP_MSGMAP_ENTRY
 };
 /*************** how to use **************************************************
 	NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
+	// 捕获所有控件触发的 WM_KEYUP 消息
 	NPP_ON_CTRL_MSGMAP(WM_KEYUP, OnClick)
+	// 捕获控件id为IDC_CBO_FILTER控件触发的 WM_LBUTTONDOWN消息
 	NPP_ON_CTRL_MSGMAP_ID(IDC_CBO_FILTER, WM_LBUTTONDOWN, OnBtnAdd)
+	// 捕获控件名为"btnAddAll"控件触发的 所有消息
 	NPP_ON_CTRL_MSGMAP_NAME(_T("btnAddAll"), -1, OnBtnAddAll)
-	NPP_ON_MSGMAP_CMD(IDC_BTN_DEL, BN_CLICKED, OnBtnAddAll)
-	NPP_ON_MSGMAP_CMD(IDC_BTN_DEL, -1, OnBtnAddAll)
+	// 捕获WM_COMAND消息中控件id为 IDC_BTN_DEL控件的BN_CLICKED 通知码
+	NPP_ON_MSGMAP_CMD(IDC_BTN_DEL, BN_CLICKED, OnBtnAddAll) 
+	// 捕获WM_COMAND消息中控件id为IDC_BTN_DEL控件的所有通知码
+	NPP_ON_MSGMAP_CMD(IDC_BTN_DEL, -1, OnBtnAddAll) 
+	// 捕获WM_COMAND消息中所有控件的 BN_CLICKED 消息
+	NPP_ON_MSGMAP_CMD(-1, BN_CLICKED, OnBtnAddAll) 
+	
 	NPP_END_MESSAGE_MAP()
 *******************************************************************************/
 #define NPP_BEGIN_MESSAGE_MAP(theClass)                      \

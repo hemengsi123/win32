@@ -5,10 +5,12 @@ HANDLE g_hEvent[EID_MAX]	= {NULL};
 HANDLE g_hThread			= NULL;
 
 NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
-//NPP_ON_CTRL_MSGMAP(WM_KEYUP, OnClick) WM_LBUTTONDOWN  BN_CLICKED
-NPP_ON_CTRL_MSGMAP_ID(IDC_BTN_ADDALL, WM_LBUTTONDOWN, OnBtnAddAll) 
+//NPP_ON_CTRL_MSGMAP(WM_KEYUP, OnClick) WM_LBUTTONDOWN  BN_CLICKED IDC_BTN_DEL
+//NPP_ON_CTRL_MSGMAP_ID(IDC_BTN_ADDALL, WM_LBUTTONDOWN, OnBtnAddAll) 
 //NPP_ON_CTRL_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
-NPP_ON_MSGMAP_CMD(IDC_BTN_DEL, -1, OnBtnAddAll)
+NPP_ON_MSGMAP_CMD(-1, BN_CLICKED, OnBtnAddAll)
+NPP_ON_MSGMAP_CMD(IDC_CBO_FILTER, -1, OnComboxList)
+
 NPP_END_MESSAGE_MAP()
 
 DWORD WINAPI UpdateThread(LPVOID lpParam)
@@ -82,7 +84,7 @@ void CExplorerDlg::initCtrl()
 	m_btnDel.init(m_hInst, m_hSelf, IDC_BTN_DEL);
 	m_btnDel.create();
 	m_btnDelAll.init(m_hInst, m_hSelf, IDC_BTN_DELALL);
-	
+	m_btnDelAll.create();
 	//m_btnAdd.alignTo(m_hSelf, TOPALIGN, RIGHTALIGN, 10, 10);
 	
 	CNppFont nppFont;
@@ -113,6 +115,7 @@ LRESULT CExplorerDlg::handleMessage( struct NPP_MSGPARAMS & msgParams)
 	msgParams.lResult = TRUE;
 	switch(msgParams.uMsg)
 	{
+	// OnInitDlg
 	case WM_INITDIALOG:
 	{
 		initCtrl();
@@ -161,7 +164,7 @@ BOOL CExplorerDlg::handleCommand( struct NPP_MSGPARAMS & msg)
 		if(msg.cmdCtrl.uCode == BN_CLICKED)
 		{
 			dbg_log(_T("BN_DBLCLK"));
-			dbg_log("msg.iCtrlID = %d, uMsg = %d", msg.iCtrlID, msg.uMsg);
+			dbg_log("%s msg.iCtrlID = %d, uMsg = %d", msg.sCtrlName.getData(), msg.iCtrlID, msg.uMsg);
 			/*
 			static CNppDlg nppDlg;
 			nppDlg.init(m_hInst, m_hSelf);
@@ -902,8 +905,16 @@ BOOL CExplorerDlg::OnClick(NPP_MSGPARAMS & msg)
 
 BOOL CExplorerDlg::OnBtnAddAll(NPP_MSGPARAMS & msg)
 {
-	dbg_log("uMsg = %04X, ctrlName = %s, id = %d", msg.uMsg, msg.sCtrlName.getData(), msg.iCtrlID);
+	dbg_log(_T("uMsg = %04X, ctrlName = %s, id = %d"), msg.uMsg, msg.sCtrlName.getData(), msg.iCtrlID);
 
+	msg.lResult = TRUE;
+	return msg.lResult;
+}
+BOOL CExplorerDlg::OnComboxList(NPP_MSGPARAMS & msg)
+{
+	dbg_log("combox");
+	dbg_log("uMsg = %04X, ctrlName = %s, id = %d", msg.uMsg, msg.sCtrlName.getData(), msg.iCtrlID);
+	
 	msg.lResult = TRUE;
 	return msg.lResult;
 }

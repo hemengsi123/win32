@@ -67,6 +67,7 @@ public:
 	void UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard = _T("*")/*HTREEITEM hSelectItem*/);
 	BOOL OnClick(NPP_MSGPARAMS & msg);
 	BOOL OnBtnAddAll(NPP_MSGPARAMS & msg);
+	BOOL OnComboxList(NPP_MSGPARAMS & msg);
 protected:
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;
