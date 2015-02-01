@@ -49,6 +49,15 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 	const NPP_MSGMAP_ENTRY * lpMsgMapEntry = FindMessageEntry(m_messageEntries, msgParams);
 	if( lpMsgMapEntry != NULL)
 	{
+		// 得到父窗口this指针
+		if(m_hParent != NULL)
+		{
+			CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+			if( phSelf != NULL)
+			{
+				return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
+			}
+		}
 		// @brief: this 指向控件地址，所以在函数 => lpMsgMapEntry->pfn(this, msgParams)
 		// 所以在pfn中使用this指针指向的是对应控件地址
 		return (this->*(lpMsgMapEntry->pfn))(msgParams);

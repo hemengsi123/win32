@@ -7,7 +7,7 @@ HANDLE g_hThread			= NULL;
 NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
 //NPP_ON_MSGMAP(WM_KEYUP, OnClick)
 //NPP_ON_MSGMAP_ID(IDC_CBO_FILTER, WM_KEYUP, OnClick)
-//NPP_ON_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
+NPP_ON_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
 NPP_END_MESSAGE_MAP()
 
 DWORD WINAPI UpdateThread(LPVOID lpParam)
@@ -52,7 +52,6 @@ DWORD WINAPI GetVolumeInformationTimeoutThread(LPVOID lpParam)
 
 void CExplorerDlg::initCtrl()
 {
-
 	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
 	m_treeView2.create();
 	m_listViewAll.init(m_hInst, m_hSelf, IDC_LIST_ALL);
@@ -161,6 +160,9 @@ BOOL CExplorerDlg::handleCommand( struct NPP_MSGPARAMS & msg)
 		if(msg.cmdCtrl.uCode == BN_CLICKED)
 		{
 			dbg_log(_T("BN_DBLCLK"));
+			dbg_log("msg.iCtrlID = %d, uMsg = %d", msg.iCtrlID, msg.uMsg);
+			dbg_log("iID = %d, uCode = %d", msg.cmdCtrl.iID, msg.cmdCtrl.uCode);
+			dbg_log("hwndFrom = %p, m_hSelf = %p, m_btnAdd = %p", msg.hwndFrom, m_hSelf, &this->m_btnAdd);
 			/*
 			static CNppDlg nppDlg;
 			nppDlg.init(m_hInst, m_hSelf);
@@ -902,6 +904,8 @@ BOOL CExplorerDlg::OnClick(NPP_MSGPARAMS & msg)
 BOOL CExplorerDlg::OnBtnAddAll(NPP_MSGPARAMS & msg)
 {
 	dbg_log("uMsg = %04X, ctrlName = %s, id = %d", msg.uMsg, msg.sCtrlName.getData(), msg.iCtrlID);
+	dbg_log("m_btnAddAll = %p, pSender = %p", &this->m_btnAddAll, msg.pSender);
+
 	msg.lResult = TRUE;
 	return msg.lResult;
 }
