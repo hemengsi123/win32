@@ -21,7 +21,8 @@ public:
 	LPCTSTR getExtension(LPCTSTR lpszFilePath = NULL) const;
 	LPTSTR addBackslash(LPTSTR lpszFilePath = NULL);
 	LPCTSTR setName(LPCTSTR lpszName);
-	LPTSTR setPath(LPCTSTR lpszPath);
+	LPTSTR  setBuff(LPCTSTR lpszPath);
+	LPCTSTR getBuff()const;
 	LPCTSTR rmExtension(LPCTSTR lpszFilePath = NULL);
 	LPCTSTR append(LPCTSTR  pszMore=NULL, LPTSTR pszPath =NULL);
 	//

@@ -85,7 +85,7 @@ LPCTSTR CNppFile::getPath(LPCTSTR lpszFilePath)
 	}
 	else
 	{
-		setPath(lpszFilePath);
+		setBuff(lpszFilePath);
 		if(::PathRemoveFileSpec(m_szBuff) )
 		{
 			return m_szBuff;
@@ -93,10 +93,14 @@ LPCTSTR CNppFile::getPath(LPCTSTR lpszFilePath)
 	}
 	return NULL;
 }
-LPTSTR CNppFile::setPath(LPCTSTR lpszPath)
+LPTSTR CNppFile::setBuff(LPCTSTR lpszPath)
 {
 
 	_tcscpy(m_szBuff, lpszPath);
+	return m_szBuff;
+}
+LPCTSTR CNppFile::getBuff()const
+{
 	return m_szBuff;
 }
 LPCTSTR CNppFile::getNameExt(LPCTSTR lpszFilePath)const
@@ -127,7 +131,7 @@ LPCTSTR CNppFile::rmExtension(LPCTSTR lpszFilePath)
 	if( !lpszFilePath )
 		lpszFilePath = m_szFilePath;
 	
-	LPTSTR lpDotPos = _tcsrchr(setPath(lpszFilePath), _T('.'));
+	LPTSTR lpDotPos = _tcsrchr(setBuff(lpszFilePath), _T('.'));
 	if(lpDotPos != NULL)
 	{
 		*lpDotPos = _T('\0');
