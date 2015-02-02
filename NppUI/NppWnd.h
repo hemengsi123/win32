@@ -15,11 +15,11 @@ enum AlignDirect
 //
 // WndProc 窗口进程参数
 // 
-class CNppWnd;
-typedef struct NPP_MSGPARAMS
+class CNppBaseWnd;
+typedef struct NppMsgParams
 {
 	UINT       uMsg;
-	CNppWnd *  pSender;
+	CNppBaseWnd *  pSender;
 	UINT       iCtrlID;
 	CNppString sCtrlName;
 	HWND       hwndFrom;
@@ -58,7 +58,7 @@ typedef struct NPP_MSGPARAMS
 		int    intVal;                      //(lParam)
 		LPARAM lParam;                      //(lParam)
 	};
-}NPP_MSGPARAMS, *NPP_LPMSGPARAMS;
+}NppMsgParams;
 //////////////////////////////////////////////////////////////////////////////
 //
 // MESSAGE_MAP
@@ -73,14 +73,24 @@ enum NppPfnSig
 	pFnSig_msg_cmd,
 	pFnSig_msg_notify,
 };
-typedef BOOL (CNppWnd::*NPP_MSGPROC)(NPP_MSGPARAMS & msgParams); // 
-struct NPP_MSGMAP_ENTRY
+// NppStdMsgPfn
+typedef BOOL (CNppBaseWnd::*NppStdMsgPfn)(NppMsgParams & msg); // 
+
+struct NppMsgMapEntry
 {
 	UINT        uMsg;
 	UINT        iCtrlID; // 控件id
 	CNppString  sCtrlName;
 	UINT        pfnSig;
-	NPP_MSGPROC pfn;
+	NppStdMsgPfn pfn;
+};
+union NppMsgMapFunctions
+{
+	NppStdMsgPfn stdMsgPfn;
+	LRESULT (CNppBaseWnd::* pfn_msg_lwl)(WPARAM wParam, LPARAM lParam);
+	LRESULT (CNppBaseWnd::* pfn_cmd_lwl)(HWND hwndFrom, UINT iCtrlID, UINT uCode);
+	LRESULT (CNppBaseWnd::* pfn_notify_lwl)(int iCtrlID, LPNMHDR lpnmhdr);
+	void (CNppBaseWnd::* pfn_ctrl_vm)(NppMsgParams & msg);
 };
 /*************** how to use **************************************************
 	NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
@@ -100,69 +110,70 @@ struct NPP_MSGMAP_ENTRY
 	NPP_END_MESSAGE_MAP()
 *******************************************************************************/
 #define NPP_BEGIN_MESSAGE_MAP(theClass)                      \
-const NPP_MSGMAP_ENTRY theClass::m_messageEntries[] =        \
+const NppMsgMapEntry theClass::m_messageEntries[] =        \
 {                                                            \
 
 #define NPP_END_MESSAGE_MAP()                                \
-	{0, -1, _T('\0'), pFnSig_end, (NPP_MSGPROC)0 }            \
+	{0, -1, _T('\0'), pFnSig_end, (NppStdMsgPfn)0 }            \
 };
 /************************ 控件消息 ****************************/
 #define NPP_ON_CTRL_MSGMAP(msgCode, memberpFn)                        \
-	{msgCode, -1, _T('\0'), pFnSig_ctrl, (NPP_MSGPROC)&memberpFn},     \
+	{msgCode, -1, _T('\0'), pFnSig_ctrl, (NppStdMsgPfn)&memberpFn},     \
 
 // if msgCode == -1 处理所有消息码, or 处理指定消息码
 #define NPP_ON_CTRL_MSGMAP_ID(ctrlID, msgCode, memberpFn)                   \
-	{msgCode, ctrlID, _T('\0'), pFnSig_ctrl_id, (NPP_MSGPROC)&memberpFn},   \
+	{msgCode, ctrlID, _T('\0'), pFnSig_ctrl_id, (NppStdMsgPfn)&memberpFn},   \
 
 // if msgCode == -1 处理所有消息码, or 处理指定消息码
 #define NPP_ON_CTRL_MSGMAP_NAME(ctrlName, msgCode, memberpFn)               \
-	{msgCode, -1, _T(ctrlName), pFnSig_ctrl_name, (NPP_MSGPROC)&memberpFn},  \
+	{msgCode, -1, _T(ctrlName), pFnSig_ctrl_name, (NppStdMsgPfn)&memberpFn},  \
 
 /********************* 窗口消息 或对话框消息 **********************/
 #define NPP_ON_MSGMAP(msgCode, memberpFn)                          \
-	{msgCode, -1, _T('\0'), pFnSig_msg, (NPP_MSGPROC)&memberpFn},   \
+	{msgCode, -1, _T('\0'), pFnSig_msg, (NppStdMsgPfn)&memberpFn},   \
 
 // if NotifyCode == -1 处理所有通知码, or 处理指定通知码
 #define NPP_ON_MSGMAP_CMD(ctrlID, notifyCode, memberpFn)                       \
-	{notifyCode, ctrlID, _T('\0'), pFnSig_msg_cmd, (NPP_MSGPROC)&memberpFn},   \
+	{notifyCode, ctrlID, _T('\0'), pFnSig_msg_cmd, (NppStdMsgPfn)&memberpFn},   \
 
 // if NotifyCode == -1 处理所有通知码, or 处理指定通知码
 #define NPP_ON_MSGMAP_NOTIFY(ctrlID, notifyCode, memberpFn)                       \
-	{notifyCode, ctrlID, _T('\0'), pFnSig_msg_notify, (NPP_MSGPROC)&memberpFn},   \
+	{notifyCode, ctrlID, _T('\0'), pFnSig_msg_notify, (NppStdMsgPfn)&memberpFn},   \
 
 ///////////////////////////////////////////////////////////////////
 //
-// CNppWnd 窗口基类
+// CNppBaseWnd 窗口基类
 // 
-class CNppWnd
+class CNppBaseWnd
 {
 protected:
 	static LRESULT CALLBACK WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	static const NPP_MSGMAP_ENTRY * FindMessageEntry(const NPP_MSGMAP_ENTRY * msg_entries, const NPP_MSGPARAMS &msgParams);
+	static const NppMsgMapEntry * FindMessageEntry(const NppMsgMapEntry * msg_entries, const NppMsgParams &msgParams);
 	// @brief: 处理通过消息映射的函数
-	BOOL loopDispath(NPP_MSGPARAMS & msgParams);
+	BOOL loopDispath(NppMsgParams & msgParams);
 	// 替换系统默认窗口进程( 通过资源创建control )
 	WNDPROC setWndProc(HWND hWnd = NULL, WNDPROC userWndProc = WndProcWrap);
 	virtual LPCTSTR getWndClassName()const = 0;
 	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
 	virtual void destroy() = 0;
+	virtual BOOL isControl()const = 0;
 public:
-	CNppWnd();
-	virtual ~CNppWnd();
+	CNppBaseWnd();
+	virtual ~CNppBaseWnd();
 	virtual HWND create(/*HWND hwndParent, */LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, const RECT rc, DWORD dwExStyle = 0);
 	virtual HWND create(/*HWND hwndParent, */LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu = NULL, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	bool    registerWndClass();
 	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT handleMessage( struct NPP_MSGPARAMS & msgParams);
-	virtual BOOL    handleCommand( struct NPP_MSGPARAMS & msgParams);
-	virtual BOOL    handleNotify( struct NPP_MSGPARAMS & msgParams);
+	virtual LRESULT handleMessage( struct NppMsgParams & msgParams);
+	virtual BOOL    handleCommand( struct NppMsgParams & msgParams);
+	virtual BOOL    handleNotify( struct NppMsgParams & msgParams);
 	//virtual BOOL    handleCommand(WPARAM wParam, LPARAM lParam);
 	//virtual BOOL    handleNotify(WPARAM wParam, LPARAM lParam);
 	virtual void init(HINSTANCE hInst, HWND parent);
 	virtual void reSizeTo(RECT & rc); // should NEVER be const !!!
 	virtual void redraw() const;
     virtual UINT getClassStyle() const;
-    virtual BOOL isControl()const;
+    
 	void         getClientRect(RECT & rc)const;
     void         getWndRect(RECT & rc) const;
 	int          getWidth() const;
@@ -199,16 +210,34 @@ protected:
 	HWND      m_hParent;
 	HWND      m_hSelf;
 	WNDPROC   m_sysWndProc; // default WndProc
-	NPP_MSGPARAMS m_msgParams;
+	NppMsgParams m_msgParams;
 	//
-	static const NPP_MSGMAP_ENTRY m_messageEntries[];
+	static const NppMsgMapEntry m_messageEntries[];
 };
-
+///////////////////////////////////////////////////////////////////
+//
+// CNppWnd 控件基类
+// 
+class CNppWnd: public CNppBaseWnd
+{
+public:
+	virtual BOOL isControl()const;
+	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT handleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	// If an application processes this message, it should return zero.
+	virtual BOOL handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
+	// The return value is ignored except for notification messages that specify otherwise. 
+	virtual BOOL handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
+	// WM_CREATE
+	virtual LRESULT OnCreate();
+private:
+	
+};
 ///////////////////////////////////////////////////////////////////
 //
 // CNppCtrlWnd 控件基类
 // 
-class CNppCtrlWnd: public CNppWnd
+class CNppCtrlWnd: public CNppBaseWnd
 {
 public:
 	CNppCtrlWnd();
@@ -225,14 +254,14 @@ public:
 	void    setCtrlName(LPCTSTR strName);
 	/*@retrn: if return true 是通过显示调用CreateWindow 创建, or 是通过MAKEINTRESOURCE(id) 创建*/
 	bool    isCreated()const;
-	virtual LRESULT handleMessage(struct NPP_MSGPARAMS & msgParams);
+	virtual LRESULT handleMessage(struct NppMsgParams & msgParams);
 	
 protected:
 	virtual HWND create(DWORD dwStyle = 0, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual BOOL    handleCommand( struct NPP_MSGPARAMS & msgParams);
-	virtual BOOL    handleNotify( struct NPP_MSGPARAMS & msgParams);
+	virtual BOOL    handleCommand( struct NppMsgParams & msgParams);
+	virtual BOOL    handleNotify( struct NppMsgParams & msgParams);
 	
 private:
 	static UINT m_nCtrlCount; // 控件总数量
@@ -246,7 +275,7 @@ private:
 // CNppDlg 对话框基类
 //
 
-class CNppDlg: public CNppWnd
+class CNppDlg: public CNppBaseWnd
 {
 public:
 	CNppDlg();
@@ -259,9 +288,9 @@ public:
 	virtual HWND create(UINT iDlgID, bool bMakeRTL = false);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle = 0, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	virtual BOOL runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT handleMessage( struct NPP_MSGPARAMS & msgParams);
-	virtual BOOL    handleCommand( struct NPP_MSGPARAMS & msgParams);
-	virtual BOOL    handleNotify( struct NPP_MSGPARAMS & msgParams);
+	virtual LRESULT handleMessage( struct NppMsgParams & msgParams);
+	virtual BOOL    handleCommand( struct NppMsgParams & msgParams);
+	virtual BOOL    handleNotify( struct NppMsgParams & msgParams);
 	UINT    doModal();
 	int     doModal(UINT iDlgID);
 protected:

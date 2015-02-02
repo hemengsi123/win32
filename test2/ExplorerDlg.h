@@ -48,9 +48,9 @@ class CExplorerDlg: public CNppDlg//public CNppStaticDialog
 {
 public:
 	BOOL CALLBACK run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT handleMessage( struct NPP_MSGPARAMS & msgParams);
-	virtual BOOL    handleCommand( struct NPP_MSGPARAMS & msgParams);
-	virtual BOOL    handleNotify( struct NPP_MSGPARAMS & msgParams);
+	virtual LRESULT handleMessage( struct NppMsgParams & msgParams);
+	virtual BOOL    handleCommand( struct NppMsgParams & msgParams);
+	virtual BOOL    handleNotify( struct NppMsgParams & msgParams);
 	void initCtrl();
 	void UpdateDevices();
 	void UpdateFolders(void);
@@ -65,9 +65,9 @@ public:
     void GetFolderFullPath(HTREEITEM hItem, LPTSTR lpszFolderFullPath, LPCTSTR lpszChildName);
     bool HaveChildDir(LPCTSTR lpszPath);
 	void UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard = _T("*")/*HTREEITEM hSelectItem*/);
-	BOOL OnClick(NPP_MSGPARAMS & msg);
-	BOOL OnBtnAddAll(NPP_MSGPARAMS & msg);
-	BOOL OnComboxList(NPP_MSGPARAMS & msg);
+	BOOL OnClick(NppMsgParams & msg);
+	BOOL OnBtnAddAll(NppMsgParams & msg);
+	BOOL OnComboxList(NppMsgParams & msg);
 protected:
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;

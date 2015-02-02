@@ -110,7 +110,7 @@ void CExplorerDlg::initCtrl()
 	m_listViewFiles.addItem(_T("test2.txt"), 1);
 	
 }
-LRESULT CExplorerDlg::handleMessage( struct NPP_MSGPARAMS & msgParams)
+LRESULT CExplorerDlg::handleMessage( struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = TRUE;
 	switch(msgParams.uMsg)
@@ -155,7 +155,7 @@ LRESULT CExplorerDlg::handleMessage( struct NPP_MSGPARAMS & msgParams)
 	return CNppDlg::handleMessage(msgParams);
 }
 
-BOOL CExplorerDlg::handleCommand( struct NPP_MSGPARAMS & msg)
+BOOL CExplorerDlg::handleCommand( struct NppMsgParams & msg)
 {
 	msg.lResult = TRUE;
 	
@@ -188,7 +188,7 @@ BOOL CExplorerDlg::handleCommand( struct NPP_MSGPARAMS & msg)
 	
 	return msg.lResult;
 }
-BOOL CExplorerDlg::handleNotify( struct NPP_MSGPARAMS & msgParams)
+BOOL CExplorerDlg::handleNotify( struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = TRUE;
 	LPNMHDR		nmhdr = (LPNMHDR)msgParams.lParam;
@@ -893,7 +893,7 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 	}
 	
 }
-BOOL CExplorerDlg::OnClick(NPP_MSGPARAMS & msg)
+BOOL CExplorerDlg::OnClick(NppMsgParams & msg)
 {
 	//bg_log("m_com = %p, sender = %p, this= %p", &m_comBoFilter, msg.pSender, this);
 	//dbg_log("msg.hwnd = %p, m_self = %p", msg.hWnd, m_comBoFilter.getHSelf());
@@ -906,14 +906,14 @@ BOOL CExplorerDlg::OnClick(NPP_MSGPARAMS & msg)
 	return msg.lResult;
 }
 
-BOOL CExplorerDlg::OnBtnAddAll(NPP_MSGPARAMS & msg)
+BOOL CExplorerDlg::OnBtnAddAll(NppMsgParams & msg)
 {
 	dbg_log(_T("uMsg = %04X, ctrlName = %s, id = %d"), msg.uMsg, msg.sCtrlName.getData(), msg.iCtrlID);
 
 	msg.lResult = TRUE;
 	return msg.lResult;
 }
-BOOL CExplorerDlg::OnComboxList(NPP_MSGPARAMS & msg)
+BOOL CExplorerDlg::OnComboxList(NppMsgParams & msg)
 {
 	dbg_log("combox");
 	dbg_log("uMsg = %04X, ctrlName = %s, id = %d", msg.uMsg, msg.sCtrlName.getData(), msg.iCtrlID);

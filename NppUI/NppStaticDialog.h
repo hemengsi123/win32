@@ -20,10 +20,10 @@ struct DLGTEMPLATEEX {
       // The structure has more fields but are variable length
 } ;
 /**/
-class CNppStaticDialog : public CNppWnd
+class CNppStaticDialog : public CNppBaseWnd
 {
 public :
-	CNppStaticDialog() : CNppWnd() {};
+	CNppStaticDialog() : CNppBaseWnd() {};
 	~CNppStaticDialog(){
 		if (isCreated())
 			destroy();

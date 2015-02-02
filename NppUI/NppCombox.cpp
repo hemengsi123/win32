@@ -32,7 +32,7 @@ HWND CNppCombox::create(DWORD dwStyle, DWORD dwExStyle)
 		COMBOBOXINFO	comboBoxInfo;
 		comboBoxInfo.cbSize = sizeof(COMBOBOXINFO);
 		::SendMessage(hWnd, CB_GETCOMBOBOXINFO, 0, (LPARAM)&comboBoxInfo);
-		CNppWnd::setWndProc(comboBoxInfo.hwndItem);
+		CNppBaseWnd::setWndProc(comboBoxInfo.hwndItem);
 	}
 	return hWnd;
 }
@@ -43,7 +43,7 @@ HWND CNppCombox::create(DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExS
 		COMBOBOXINFO	comboBoxInfo;
 		comboBoxInfo.cbSize = sizeof(COMBOBOXINFO);
 		::SendMessage(m_hSelf, CB_GETCOMBOBOXINFO, 0, (LPARAM)&comboBoxInfo);
-		CNppWnd::setWndProc(comboBoxInfo.hwndItem);
+		CNppBaseWnd::setWndProc(comboBoxInfo.hwndItem);
 	}
 	return m_hSelf;
 }
@@ -84,7 +84,7 @@ LRESULT CNppCombox::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, OUT boo
 	}
 	return bDone;
 }
-LRESULT CNppCombox::handleMessage(struct NPP_MSGPARAMS & msgParams)
+LRESULT CNppCombox::handleMessage(struct NppMsgParams & msgParams)
 {
 /*
 	switch( msgParams.uMsg )

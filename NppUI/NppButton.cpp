@@ -27,7 +27,7 @@ HWND CNppButton::create(LPCTSTR lpszText, DWORD dwStyle, int x, int y, int cx, i
 	setWndProc();
 	return m_hSelf;
 }
-LRESULT CNppButton::handleMessage(struct NPP_MSGPARAMS & msgParams)
+LRESULT CNppButton::handleMessage(struct NppMsgParams & msgParams)
 {
 	return CNppCtrlWnd::handleMessage(msgParams);
 }

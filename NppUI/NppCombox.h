@@ -37,7 +37,7 @@ public :
 	void getComboList(std::vector<tstring> & vStrList);
 	
 	virtual LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, OUT bool & bDone);
-	virtual LRESULT handleMessage(struct NPP_MSGPARAMS & msgParams);
+	virtual LRESULT handleMessage(struct NppMsgParams & msgParams);
 private:
 	void selectComboText(LPCTSTR pszText);
 

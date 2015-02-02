@@ -2,17 +2,17 @@
 #include "NppLib.h"
 #include "NppWnd.h"
 
-CNppWnd::CNppWnd(): m_hInst(NULL), m_hParent(NULL), m_hSelf(NULL), \
+CNppBaseWnd::CNppBaseWnd(): m_hInst(NULL), m_hParent(NULL), m_hSelf(NULL), \
 					m_sysWndProc(::DefWindowProc)
 {
 	
 }
-CNppWnd::~CNppWnd()
+CNppBaseWnd::~CNppBaseWnd()
 {
 	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
 }
 // @brief: 如果多个消息映射有冲突，则只会选择第一次匹配成功的映射，后面的映射会忽略
-const NPP_MSGMAP_ENTRY * CNppWnd::FindMessageEntry(const NPP_MSGMAP_ENTRY * lpMsgMapEntries, const NPP_MSGPARAMS &msgParams)
+const NppMsgMapEntry * CNppBaseWnd::FindMessageEntry(const NppMsgMapEntry * lpMsgMapEntries, const NppMsgParams &msgParams)
 {
 //	if(lpMsgMapEntries == NULL)
 //		return NULL;
@@ -20,7 +20,7 @@ const NPP_MSGMAP_ENTRY * CNppWnd::FindMessageEntry(const NPP_MSGMAP_ENTRY * lpMs
 	ASSERT(lpMsgMapEntries != NULL);
 	UINT uMsg    = msgParams.uMsg;
 	UINT iCtrlID = msgParams.iCtrlID;
-	//const NPP_MSGMAP_ENTRY * lpMsgMapEntry = NULL;
+	//const NppMsgMapEntry * lpMsgMapEntry = NULL;
 	int index = 0;
 	while( lpMsgMapEntries->pfnSig != pFnSig_end )
 	{
@@ -63,9 +63,9 @@ const NPP_MSGMAP_ENTRY * CNppWnd::FindMessageEntry(const NPP_MSGMAP_ENTRY * lpMs
 	return NULL;
 	//return lpMsgMapEntry;
 }
-BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
+BOOL CNppBaseWnd::loopDispath(NppMsgParams & msgParams)
 {
-	const NPP_MSGMAP_ENTRY * lpMsgMapEntry = FindMessageEntry(m_messageEntries, msgParams);
+	const NppMsgMapEntry * lpMsgMapEntry = FindMessageEntry(m_messageEntries, msgParams);
 	if( lpMsgMapEntry != NULL)
 	{
 		// 控件消息映射
@@ -74,7 +74,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 			// 得到父窗口this指针
 			if(m_hParent != NULL)
 			{
-				CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+				CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
 				if( phSelf != NULL)
 				{
 					return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
@@ -91,7 +91,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 				// 得到父窗口this指针
 				if(m_hParent != NULL)
 				{
-					CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+					CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
 					if( phSelf != NULL)
 					{
 						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
@@ -109,7 +109,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 				{
 					if(m_hParent != NULL)
 					{
-						CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+						CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
 						if( phSelf != NULL)
 						{
 							return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
@@ -126,7 +126,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 				{
 					if(m_hParent != NULL)
 					{
-						CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+						CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
 						if( phSelf != NULL)
 						{
 							dbg_log("good jobs");
@@ -159,6 +159,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 					msgParams.iCtrlID  = LOWORD(msgParams.wParam);
 					msgParams.uMsg     = HIWORD(msgParams.wParam);
 					msgParams.hwndFrom = (HWND)msgParams.lParam;
+					/*
 					// 效率??
 					CNppCtrlWnd * phSelf = reinterpret_cast<CNppCtrlWnd*>(::GetWindowLongPtr(msgParams.hwndFrom, GWLP_USERDATA));
 					if(phSelf != NULL)
@@ -170,7 +171,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 					{
 						msgParams.sCtrlName = _T("warning button");
 					}
-					
+					*/
 					return (this->*(lpMsgMapEntry->pfn))(msgParams);
 				}
 				break;
@@ -183,17 +184,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 					msgParams.uMsg     = lpnmhdr->code;
 					msgParams.hwndFrom = lpnmhdr->hwndFrom;
 					msgParams.iCtrlID  = lpnmhdr->idFrom;
-					
-					CNppCtrlWnd * phSelf = reinterpret_cast<CNppCtrlWnd*>(::GetWindowLongPtr(msgParams.hwndFrom, GWLP_USERDATA));
-					if(phSelf != NULL)
-					{
-						msgParams.sCtrlName = phSelf->getCtrlName();
-						msgParams.pSender   = phSelf;
-					}
-					else
-					{
-						msgParams.sCtrlName = _T("warning button");
-					}	
+						
 					return (this->*(lpMsgMapEntry->pfn))(msgParams);
 				}
 				break;
@@ -210,7 +201,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 			// 得到父窗口this指针
 			if(m_hParent != NULL)
 			{
-				CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+				CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
 				if( phSelf != NULL)
 				{
 					return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
@@ -227,7 +218,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 			{
 				if(m_hParent != NULL)
 				{
-					CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+					CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
 					if( phSelf != NULL)
 					{
 						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
@@ -243,7 +234,7 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 			{
 				if(m_hParent != NULL)
 				{
-					CNppWnd * phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
+					CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
 					if( phSelf != NULL)
 					{
 						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
@@ -288,20 +279,20 @@ BOOL CNppWnd::loopDispath(NPP_MSGPARAMS & msgParams)
 	}
 	return FALSE;
 }
-LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK CNppBaseWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	 CNppWnd* phSelf = NULL;
+	 CNppBaseWnd* phSelf = NULL;
     if( uMsg == WM_NCCREATE && lParam != 0)
 	{
         LPCREATESTRUCT lpcs = reinterpret_cast<LPCREATESTRUCT>(lParam);
-        phSelf = static_cast<CNppWnd*>(lpcs->lpCreateParams);
+        phSelf = static_cast<CNppBaseWnd*>(lpcs->lpCreateParams);
         phSelf->m_hSelf      = hwnd;
 		phSelf->m_sysWndProc = ::DefWindowProc;
         ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LPARAM>(phSelf));
     } 
     else
 	{
-        phSelf = reinterpret_cast<CNppWnd*>(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
+        phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
         if( uMsg == WM_NCDESTROY && phSelf != NULL ) 
 		{
             LRESULT lRes = ::CallWindowProc(phSelf->m_sysWndProc, hwnd, uMsg, wParam, lParam);
@@ -318,7 +309,7 @@ LRESULT CALLBACK CNppWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
         return ::DefWindowProc(hwnd, uMsg, wParam, lParam);
  
 }
-WNDPROC CNppWnd::setWndProc(HWND hWnd, WNDPROC userWndProc)
+WNDPROC CNppBaseWnd::setWndProc(HWND hWnd, WNDPROC userWndProc)
 {
 	if( !hWnd )
 		hWnd = m_hSelf;
@@ -327,7 +318,7 @@ WNDPROC CNppWnd::setWndProc(HWND hWnd, WNDPROC userWndProc)
 	ASSERT(m_sysWndProc != NULL);
 	return m_sysWndProc;
 }
-bool CNppWnd::registerWndClass()
+bool CNppBaseWnd::registerWndClass()
 {
 //	if the wndClassName had exist return true, or to register it
 	WNDCLASSEX wndex;
@@ -351,16 +342,16 @@ bool CNppWnd::registerWndClass()
     ASSERT(ret!=NULL || ::GetLastError()==ERROR_CLASS_ALREADY_EXISTS);
     return ret != NULL || ::GetLastError() == ERROR_CLASS_ALREADY_EXISTS;
 }
-UINT CNppWnd::getClassStyle() const
+UINT CNppBaseWnd::getClassStyle() const
 {
     return (CS_VREDRAW | CS_HREDRAW);
 }
-HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, const RECT rc, DWORD dwExStyle)
+HWND CNppBaseWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, const RECT rc, DWORD dwExStyle)
 {
     return create(lpszCaption, dwStyle, hMenu, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, dwExStyle);
 }
 
-HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, int x, int y, int cx, int cy, DWORD dwExStyle)
+HWND CNppBaseWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, int x, int y, int cx, int cy, DWORD dwExStyle)
 {
 	if( !registerWndClass() )
 		return NULL;
@@ -368,7 +359,8 @@ HWND CNppWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, int x, int
     ASSERT(m_hSelf!=NULL);
 	return m_hSelf;
 }
-LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+
+LRESULT CNppBaseWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	m_msgParams.uMsg     = uMsg;
 	m_msgParams.hwndFrom = hwnd;
@@ -415,149 +407,146 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //	return m_sysWndProc(hwnd, uMsg, wParam, lParam); // 出错
 //	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
-LRESULT CNppWnd::handleMessage(struct NPP_MSGPARAMS & msgParams)
+LRESULT CNppBaseWnd::handleMessage(struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = 0;
 	
 	return ::CallWindowProc(m_sysWndProc, msgParams.hwndFrom, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
 }
-BOOL CNppWnd::handleCommand(struct NPP_MSGPARAMS & msgParams)
+BOOL CNppBaseWnd::handleCommand(struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = FALSE;
 	
 	return msgParams.lResult;
 }
-BOOL CNppWnd::handleNotify(struct NPP_MSGPARAMS & msgParams)
+BOOL CNppBaseWnd::handleNotify(struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = FALSE;
 	
 	return msgParams.lResult;
 }
-void CNppWnd::init(HINSTANCE hInst, HWND parent)
+void CNppBaseWnd::init(HINSTANCE hInst, HWND parent)
 {
 	m_hInst = hInst;
 	m_hParent = parent;
 }
-BOOL CNppWnd::showWnd(int nCmdShow )
+BOOL CNppBaseWnd::showWnd(int nCmdShow )
 {
 	return ::ShowWindow(m_hSelf, nCmdShow);
 }
-void CNppWnd::display(bool toShow) const 
+void CNppBaseWnd::display(bool toShow) const 
 {
 	::ShowWindow(m_hSelf, toShow?SW_SHOW:SW_HIDE);
 }
-DWORD CNppWnd::setWndStyle(DWORD nStyle)
+DWORD CNppBaseWnd::setWndStyle(DWORD nStyle)
 {
 	return (DWORD)::SetWindowLongPtr(m_hSelf, GWL_STYLE, nStyle);
 }
-DWORD CNppWnd::getWndStyle() const
+DWORD CNppBaseWnd::getWndStyle() const
 {
 	return (DWORD)::GetWindowLongPtr(m_hSelf, GWL_STYLE);
 }
-DWORD CNppWnd::setWndExStyle(DWORD dwExStyle)
+DWORD CNppBaseWnd::setWndExStyle(DWORD dwExStyle)
 {
 	return (DWORD)::SetWindowLongPtr(m_hSelf, GWL_EXSTYLE, dwExStyle);
 }
-DWORD CNppWnd::getWndExStyle() const
+DWORD CNppBaseWnd::getWndExStyle() const
 {
 	return (DWORD)::GetWindowLongPtr(m_hSelf, GWL_EXSTYLE);
 }
-BOOL CNppWnd::setWndText(LPCTSTR lpszText)
+BOOL CNppBaseWnd::setWndText(LPCTSTR lpszText)
 {
 	if( !lpszText )
 		return FALSE;
 	return ::SetWindowText(m_hSelf, lpszText);
 }
-int  CNppWnd::getWndText(LPTSTR OUT lpString, int IN nMaxCount)
+int  CNppBaseWnd::getWndText(LPTSTR OUT lpString, int IN nMaxCount)
 {
 	return ::GetWindowText(m_hSelf, lpString, nMaxCount);
 }
-void CNppWnd::reSizeTo(RECT & rc) // should NEVER be const !!!
+void CNppBaseWnd::reSizeTo(RECT & rc) // should NEVER be const !!!
 { 
 	//::MoveWindow(m_hSelf, rc.left, rc.top, rc.right, rc.bottom, TRUE);
 	// it should be :
 	::MoveWindow(m_hSelf, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
 	redraw();
 }
-void CNppWnd::redraw() const 
+void CNppBaseWnd::redraw() const 
 {
 	::InvalidateRect(m_hSelf, NULL, TRUE);
 	::UpdateWindow(m_hSelf);
 }
-void CNppWnd::getClientRect(RECT & rc) const 
+void CNppBaseWnd::getClientRect(RECT & rc) const 
 {
 	::GetClientRect(m_hSelf, &rc);
 }
-void CNppWnd::getWndRect(RECT & rc) const 
+void CNppBaseWnd::getWndRect(RECT & rc) const 
 {
 	::GetWindowRect(m_hSelf, &rc);
 }
-int CNppWnd::getWidth() const 
+int CNppBaseWnd::getWidth() const 
 {
 	RECT rc;
 	::GetClientRect(m_hSelf, &rc);
 	return (rc.right - rc.left);
 }
-int CNppWnd::getHeight() const 
+int CNppBaseWnd::getHeight() const 
 {
 	RECT rc;
 	::GetClientRect(m_hSelf, &rc);
 	return (rc.bottom - rc.top);
 }
-BOOL CNppWnd::isVisible() const 
+BOOL CNppBaseWnd::isVisible() const 
 {
 	if (!m_hSelf)
 		return FALSE;
 	else
 		return ::IsWindowVisible(m_hSelf);
 }
-BOOL CNppWnd::isWnd()const
+BOOL CNppBaseWnd::isWnd()const
 {
 	return ::IsWindow(m_hSelf);
 }
-BOOL CNppWnd::isEnabled()const
+BOOL CNppBaseWnd::isEnabled()const
 {
 	return ::IsWindowEnabled(m_hSelf);
 }
-BOOL CNppWnd::isFocus()const
+BOOL CNppBaseWnd::isFocus()const
 {
 	return (::GetFocus() == m_hSelf);
 }
-BOOL CNppWnd::isControl()const
-{
-	return FALSE;
-}
-HWND CNppWnd::getHSelf() const 
+
+HWND CNppBaseWnd::getHSelf() const 
 {
 	return m_hSelf;
 }
-void CNppWnd::setHSelf(HWND hSelf)
+void CNppBaseWnd::setHSelf(HWND hSelf)
 {
 	m_hSelf = hSelf;
 }
-void CNppWnd::getFocus() const 
+void CNppBaseWnd::getFocus() const 
 {
 	::SetFocus(m_hSelf);
 }
-HINSTANCE CNppWnd::getHInst() const
+HINSTANCE CNppBaseWnd::getHInst() const
 {
 	return m_hInst;
 }
-HWND CNppWnd::getParent()const
+HWND CNppBaseWnd::getParent()const
 {
 	return m_hParent;
 }
-LRESULT CNppWnd::sendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CNppBaseWnd::sendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	ASSERT(::IsWindow(m_hSelf));
     return ::SendMessage(m_hSelf, uMsg, wParam, lParam);
 }
-LRESULT CNppWnd::postMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CNppBaseWnd::postMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	ASSERT(::IsWindow(m_hSelf));
     return ::PostMessage(m_hSelf, uMsg, wParam, lParam);
 }
-void CNppWnd::gotoCenter(HWND hParent)
+void CNppBaseWnd::gotoCenter(HWND hParent)
 {
     RECT rc;
 	if( hParent == NULL )
@@ -580,7 +569,7 @@ void CNppWnd::gotoCenter(HWND hParent)
 
 	::SetWindowPos(m_hSelf, HWND_TOP, x, y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, SWP_SHOWWINDOW);
 }
-void CNppWnd::alignTo(HWND hTag, AlignDirect alignFlags1, AlignDirect alignFlags2, int cx, int cy)
+void CNppBaseWnd::alignTo(HWND hTag, AlignDirect alignFlags1, AlignDirect alignFlags2, int cx, int cy)
 {
 	RECT rcTag, rcSelf;
 	POINT ptTo = {0};
@@ -710,6 +699,75 @@ void CNppWnd::alignTo(HWND hTag, AlignDirect alignFlags1, AlignDirect alignFlags
 	}
 	::MoveWindow(m_hSelf, ptTo.x, ptTo.y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, TRUE);
 }
+///////////////////////////////////////////////////////////////////
+//
+// CNppBaseWnd 窗口基类
+// 
+BOOL CNppWnd::isControl()const
+{
+	return FALSE;
+}
+LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	m_msgParams.uMsg     = uMsg;
+	m_msgParams.hwndFrom = hwnd;
+	m_msgParams.iCtrlID  = 0;
+	//m_msgParams.sCtrlName = _T('\0')
+	m_msgParams.pSender  = this;
+	m_msgParams.wParam   = wParam;
+	m_msgParams.lParam   = lParam;
+	m_msgParams.lResult  = 0;
+
+	loopDispath(m_msgParams);
+	
+	switch(uMsg)
+	{
+	case WM_COMMAND:
+	{
+		HWND hwndFrom = (HWND)lParam;   // handle to control (HWND)
+		// The low-order word specifies the identifier of the menu item, control, or accelerator
+		UINT iCtrlID  = LOWORD(wParam); 
+		// The high-order word specifies the notification code if the message is 
+		// from a control. If the message is from an accelerator, this value is 1. 
+		// If the message is from a menu, this value is zero. 
+		UINT uMsg     = HIWORD(wParam);
+		//If an application processes this message, it should return zero. 
+		if( handleCommand(iCtrlID, uMsg, hwndFrom) )
+			return 0;
+		break;
+	}
+	case WM_NOTIFY:
+	{
+		LPNMHDR lpnmhdr      = (LPNMHDR)lParam;
+		UINT iCtrlID  = lpnmhdr->idFrom;
+		UINT uMsg     = lpnmhdr->code;
+		// The return value is ignored except for notification messages that specify otherwise. 
+		if( handleNotify(iCtrlID, uMsg, lpnmhdr) )
+			return 0;
+		break;
+	}
+	default:
+		break;
+	}
+	return handleMessage(uMsg, wParam, lParam);
+//	return m_sysWndProc(hwnd, uMsg, wParam, lParam); // 出错
+//	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
+}
+LRESULT CNppWnd::handleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+
+	return ::CallWindowProc(m_sysWndProc, m_hSelf, uMsg, wParam, lParam);
+}
+BOOL CNppWnd::handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
+{
+	
+	return FALSE;
+}
+BOOL CNppWnd::handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
+{
+	
+	return FALSE;
+}
 ////////////////////////////////////////////////////////////////////////////////
 // 
 // CNppCtrlWnd
@@ -731,7 +789,7 @@ UINT CNppCtrlWnd::getCtrlCount()
 }
 void CNppCtrlWnd::init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName)
 {
-	CNppWnd::init(hInst, hParent);
+	CNppBaseWnd::init(hInst, hParent);
 	m_iCtrlID   = iCtrlID;
 	m_sCtrlName = sCtrlName;
 }
@@ -741,7 +799,7 @@ HWND CNppCtrlWnd::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 	if(hWnd)
 	{
 //		setHSelf(hWnd);
-//		CNppWnd::setWndProc();
+//		CNppBaseWnd::setWndProc();
 		m_hSelf = hWnd;
 		if(lpszCaption )
 		{
@@ -768,7 +826,7 @@ HWND CNppCtrlWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int c
 {
 	m_bIsCreated = true;
 	dwStyle |= (WS_CHILD | WS_VISIBLE);
-	return CNppWnd::create(lpszCaption, dwStyle, (HMENU)m_iCtrlID, x, y, cx, cy, dwExStyle);
+	return CNppBaseWnd::create(lpszCaption, dwStyle, (HMENU)m_iCtrlID, x, y, cx, cy, dwExStyle);
 }
 LRESULT CNppCtrlWnd::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
 {
@@ -791,18 +849,18 @@ LRESULT CNppCtrlWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	
 	return this->handleMessage(m_msgParams);
 }
-LRESULT CNppCtrlWnd::handleMessage(struct NPP_MSGPARAMS & msgParams)
+LRESULT CNppCtrlWnd::handleMessage(struct NppMsgParams & msgParams)
 {
 
 	return ::CallWindowProc(m_sysWndProc, msgParams.hwndFrom, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
 }
-BOOL CNppCtrlWnd::handleCommand(struct NPP_MSGPARAMS & msgParams)
+BOOL CNppCtrlWnd::handleCommand(struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = FALSE;
 	
 	return msgParams.lResult;
 }
-BOOL CNppCtrlWnd::handleNotify(struct NPP_MSGPARAMS & msgParams)
+BOOL CNppCtrlWnd::handleNotify(struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = FALSE;
 	
@@ -944,7 +1002,7 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	//return ::DefDlgProc(hDlg, uMsg, wParam, lParam);
 
 }
-LRESULT CNppDlg::handleMessage(struct NPP_MSGPARAMS & msgParams)
+LRESULT CNppDlg::handleMessage(struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = TRUE;
 	switch(msgParams.uMsg)
@@ -965,13 +1023,13 @@ LRESULT CNppDlg::handleMessage(struct NPP_MSGPARAMS & msgParams)
 	}
 	return msgParams.lResult;
 }
-BOOL CNppDlg::handleCommand(struct NPP_MSGPARAMS & msgParams)
+BOOL CNppDlg::handleCommand(struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = FALSE;
 	
 	return msgParams.lResult;
 }
-BOOL CNppDlg::handleNotify(struct NPP_MSGPARAMS & msgParams)
+BOOL CNppDlg::handleNotify(struct NppMsgParams & msgParams)
 {
 	msgParams.lResult = FALSE;
 	
@@ -979,7 +1037,7 @@ BOOL CNppDlg::handleNotify(struct NPP_MSGPARAMS & msgParams)
 }
 void CNppDlg::init(HINSTANCE hInst, HWND hParent)
 {
-	CNppWnd::init(hInst, hParent);
+	CNppBaseWnd::init(hInst, hParent);
 }
 HWND CNppDlg::create(UINT iDlgID, bool bmakeRTL)
 {
@@ -1039,7 +1097,7 @@ HWND CNppDlg::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, i
 //#endif
 	m_hSelf= ::CreateDialogIndirectParam(m_hInst, (LPCDLGTEMPLATE)&dlgTemp, m_hParent, DlgProcWrap, (LPARAM)this);
 	ASSERT(m_hSelf != NULL);
-	CNppWnd::setWndText(lpszCaption);
+	CNppBaseWnd::setWndText(lpszCaption);
 	display();
 	//delete []ptmp;
 	return m_hSelf;

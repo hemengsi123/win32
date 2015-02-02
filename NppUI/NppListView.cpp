@@ -111,7 +111,7 @@ void CNppListView::setFocusItem(int iItem)
 }
 void CNppListView::hiddenHeader()
 {
-	CNppWnd::setWndStyle(getWndStyle() | LVS_NOCOLUMNHEADER);
+	CNppBaseWnd::setWndStyle(getWndStyle() | LVS_NOCOLUMNHEADER);
 }
 int CNppListView::addItem(LPCTSTR  lpszText, int iItem, int iIcon)
 {
