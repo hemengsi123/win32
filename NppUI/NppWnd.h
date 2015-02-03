@@ -88,9 +88,7 @@ union NppMsgMapFunctions
 {
 	NppStdMsgPfn stdMsgPfn;
 	LRESULT (CNppBaseWnd::* pfn_msg_lwl)(WPARAM wParam, LPARAM lParam);
-	LRESULT (CNppBaseWnd::* pfn_cmd_lwl)(HWND hwndFrom, UINT iCtrlID, UINT uCode);
-	LRESULT (CNppBaseWnd::* pfn_notify_lwl)(int iCtrlID, LPNMHDR lpnmhdr);
-	void (CNppBaseWnd::* pfn_ctrl_vm)(NppMsgParams & msg);
+	BOOL (CNppBaseWnd::* pfn_msg_biml)(UINT iCtrlID, UINT uCode, LPARAM lParam);
 };
 /*************** how to use **************************************************
 	NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
@@ -147,33 +145,30 @@ const NppMsgMapEntry theClass::m_messageEntries[] =        \
 class CNppBaseWnd
 {
 protected:
-	static LRESULT CALLBACK WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	static const NppMsgMapEntry * FindMessageEntry(const NppMsgMapEntry * msg_entries, const NppMsgParams &msgParams);
-	// @brief: 处理通过消息映射的函数
-	BOOL loopDispath(NppMsgParams & msgParams);
-	// 替换系统默认窗口进程( 通过资源创建control )
-	WNDPROC setWndProc(HWND hWnd = NULL, WNDPROC userWndProc = WndProcWrap);
 	virtual LPCTSTR getWndClassName()const = 0;
 	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
 	virtual void destroy() = 0;
 	virtual BOOL isControl()const = 0;
+	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
+	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
+	static LRESULT CALLBACK WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	BOOL    registerWndClass();
+	/************************ 消息映射支持 **************************/
+    const NppMsgMapEntry * findMessageEntry(const NppMsgMapEntry * msg_entries, const NppMsgParams &msgParams);
+	// @brief: 处理通过消息映射的函数
+	BOOL loopDispath(NppMsgParams & msgParams);
+	/************************ end **********************************/
+	// 替换系统默认窗口进程( 通过资源创建control )
+	WNDPROC setWndProc(HWND hWnd = NULL, WNDPROC userWndProc = WndProcWrap);
 public:
 	CNppBaseWnd();
 	virtual ~CNppBaseWnd();
 	virtual HWND create(/*HWND hwndParent, */LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, const RECT rc, DWORD dwExStyle = 0);
 	virtual HWND create(/*HWND hwndParent, */LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu = NULL, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
-	bool    registerWndClass();
-	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT handleMessage( struct NppMsgParams & msgParams);
-	virtual BOOL    handleCommand( struct NppMsgParams & msgParams);
-	virtual BOOL    handleNotify( struct NppMsgParams & msgParams);
-	//virtual BOOL    handleCommand(WPARAM wParam, LPARAM lParam);
-	//virtual BOOL    handleNotify(WPARAM wParam, LPARAM lParam);
 	virtual void init(HINSTANCE hInst, HWND parent);
 	virtual void reSizeTo(RECT & rc); // should NEVER be const !!!
 	virtual void redraw() const;
     virtual UINT getClassStyle() const;
-    
 	void         getClientRect(RECT & rc)const;
     void         getWndRect(RECT & rc) const;
 	int          getWidth() const;
@@ -223,13 +218,13 @@ class CNppWnd: public CNppBaseWnd
 public:
 	virtual BOOL isControl()const;
 	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT handleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	// If an application processes this message, it should return zero.
 	virtual BOOL handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
 	// The return value is ignored except for notification messages that specify otherwise. 
 	virtual BOOL handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
 	// WM_CREATE
-	virtual LRESULT OnCreate();
+	//virtual LRESULT OnCreate();
 private:
 	
 };
@@ -244,7 +239,7 @@ public:
 	~CNppCtrlWnd();
 	static  UINT getCtrlCount();
 	virtual void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
-	virtual LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
+	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual BOOL isControl()const;
 	virtual void destroy();
 	/*@retrn: if id invalid return 0, or nozero*/
@@ -253,15 +248,11 @@ public:
 	LPCTSTR getCtrlName()const;
 	void    setCtrlName(LPCTSTR strName);
 	/*@retrn: if return true 是通过显示调用CreateWindow 创建, or 是通过MAKEINTRESOURCE(id) 创建*/
-	bool    isCreated()const;
-	virtual LRESULT handleMessage(struct NppMsgParams & msgParams);
-	
+	bool    isCreated()const;	
 protected:
 	virtual HWND create(DWORD dwStyle = 0, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual BOOL    handleCommand( struct NppMsgParams & msgParams);
-	virtual BOOL    handleNotify( struct NppMsgParams & msgParams);
 	
 private:
 	static UINT m_nCtrlCount; // 控件总数量
@@ -288,9 +279,12 @@ public:
 	virtual HWND create(UINT iDlgID, bool bMakeRTL = false);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle = 0, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	virtual BOOL runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT handleMessage( struct NppMsgParams & msgParams);
-	virtual BOOL    handleCommand( struct NppMsgParams & msgParams);
-	virtual BOOL    handleNotify( struct NppMsgParams & msgParams);
+	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	// If an application processes this message, it should return zero.
+	virtual BOOL handleCommand(UINT iCtrlID, UINT uCode, HWND hwndFrom);
+	// The return value is ignored except for notification messages that specify otherwise. 
+	virtual BOOL handleNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr);
+	
 	UINT    doModal();
 	int     doModal(UINT iDlgID);
 protected:
@@ -299,7 +293,7 @@ protected:
 private:
 	bool m_bIsModel;
 	UINT m_iDlgID;
-	//DLGPROC m_sysDlgProc;
+	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
                                                        \
 

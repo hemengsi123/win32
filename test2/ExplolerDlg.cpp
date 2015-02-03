@@ -110,10 +110,9 @@ void CExplorerDlg::initCtrl()
 	m_listViewFiles.addItem(_T("test2.txt"), 1);
 	
 }
-LRESULT CExplorerDlg::handleMessage( struct NppMsgParams & msgParams)
+LRESULT CExplorerDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	msgParams.lResult = TRUE;
-	switch(msgParams.uMsg)
+	switch(uMsg)
 	{
 	// OnInitDlg
 	case WM_INITDIALOG:
@@ -149,22 +148,18 @@ LRESULT CExplorerDlg::handleMessage( struct NppMsgParams & msgParams)
 		return TRUE;
 	}
 	default:
-		msgParams.lResult = FALSE;
 		break;
 	}
-	return CNppDlg::handleMessage(msgParams);
+	return CNppDlg::handleMessage(hwnd, uMsg, wParam, lParam);
 }
 
-BOOL CExplorerDlg::handleCommand( struct NppMsgParams & msg)
+BOOL CExplorerDlg::handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 {
-	msg.lResult = TRUE;
-	
-	if(msg.cmdCtrl.iID == IDC_BTN_ADD )
+	if( iCtrlID== IDC_BTN_ADD )
 	{
-		if(msg.cmdCtrl.uCode == BN_CLICKED)
+		if(uMsg == BN_CLICKED)
 		{
 			dbg_log(_T("BN_DBLCLK"));
-			dbg_log("%s msg.iCtrlID = %d, uMsg = %d", msg.sCtrlName.getData(), msg.iCtrlID, msg.uMsg);
 			/*
 			static CNppDlg nppDlg;
 			nppDlg.init(m_hInst, m_hSelf);
@@ -173,29 +168,28 @@ BOOL CExplorerDlg::handleCommand( struct NppMsgParams & msg)
 			nppDlg.doModal();*/
 		}
 	}
-	else if(msg.cmdCtrl.iID == IDC_CBO_FILTER)
+	else if(iCtrlID == IDC_CBO_FILTER)
 	{
-		if( msg.cmdCtrl.uCode == CBN_EDITUPDATE)
+		if( uMsg == CBN_EDITUPDATE)
 		{
 
 		}
-		else if(msg.cmdCtrl.uCode == CBN_EDITCHANGE)
+		else if( uMsg == CBN_EDITCHANGE)
 		{
 
 		}
 	
 	}
 	
-	return msg.lResult;
+	return TRUE;
 }
-BOOL CExplorerDlg::handleNotify( struct NppMsgParams & msgParams)
+BOOL CExplorerDlg::handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 {
-	msgParams.lResult = TRUE;
-	LPNMHDR		nmhdr = (LPNMHDR)msgParams.lParam;
-	
-	if (nmhdr->hwndFrom == m_treeView2.getHSelf())
+	BOOL bDone = FALSE;
+	if (lpNmhdr->hwndFrom == m_treeView2.getHSelf())
 	{
-		switch (nmhdr->code)
+		bDone = TRUE;
+		switch (lpNmhdr->code)
 		{
 			case NM_RCLICK:
 			{
@@ -205,7 +199,7 @@ BOOL CExplorerDlg::handleNotify( struct NppMsgParams & msgParams)
 			case TVN_SELCHANGED:
 			{
 				dbg_log(_T("TVN_SELCHANGED"));
-				TVITEM	tvi	= (TVITEM)((LPNMTREEVIEW)msgParams.lParam)->itemNew;
+				TVITEM	tvi	= (TVITEM)((LPNMTREEVIEW)lpNmhdr)->itemNew;
 				TCHAR szItemPath[MAX_PATH] = {0};
 				if( m_treeView2.isSelected(tvi.hItem) )
 				{
@@ -218,7 +212,7 @@ BOOL CExplorerDlg::handleNotify( struct NppMsgParams & msgParams)
 			case TVN_ITEMEXPANDING:
 			{
 				
-				TVITEM	tvi	= (TVITEM)((LPNMTREEVIEW)msgParams.lParam)->itemNew;
+				TVITEM	tvi	= (TVITEM)((LPNMTREEVIEW)lpNmhdr)->itemNew;
 				if (!(tvi.state & TVIS_EXPANDED))
 				{
 					dbg_log(_T("TVN_ITEMEXPANDING not "));
@@ -240,7 +234,7 @@ BOOL CExplorerDlg::handleNotify( struct NppMsgParams & msgParams)
 			}
 			case TVN_KEYDOWN:
 			{
-				if (((LPNMTVKEYDOWN)msgParams.lParam)->wVKey == VK_RIGHT)
+				if (((LPNMTVKEYDOWN)lpNmhdr)->wVKey == VK_RIGHT)
 				{
 					dbg_log(_T("TVN_KEYDOWN"));
 				}
@@ -248,14 +242,16 @@ BOOL CExplorerDlg::handleNotify( struct NppMsgParams & msgParams)
 				return TRUE;
 			}
 			default:
+				bDone = FALSE;
 				break;
 		}
 	}
-	else if(nmhdr->hwndFrom == m_filterCtrl)
+	else if(lpNmhdr->hwndFrom == m_filterCtrl)
 	{
+		bDone = TRUE;
 		dbg_log(_T("m_filterCtrl NM_RCLICK"));
 	}
-	return msgParams.lResult;
+	return bDone;
 }
 BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {

@@ -18,11 +18,10 @@ public :
 	virtual ~CNppTreeView(){};
 	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
-	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
 	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	HWND create(DWORD dwStyle =  TVS_HASLINES, DWORD dwExStyle = 0);
 	HWND create(DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
-	bool getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize = MAX_PATH);
+	BOOL getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize = MAX_PATH);
 	BOOL getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, LPINT piOverlay);
 	void getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconSelected = NULL, LPINT iIconOverlayed = NULL);
 	HIMAGELIST setImageList(HIMAGELIST himl, int iImgLstType = TVSIL_NORMAL);
@@ -48,8 +47,8 @@ public :
 	void setParam(HTREEITEM hItem, LPARAM lParam);
     int getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath);
 // protected:
-	HTREEITEM insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, int haveChildren = true, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL, bool bHidden = false);
-	BOOL updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren = true, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL, bool bHidden = false, bool delChildren = true); 
+	HTREEITEM insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, int haveChildren = true, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL, BOOL bHidden = false);
+	BOOL updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren = true, int nImage = 0, int nSelectedImage = 0, int nOverlayedImage = 0, LPARAM lParam = NULL, BOOL bHidden = false, BOOL delChildren = true); 
 private :
 	HIMAGELIST _hImglst;
 	

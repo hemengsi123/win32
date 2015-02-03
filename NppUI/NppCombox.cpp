@@ -84,39 +84,6 @@ LRESULT CNppCombox::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, OUT boo
 	}
 	return bDone;
 }
-LRESULT CNppCombox::handleMessage(struct NppMsgParams & msgParams)
-{
-/*
-	switch( msgParams.uMsg )
-	{
-		case WM_KEYUP:
-		{
-			// 13 ENTER
-			if (msgParams.wParam == 13)
-			{
-				LPTSTR	pszText	= (LPTSTR)new TCHAR[MAX_PATH];
-				dbg_log(_T("uMsg = %04x, ctrlID = %d"), msgParams.uMsg, msgParams.ctrlID);
-				getText(pszText);
-				addText(pszText);
-				::SendMessage(::GetParent(getHSelf()), EXM_CHANGECOMBO, 0, 0);
-				delete [] pszText;
-				return TRUE;
-			}
-//			dbg_log(_T("combo hwnd = 0x%08X"), getHSelf());
-//			::SendMessage(::GetParent(getHSelf()), uMsg, wParam, lParam);
-			break;
-		}
-		case WM_DESTROY:
-		{
-			m_comboItems.clear();
-			break;
-		}
-		default :
-			break;
-	}*/
-	return CNppCtrlWnd::handleMessage(msgParams);
-}
-
 void CNppCombox::addText(LPCTSTR pszText)
 {
 	/* find item */

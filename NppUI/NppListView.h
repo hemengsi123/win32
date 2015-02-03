@@ -60,7 +60,6 @@ protected:
 	WNDPROC setHeaderWndProc(WNDPROC headerProc = headerWndProcWrap);
 	static LRESULT CALLBACK headerWndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	LRESULT runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bDone);
 };
 
 

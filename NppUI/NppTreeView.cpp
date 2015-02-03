@@ -20,19 +20,12 @@ HWND CNppTreeView::create(DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwE
 {
 	return CNppCtrlWnd::create(NULL, dwStyle, x, y, cx, cy, dwExStyle);
 }
-LRESULT CNppTreeView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
-{
-	bDone = false;
-	
-	return CNppCtrlWnd::runCtrlProc(uMsg, wParam, lParam, bDone);
-}
-
 HIMAGELIST CNppTreeView::setImageList(HIMAGELIST himl, int iImgLstType)
 {
 //	::SendMessage(m_hSelf, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)himl);
 	return TreeView_SetImageList(m_hSelf, himl, iImgLstType);
 }
-bool CNppTreeView::getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
+BOOL CNppTreeView::getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
 {
 	TVITEM			tvi;
 	tvi.mask		= TVIF_TEXT;
@@ -41,7 +34,7 @@ bool CNppTreeView::getText(HTREEITEM hItem, LPTSTR szBuf, int bufSize)
 	tvi.cchTextMax	= bufSize;
 	
 //	return TreeView_GetItem(m_hSelf, &tvi);
-	return static_cast<bool>(::SendMessage(m_hSelf, TVM_GETITEM, 0, (LPARAM)(TV_ITEM *)&tvi));
+	return ::SendMessage(m_hSelf, TVM_GETITEM, 0, (LPARAM)(TV_ITEM *)&tvi);
 }
 HTREEITEM CNppTreeView::getSpecItem(HTREEITEM hitem, UINT flag)
 {
@@ -52,7 +45,7 @@ HTREEITEM CNppTreeView::getNext(HTREEITEM hitem)
 	return getSpecItem(hitem, TVGN_NEXT);
 }
 
-HTREEITEM CNppTreeView::insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter, int haveChildren, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, bool bHidden)
+HTREEITEM CNppTreeView::insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITEM hInsertAfter, int haveChildren, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, BOOL bHidden)
 {
 	TV_INSERTSTRUCT tvis;
 
@@ -85,7 +78,7 @@ HTREEITEM CNppTreeView::insertItem(LPCTSTR lpszItem, HTREEITEM hParent, HTREEITE
 	return (HTREEITEM)::SendMessage(m_hSelf, TVM_INSERTITEM, 0, (LPARAM)(LPTV_INSERTSTRUCT)(&tvis));
 }
 
-BOOL CNppTreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, bool bHidden, bool bDelChildren)
+BOOL CNppTreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveChildren, int nImage, int nSelectedImage, int nOverlayedImage, LPARAM lParam, BOOL bHidden, BOOL bDelChildren)
 {
 	TVITEM		item;
 	::ZeroMemory(&item, sizeof(TVITEM));
@@ -126,7 +119,7 @@ BOOL CNppTreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveCh
 	}
 
 	// return TreeView_SetItem(m_hSelf, &item);
-	return (BOOL)::SendMessage(m_hSelf, TVM_SETITEM, 0, (LPARAM)(const TV_ITEM *)(&item));
+	return ::SendMessage(m_hSelf, TVM_SETITEM, 0, (LPARAM)(const TV_ITEM *)(&item));
 }
 
 BOOL CNppTreeView::getItemIcon(HTREEITEM hItem, LPINT piIcon, LPINT piSelected, LPINT piOverlay)
@@ -154,7 +147,7 @@ void CNppTreeView::getFileIcon(LPCTSTR lpszFile, LPINT iIconNormal, LPINT iIconS
 	if( iIconNormal == NULL)
 		return;
 	SHFILEINFO sfi = {0};
-	bool isDir     = false;
+	BOOL isDir     = false;
 	int tmpIconOverlayed = iIconOverlayed ? SHGFI_OVERLAYINDEX : 0;
 	// TCHAR			TEMP[MAX_PATH];
 	CNppFile tmpFile(lpszFile);

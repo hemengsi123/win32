@@ -12,18 +12,15 @@ CNppBaseWnd::~CNppBaseWnd()
 	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
 }
 // @brief: 如果多个消息映射有冲突，则只会选择第一次匹配成功的映射，后面的映射会忽略
-const NppMsgMapEntry * CNppBaseWnd::FindMessageEntry(const NppMsgMapEntry * lpMsgMapEntries, const NppMsgParams &msgParams)
+const NppMsgMapEntry * CNppBaseWnd::findMessageEntry(const NppMsgMapEntry * lpMsgMapEntries, const NppMsgParams &msgParams)
 {
-//	if(lpMsgMapEntries == NULL)
-//		return NULL;
-
 	ASSERT(lpMsgMapEntries != NULL);
 	UINT uMsg    = msgParams.uMsg;
 	UINT iCtrlID = msgParams.iCtrlID;
-	//const NppMsgMapEntry * lpMsgMapEntry = NULL;
-	int index = 0;
+
 	while( lpMsgMapEntries->pfnSig != pFnSig_end )
 	{
+
 		if(msgParams.uMsg == WM_COMMAND && lpMsgMapEntries->pfnSig == pFnSig_msg_cmd)
 		{
 			uMsg    = HIWORD(msgParams.wParam);
@@ -39,7 +36,7 @@ const NppMsgMapEntry * CNppBaseWnd::FindMessageEntry(const NppMsgMapEntry * lpMs
 			uMsg    = msgParams.uMsg;
 			iCtrlID = msgParams.iCtrlID;
 		}
-		
+	
 		if( ( lpMsgMapEntries->uMsg == uMsg && lpMsgMapEntries->iCtrlID == -1 )
 		 && ( lpMsgMapEntries->pfn != NULL) )
 		{
@@ -61,13 +58,14 @@ const NppMsgMapEntry * CNppBaseWnd::FindMessageEntry(const NppMsgMapEntry * lpMs
 		++lpMsgMapEntries;
 	}
 	return NULL;
-	//return lpMsgMapEntry;
 }
 BOOL CNppBaseWnd::loopDispath(NppMsgParams & msgParams)
 {
-	const NppMsgMapEntry * lpMsgMapEntry = FindMessageEntry(m_messageEntries, msgParams);
+	const NppMsgMapEntry * lpMsgMapEntry = findMessageEntry(m_messageEntries, msgParams);
+	union NppMsgMapFunctions msgMapFunc;
 	if( lpMsgMapEntry != NULL)
 	{
+		//msgMapFunc.stdMsgPfn = lpMsgMapEntry->pfn;
 		// 控件消息映射
 		if(lpMsgMapEntry->pfnSig < pFnSig_msg )
 		{
@@ -83,64 +81,6 @@ BOOL CNppBaseWnd::loopDispath(NppMsgParams & msgParams)
 			// @brief: this 指向控件地址，所以在函数 => lpMsgMapEntry->pfn(this, msgParams)
 			// 所以在pfn中使用this指针指向的是对应控件地址
 			return (this->*(lpMsgMapEntry->pfn))(msgParams);
-		/*
-			switch(lpMsgMapEntry->pfnSig)
-			{
-			case pFnSig_ctrl:
-			{
-				// 得到父窗口this指针
-				if(m_hParent != NULL)
-				{
-					CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
-					if( phSelf != NULL)
-					{
-						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
-					}
-				}
-				// @brief: this 指向控件地址，所以在函数 => lpMsgMapEntry->pfn(this, msgParams)
-				// 所以在pfn中使用this指针指向的是对应控件地址
-				return (this->*(lpMsgMapEntry->pfn))(msgParams);
-				break;
-			}
-			case pFnSig_ctrl_id:
-			{
-				if( (lpMsgMapEntry->iCtrlID == msgParams.iCtrlID ) && 
-					(lpMsgMapEntry->uMsg == msgParams.uMsg || lpMsgMapEntry->uMsg == -1) )
-				{
-					if(m_hParent != NULL)
-					{
-						CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
-						if( phSelf != NULL)
-						{
-							return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
-						}
-					}
-					return (this->*(lpMsgMapEntry->pfn))(msgParams);
-				}
-				break;
-			}
-			case pFnSig_ctrl_name:
-			{
-				if( (lpMsgMapEntry->sCtrlName == msgParams.sCtrlName ) && 
-					( lpMsgMapEntry->uMsg == msgParams.uMsg || lpMsgMapEntry->uMsg == -1) )
-				{
-					if(m_hParent != NULL)
-					{
-						CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
-						if( phSelf != NULL)
-						{
-							dbg_log("good jobs");
-							return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
-						}
-					}
-					return (this->*(lpMsgMapEntry->pfn))(msgParams);
-				}
-				break;
-			}
-			default:
-				break;
-			}
-		*/
 		}
 		else  // 主框架消息映射
 		{
@@ -149,11 +89,11 @@ BOOL CNppBaseWnd::loopDispath(NppMsgParams & msgParams)
 			case pFnSig_msg:
 			{
 				return (this->*(lpMsgMapEntry->pfn))(msgParams);
+				// return (this->*(msgMapFunc.pfn_msg_lwl))(msgParams.wParam, msgParams.lParam);
 				break;
 			}
 			case pFnSig_msg_cmd:
 			{
-				
 				if(msgParams.uMsg == WM_COMMAND)
 				{
 					msgParams.iCtrlID  = LOWORD(msgParams.wParam);
@@ -173,6 +113,7 @@ BOOL CNppBaseWnd::loopDispath(NppMsgParams & msgParams)
 					}
 					*/
 					return (this->*(lpMsgMapEntry->pfn))(msgParams);
+					// return (this->*(msgMapFunc.pfn_msg_biml))(msgParams.iCtrlID, msgParams.uMsg, msgParams.lParam);
 				}
 				break;
 			}
@@ -186,6 +127,7 @@ BOOL CNppBaseWnd::loopDispath(NppMsgParams & msgParams)
 					msgParams.iCtrlID  = lpnmhdr->idFrom;
 						
 					return (this->*(lpMsgMapEntry->pfn))(msgParams);
+					// return (this->*(msgMapFunc.pfn_msg_biml))(msgParams.iCtrlID, msgParams.uMsg, msgParams.lParam);
 				}
 				break;
 			}
@@ -193,89 +135,6 @@ BOOL CNppBaseWnd::loopDispath(NppMsgParams & msgParams)
 				break;
 			}
 		}
-		/*
-		switch(lpMsgMapEntry->pfnSig)
-		{
-		case pFnSig_ctrl:
-		{
-			// 得到父窗口this指针
-			if(m_hParent != NULL)
-			{
-				CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
-				if( phSelf != NULL)
-				{
-					return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
-				}
-			}
-			// @brief: this 指向控件地址，所以在函数 => lpMsgMapEntry->pfn(this, msgParams)
-			// 所以在pfn中使用this指针指向的是对应控件地址
-			return (this->*(lpMsgMapEntry->pfn))(msgParams);
-			break;
-		}
-		case pFnSig_ctrl_id:
-		{
-			if(lpMsgMapEntry->iCtrlID == msgParams.iCtrlID)
-			{
-				if(m_hParent != NULL)
-				{
-					CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
-					if( phSelf != NULL)
-					{
-						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
-					}
-				}
-				return (this->*(lpMsgMapEntry->pfn))(msgParams);
-			}
-			break;
-		}
-		case pFnSig_ctrl_name:
-		{
-			if(lpMsgMapEntry->sCtrlName == msgParams.sCtrlName)
-			{
-				if(m_hParent != NULL)
-				{
-					CNppBaseWnd * phSelf = reinterpret_cast<CNppBaseWnd*>(::GetWindowLongPtr(m_hParent, GWLP_USERDATA));
-					if( phSelf != NULL)
-					{
-						return (phSelf->*(lpMsgMapEntry->pfn))(msgParams);
-					}
-				}
-				return (this->*(lpMsgMapEntry->pfn))(msgParams);
-			}
-			break;
-		}
-		case pFnSig_msg:
-		{
-			return (this->*(lpMsgMapEntry->pfn))(msgParams);
-			break;
-		}
-		case pFnSig_msg_cmd:
-		{
-			if(msgParams.uMsg == WM_COMMAND)
-			{
-				msgParams.iCtrlID  = LOWORD(msgParams.wParam);
-				msgParams.uMsg     = HIWORD(msgParams.wParam);
-				msgParams.hwndFrom = (HWND)msgParams.lParam; 
-				return (this->*(lpMsgMapEntry->pfn))(msgParams);
-			}
-			break;
-		}
-		case pFnSig_msg_notify:
-		{
-			if(msgParams.uMsg == WM_NOTIFY)
-			{
-				LPNMHDR lpnmhdr    = (LPNMHDR)msgParams.lParam;
-				msgParams.uMsg     = lpnmhdr->code;
-				msgParams.hwndFrom = lpnmhdr->hwndFrom;
-				msgParams.iCtrlID  = lpnmhdr->idFrom;
-				return (this->*(lpMsgMapEntry->pfn))(msgParams);
-			}
-			break;
-		}
-		default:
-			break;
-		}
-		*/
 	}
 	return FALSE;
 }
@@ -318,7 +177,7 @@ WNDPROC CNppBaseWnd::setWndProc(HWND hWnd, WNDPROC userWndProc)
 	ASSERT(m_sysWndProc != NULL);
 	return m_sysWndProc;
 }
-bool CNppBaseWnd::registerWndClass()
+BOOL CNppBaseWnd::registerWndClass()
 {
 //	if the wndClassName had exist return true, or to register it
 	WNDCLASSEX wndex;
@@ -362,6 +221,7 @@ HWND CNppBaseWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, HMENU hMenu, int x,
 
 LRESULT CNppBaseWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+/*
 	m_msgParams.uMsg     = uMsg;
 	m_msgParams.hwndFrom = hwnd;
 	m_msgParams.iCtrlID  = 0;
@@ -402,29 +262,23 @@ LRESULT CNppBaseWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	}
 	default:
 		break;
-	}
-	return handleMessage(m_msgParams);
+	}*/
+	
+	return handleMessage(hwnd, uMsg, wParam, lParam);
 //	return m_sysWndProc(hwnd, uMsg, wParam, lParam); // 出错
 //	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
-LRESULT CNppBaseWnd::handleMessage(struct NppMsgParams & msgParams)
+
+LRESULT CNppBaseWnd::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	msgParams.lResult = 0;
-	
-	return ::CallWindowProc(m_sysWndProc, msgParams.hwndFrom, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
+	BOOL bDone = FALSE;
+	LRESULT lRes = 0;
+
+	if( bDone )
+		return lRes;
+	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
-BOOL CNppBaseWnd::handleCommand(struct NppMsgParams & msgParams)
-{
-	msgParams.lResult = FALSE;
-	
-	return msgParams.lResult;
-}
-BOOL CNppBaseWnd::handleNotify(struct NppMsgParams & msgParams)
-{
-	msgParams.lResult = FALSE;
-	
-	return msgParams.lResult;
-}
+
 void CNppBaseWnd::init(HINSTANCE hInst, HWND parent)
 {
 	m_hInst = hInst;
@@ -710,63 +564,119 @@ BOOL CNppWnd::isControl()const
 LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	m_msgParams.uMsg     = uMsg;
-	m_msgParams.hwndFrom = hwnd;
-	m_msgParams.iCtrlID  = 0;
-	//m_msgParams.sCtrlName = _T('\0')
-	m_msgParams.pSender  = this;
+	m_msgParams.hwndFrom = hwnd; 
 	m_msgParams.wParam   = wParam;
 	m_msgParams.lParam   = lParam;
+	m_msgParams.pSender  = this;
+	m_msgParams.iCtrlID  = 0;
 	m_msgParams.lResult  = 0;
-
-	loopDispath(m_msgParams);
-	
+	m_msgParams.sCtrlName = _T('\0');
+	BOOL bDone = loopDispath(m_msgParams);
 	switch(uMsg)
 	{
-	case WM_COMMAND:
+		case WM_COMMAND:
+		{
+			UINT iCtrlID  = LOWORD(wParam);
+			UINT uCode    = HIWORD(wParam);
+			HWND hwndFrom = (HWND)lParam;
+			if( handleCommand(iCtrlID, uCode, hwndFrom) || bDone)
+				return 0;
+			break;
+		}
+		case WM_NOTIFY:
+		{
+			LPNMHDR lpnmhdr = (LPNMHDR)lParam;
+			UINT iCtrlID    = lpnmhdr->idFrom;
+			UINT uCode      = lpnmhdr->code;
+			HWND hwndFrom   = lpnmhdr->hwndFrom;
+			BOOL lres = handleNotify(iCtrlID, uCode, lpnmhdr);
+			if( lres || bDone)
+				return lres;
+			break;
+		}
+		default:
+			break;
+	}
+	/******************** 下面这样很容易产生冲突(相同的控件ID 触发的uMsg 和消息
+	 WM_COMMAND 的通知码 很容易相同)
+	switch(uMsg)
 	{
-		HWND hwndFrom = (HWND)lParam;   // handle to control (HWND)
-		// The low-order word specifies the identifier of the menu item, control, or accelerator
-		UINT iCtrlID  = LOWORD(wParam); 
-		// The high-order word specifies the notification code if the message is 
-		// from a control. If the message is from an accelerator, this value is 1. 
-		// If the message is from a menu, this value is zero. 
-		UINT uMsg     = HIWORD(wParam);
-		//If an application processes this message, it should return zero. 
-		if( handleCommand(iCtrlID, uMsg, hwndFrom) )
-			return 0;
-		break;
+		case WM_COMMAND:
+		{
+			m_msgParams.hwndFrom = (HWND)lParam;    // handle to control (HWND)
+			// The low-order word specifies the identifier of the menu item, control, or accelerator
+			m_msgParams.iCtrlID  = LOWORD(wParam);
+			// The high-order word specifies the notification code if the message is 
+			// from a control. If the message is from an accelerator, this value is 1. 
+			// If the message is from a menu, this value is zero. 
+			m_msgParams.uMsg     = HIWORD(wParam);
+			m_msgParams.pSender  = this;
+			m_msgParams.wParam   = wParam;
+			m_msgParams.lParam   = lParam;
+			m_msgParams.lResult  = 0;
+			BOOL bDone = loopDispath(m_msgParams);
+			//If an application processes this message, it should return zero. 
+			if( handleCommand(m_msgParams.iCtrlID, m_msgParams.uMsg, m_msgParams.hwndFrom) || bDone)
+				return 0;
+			break;
+		}
+		case WM_NOTIFY:
+		{
+			LPNMHDR lpnmhdr      = (LPNMHDR)lParam;
+			m_msgParams.hwndFrom = lpnmhdr->hwndFrom;
+			m_msgParams.iCtrlID  = lpnmhdr->idFrom;
+			m_msgParams.uMsg     = lpnmhdr->code;
+			m_msgParams.pSender  = this;
+			m_msgParams.wParam   = wParam;
+			m_msgParams.lParam   = lParam;
+			m_msgParams.lResult  = 0;
+			BOOL bDone = loopDispath(m_msgParams);
+			// The return value is ignored except for notification messages that specify otherwise. 
+			BOOL lres = handleNotify(m_msgParams.iCtrlID, m_msgParams.uMsg, lpnmhdr);
+			if( lres || bDone)
+				return lres;
+			break;
+		}
+		default:
+		{
+			m_msgParams.uMsg     = uMsg;
+			m_msgParams.hwndFrom = hwnd;
+			m_msgParams.iCtrlID  = 0;
+			//m_msgParams.sCtrlName = _T('\0')
+			m_msgParams.pSender  = this;
+			m_msgParams.wParam   = wParam;
+			m_msgParams.lParam   = lParam;
+			m_msgParams.lResult  = 0;
+			BOOL bDone = loopDispath(m_msgParams);
+			if( bDone )
+				return m_msgParams.lResult;
+			break;
+		}
 	}
-	case WM_NOTIFY:
-	{
-		LPNMHDR lpnmhdr      = (LPNMHDR)lParam;
-		UINT iCtrlID  = lpnmhdr->idFrom;
-		UINT uMsg     = lpnmhdr->code;
-		// The return value is ignored except for notification messages that specify otherwise. 
-		if( handleNotify(iCtrlID, uMsg, lpnmhdr) )
-			return 0;
-		break;
-	}
-	default:
-		break;
-	}
-	return handleMessage(uMsg, wParam, lParam);
+	*/
+	return handleMessage(hwnd, uMsg, wParam, lParam);
 //	return m_sysWndProc(hwnd, uMsg, wParam, lParam); // 出错
-//	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
-LRESULT CNppWnd::handleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CNppWnd::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	BOOL bDone = FALSE;
+	LRESULT lRes = 0;
 
-	return ::CallWindowProc(m_sysWndProc, m_hSelf, uMsg, wParam, lParam);
+	if( bDone )
+		return lRes;
+	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
 BOOL CNppWnd::handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 {
+	BOOL bRet = FALSE;
 	
-	return FALSE;
+	return bRet;
 }
 BOOL CNppWnd::handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 {
+	BOOL bRet = FALSE;
 	
-	return FALSE;
+	return bRet;
 }
 ////////////////////////////////////////////////////////////////////////////////
 // 
@@ -828,12 +738,6 @@ HWND CNppCtrlWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int c
 	dwStyle |= (WS_CHILD | WS_VISIBLE);
 	return CNppBaseWnd::create(lpszCaption, dwStyle, (HMENU)m_iCtrlID, x, y, cx, cy, dwExStyle);
 }
-LRESULT CNppCtrlWnd::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone)
-{
-	bDone = false;
-	
-	return 0;
-}
 LRESULT CNppCtrlWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	m_msgParams.uMsg      = uMsg;
@@ -847,24 +751,16 @@ LRESULT CNppCtrlWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	
 	loopDispath(m_msgParams);
 	
-	return this->handleMessage(m_msgParams);
+	return handleMessage(hwnd, uMsg, wParam, lParam);
 }
-LRESULT CNppCtrlWnd::handleMessage(struct NppMsgParams & msgParams)
+LRESULT CNppCtrlWnd::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	BOOL bDone = FALSE;
+	LRESULT lRes = 0;
 
-	return ::CallWindowProc(m_sysWndProc, msgParams.hwndFrom, msgParams.uMsg, msgParams.wParam, msgParams.lParam);
-}
-BOOL CNppCtrlWnd::handleCommand(struct NppMsgParams & msgParams)
-{
-	msgParams.lResult = FALSE;
-	
-	return msgParams.lResult;
-}
-BOOL CNppCtrlWnd::handleNotify(struct NppMsgParams & msgParams)
-{
-	msgParams.lResult = FALSE;
-	
-	return msgParams.lResult;
+	if( bDone )
+		return lRes;
+	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
 BOOL CNppCtrlWnd::isControl()const
 {
@@ -953,59 +849,56 @@ INT_PTR CALLBACK CNppDlg::DlgProcWrap(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 	}
 	return 	FALSE;
 }
+LRESULT CNppDlg::runWndProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return 0;
+}
 BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	m_msgParams.uMsg     = uMsg;
-	m_msgParams.hwndFrom = hDlg;
-	m_msgParams.iCtrlID  = m_iDlgID;
-	//m_msgParams.sCtrlName = _T('\0')
-	m_msgParams.pSender  = this;
+	m_msgParams.hwndFrom = hDlg; 
 	m_msgParams.wParam   = wParam;
 	m_msgParams.lParam   = lParam;
+	m_msgParams.pSender  = this;
+	m_msgParams.iCtrlID  = m_iDlgID;
 	m_msgParams.lResult  = 0;
-
-	loopDispath(m_msgParams);
-	
+	m_msgParams.sCtrlName = _T('\0');
+	BOOL bDone = loopDispath(m_msgParams);
 	switch(uMsg)
 	{
-	case WM_COMMAND:
-	{
-		m_msgParams.hwndFrom = (HWND)lParam;   // handle to control (HWND)
-		// The low-order word specifies the identifier of the menu item, control, or accelerator
-		m_msgParams.iCtrlID  = LOWORD(wParam); 
-		// The high-order word specifies the notification code if the message is 
-		// from a control. If the message is from an accelerator, this value is 1. 
-		// If the message is from a menu, this value is zero. 
-		m_msgParams.uMsg     = HIWORD(wParam);
-		//If an application processes this message, it should return zero. 
-		if( handleCommand(m_msgParams) )
-			return 0;
-		break;
+		case WM_COMMAND:
+		{
+			UINT iCtrlID  = LOWORD(wParam);
+			UINT uCode    = HIWORD(wParam);
+			HWND hwndFrom = (HWND)lParam;
+			if( handleCommand(iCtrlID, uCode, hwndFrom) || bDone)
+				return 0;
+			break;
+		}
+		case WM_NOTIFY:
+		{
+			LPNMHDR lpnmhdr = (LPNMHDR)lParam;
+			UINT iCtrlID    = lpnmhdr->idFrom;
+			UINT uCode      = lpnmhdr->code;
+			HWND hwndFrom   = lpnmhdr->hwndFrom;
+			BOOL lres = handleNotify(iCtrlID, uCode, lpnmhdr);
+			if( lres || bDone)
+				return lres;
+			break;
+		}
+		default:
+			break;
 	}
-	case WM_NOTIFY:
-	{
-		LPNMHDR lpnmhdr      = (LPNMHDR)lParam;
-		m_msgParams.uMsg     = lpnmhdr->code;
-		m_msgParams.hwndFrom = lpnmhdr->hwndFrom;
-		m_msgParams.iCtrlID  = lpnmhdr->idFrom;
-		// The return value is ignored except for notification messages that specify otherwise. 
-		if( handleNotify(m_msgParams) )
-			return m_msgParams.lResult;
-		break;
-	}
-	default:
-		break;
-	}
-	
-	return handleMessage(m_msgParams);
+	return handleMessage(hDlg, uMsg, wParam, lParam);
 	// 不可以用默认DefDlgProc 进程，对话框进程会陷入死循环(why?)
 	//return ::DefDlgProc(hDlg, uMsg, wParam, lParam);
 
 }
-LRESULT CNppDlg::handleMessage(struct NppMsgParams & msgParams)
+LRESULT CNppDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	msgParams.lResult = TRUE;
-	switch(msgParams.uMsg)
+	LRESULT lRes = 0;
+	BOOL bDone = TRUE;
+	switch(uMsg)
 	{
 		case WM_CLOSE:
 		{
@@ -1018,22 +911,22 @@ LRESULT CNppDlg::handleMessage(struct NppMsgParams & msgParams)
 			break;
 		}
 		default:
-			msgParams.lResult = FALSE;
+			bDone = FALSE;
 			break;
 	}
-	return msgParams.lResult;
+	return bDone;
 }
-BOOL CNppDlg::handleCommand(struct NppMsgParams & msgParams)
+BOOL CNppDlg::handleCommand(UINT iCtrlID, UINT uCode, HWND hwndFrom)
 {
-	msgParams.lResult = FALSE;
+	BOOL bRet = FALSE;
 	
-	return msgParams.lResult;
+	return bRet;
 }
-BOOL CNppDlg::handleNotify(struct NppMsgParams & msgParams)
+BOOL CNppDlg::handleNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr)
 {
-	msgParams.lResult = FALSE;
+	BOOL bRet = FALSE;
 	
-	return msgParams.lResult;
+	return bRet;
 }
 void CNppDlg::init(HINSTANCE hInst, HWND hParent)
 {

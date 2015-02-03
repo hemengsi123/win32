@@ -48,9 +48,11 @@ class CExplorerDlg: public CNppDlg//public CNppStaticDialog
 {
 public:
 	BOOL CALLBACK run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT handleMessage( struct NppMsgParams & msgParams);
-	virtual BOOL    handleCommand( struct NppMsgParams & msgParams);
-	virtual BOOL    handleNotify( struct NppMsgParams & msgParams);
+	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	// If an application processes this message, it should return zero.
+	virtual BOOL handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
+	// The return value is ignored except for notification messages that specify otherwise. 
+	virtual BOOL handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
 	void initCtrl();
 	void UpdateDevices();
 	void UpdateFolders(void);

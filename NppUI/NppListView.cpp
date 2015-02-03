@@ -311,10 +311,6 @@ LRESULT CNppListView::runListProc(UINT Message, WPARAM wParam, LPARAM lParam, BO
 	
 	return 0;
 }
-LRESULT CNppListView::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bDone)
-{
-	return runListProc(uMsg, wParam, lParam, bDone);
-}
 
 LRESULT CNppListView::runHeaderProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
