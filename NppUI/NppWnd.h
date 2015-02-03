@@ -223,9 +223,9 @@ public:
 	virtual BOOL OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
 	// The return value is ignored except for notification messages that specify otherwise. 
 	virtual BOOL OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
-	// WM_CREATE
-	//virtual LRESULT OnCreate();
-	
+//	virtual LRESULT OnCreate();       // WM_CREATE
+//	virtual LRESULT OnClose();        // WM_CLOSE
+//	virtual LRESULT OnDestroy();      // WM_DESTROY
 private:
 	
 };

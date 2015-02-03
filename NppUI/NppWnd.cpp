@@ -589,7 +589,11 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			UINT iCtrlID    = lpnmhdr->idFrom;
 			UINT uCode      = lpnmhdr->code;
 			HWND hwndFrom   = lpnmhdr->hwndFrom;
+<<<<<<< HEAD
 			BOOL lres = OnNotify(iCtrlID, uCode, lpnmhdr);
+=======
+			LRESULT lres = OnNotify(iCtrlID, uCode, lpnmhdr);
+>>>>>>> 4fae9660a6b77377b6fd2b0921b7385942752b77
 			if( lres || bDone)
 				return lres;
 			break;
@@ -666,6 +670,7 @@ LRESULT CNppWnd::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		return lRes;
 	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
+
 BOOL CNppWnd::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 {
 	BOOL bRet = FALSE;
@@ -916,12 +921,14 @@ LRESULT CNppDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	}
 	return bDone;
 }
+
 BOOL CNppDlg::OnCommand(UINT iCtrlID, UINT uCode, HWND hwndFrom)
 {
 	BOOL bRet = FALSE;
 	
 	return bRet;
 }
+
 BOOL CNppDlg::OnNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr)
 {
 	BOOL bRet = FALSE;
