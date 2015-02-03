@@ -245,7 +245,7 @@ LRESULT CNppBaseWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		// If the message is from a menu, this value is zero. 
 		m_msgParams.uMsg     = HIWORD(wParam);
 		//If an application processes this message, it should return zero. 
-		if( handleCommand(m_msgParams) )
+		if( OnCommand(m_msgParams) )
 			return 0;
 		break;
 	}
@@ -256,7 +256,7 @@ LRESULT CNppBaseWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		m_msgParams.hwndFrom = lpnmhdr->hwndFrom;
 		m_msgParams.iCtrlID  = lpnmhdr->idFrom;
 		// The return value is ignored except for notification messages that specify otherwise. 
-		if( handleNotify(m_msgParams) )
+		if( OnNotify(m_msgParams) )
 			return m_msgParams.lResult;
 		break;
 	}
@@ -579,7 +579,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			UINT iCtrlID  = LOWORD(wParam);
 			UINT uCode    = HIWORD(wParam);
 			HWND hwndFrom = (HWND)lParam;
-			if( handleCommand(iCtrlID, uCode, hwndFrom) || bDone)
+			if( OnCommand(iCtrlID, uCode, hwndFrom) || bDone)
 				return 0;
 			break;
 		}
@@ -589,7 +589,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			UINT iCtrlID    = lpnmhdr->idFrom;
 			UINT uCode      = lpnmhdr->code;
 			HWND hwndFrom   = lpnmhdr->hwndFrom;
-			BOOL lres = handleNotify(iCtrlID, uCode, lpnmhdr);
+			LRESULT lres = OnNotify(iCtrlID, uCode, lpnmhdr);
 			if( lres || bDone)
 				return lres;
 			break;
@@ -616,7 +616,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			m_msgParams.lResult  = 0;
 			BOOL bDone = loopDispath(m_msgParams);
 			//If an application processes this message, it should return zero. 
-			if( handleCommand(m_msgParams.iCtrlID, m_msgParams.uMsg, m_msgParams.hwndFrom) || bDone)
+			if( OnCommand(m_msgParams.iCtrlID, m_msgParams.uMsg, m_msgParams.hwndFrom) || bDone)
 				return 0;
 			break;
 		}
@@ -632,7 +632,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			m_msgParams.lResult  = 0;
 			BOOL bDone = loopDispath(m_msgParams);
 			// The return value is ignored except for notification messages that specify otherwise. 
-			BOOL lres = handleNotify(m_msgParams.iCtrlID, m_msgParams.uMsg, lpnmhdr);
+			BOOL lres = OnNotify(m_msgParams.iCtrlID, m_msgParams.uMsg, lpnmhdr);
 			if( lres || bDone)
 				return lres;
 			break;
@@ -666,13 +666,13 @@ LRESULT CNppWnd::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		return lRes;
 	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
-BOOL CNppWnd::handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
+LRESULT CNppWnd::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 {
 	BOOL bRet = FALSE;
 	
 	return bRet;
 }
-BOOL CNppWnd::handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
+LRESULT CNppWnd::OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 {
 	BOOL bRet = FALSE;
 	
@@ -871,7 +871,7 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			UINT iCtrlID  = LOWORD(wParam);
 			UINT uCode    = HIWORD(wParam);
 			HWND hwndFrom = (HWND)lParam;
-			if( handleCommand(iCtrlID, uCode, hwndFrom) || bDone)
+			if( OnCommand(iCtrlID, uCode, hwndFrom) || bDone)
 				return 0;
 			break;
 		}
@@ -881,7 +881,7 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			UINT iCtrlID    = lpnmhdr->idFrom;
 			UINT uCode      = lpnmhdr->code;
 			HWND hwndFrom   = lpnmhdr->hwndFrom;
-			BOOL lres = handleNotify(iCtrlID, uCode, lpnmhdr);
+			BOOL lres = OnNotify(iCtrlID, uCode, lpnmhdr);
 			if( lres || bDone)
 				return lres;
 			break;
@@ -916,13 +916,13 @@ LRESULT CNppDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	}
 	return bDone;
 }
-BOOL CNppDlg::handleCommand(UINT iCtrlID, UINT uCode, HWND hwndFrom)
+LRESULT CNppDlg::OnCommand(UINT iCtrlID, UINT uCode, HWND hwndFrom)
 {
 	BOOL bRet = FALSE;
 	
 	return bRet;
 }
-BOOL CNppDlg::handleNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr)
+LRESULT CNppDlg::OnNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr)
 {
 	BOOL bRet = FALSE;
 	

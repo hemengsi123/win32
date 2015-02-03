@@ -220,11 +220,12 @@ public:
 	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	// If an application processes this message, it should return zero.
-	virtual BOOL handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
+	virtual LRESULT OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
 	// The return value is ignored except for notification messages that specify otherwise. 
-	virtual BOOL handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
-	// WM_CREATE
-	//virtual LRESULT OnCreate();
+	virtual LRESULT OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
+//	virtual LRESULT OnCreate();       // WM_CREATE
+//	virtual LRESULT OnClose();        // WM_CLOSE
+//	virtual LRESULT OnDestroy();      // WM_DESTROY
 private:
 	
 };
@@ -281,9 +282,9 @@ public:
 	virtual BOOL runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	// If an application processes this message, it should return zero.
-	virtual BOOL handleCommand(UINT iCtrlID, UINT uCode, HWND hwndFrom);
+	virtual LRESULT OnCommand(UINT iCtrlID, UINT uCode, HWND hwndFrom);
 	// The return value is ignored except for notification messages that specify otherwise. 
-	virtual BOOL handleNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr);
+	virtual LRESULT OnNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr);
 	
 	UINT    doModal();
 	int     doModal(UINT iDlgID);

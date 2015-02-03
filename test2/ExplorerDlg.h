@@ -50,9 +50,9 @@ public:
 	BOOL CALLBACK run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	// If an application processes this message, it should return zero.
-	virtual BOOL handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
+	virtual LRESULT OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
 	// The return value is ignored except for notification messages that specify otherwise. 
-	virtual BOOL handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
+	virtual LRESULT OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
 	void initCtrl();
 	void UpdateDevices();
 	void UpdateFolders(void);
