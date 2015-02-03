@@ -153,7 +153,7 @@ LRESULT CExplorerDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	return CNppDlg::handleMessage(hwnd, uMsg, wParam, lParam);
 }
 
-BOOL CExplorerDlg::handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
+BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 {
 	if( iCtrlID== IDC_BTN_ADD )
 	{
@@ -183,7 +183,7 @@ BOOL CExplorerDlg::handleCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 	
 	return TRUE;
 }
-BOOL CExplorerDlg::handleNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
+BOOL CExplorerDlg::OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 {
 	BOOL bDone = FALSE;
 	if (lpNmhdr->hwndFrom == m_treeView2.getHSelf())
