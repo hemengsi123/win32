@@ -147,8 +147,9 @@ class CNppBaseWnd
 protected:
 	virtual LPCTSTR getWndClassName()const = 0;
 	// 不要在构造和析构函数中调用virtual 函数，可能发生运行时错误:r6025 pure virtual function call
-	virtual void destroy() = 0;
 	virtual BOOL isControl()const = 0;
+	virtual void OnClose() = 0;        // WM_CLOSE
+	virtual void OnDestroy() = 0;      // WM_DESTROY
 	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
 	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
 	static LRESULT CALLBACK WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -156,7 +157,7 @@ protected:
 	/************************ 消息映射支持 **************************/
     const NppMsgMapEntry * findMessageEntry(const NppMsgMapEntry * msg_entries, const NppMsgParams &msgParams);
 	// @brief: 处理通过消息映射的函数
-	BOOL loopDispath(NppMsgParams & msgParams);
+	BOOL dispathMessage(NppMsgParams & msgParams);
 	/************************ end **********************************/
 	// 替换系统默认窗口进程( 通过资源创建control )
 	WNDPROC setWndProc(HWND hWnd = NULL, WNDPROC userWndProc = WndProcWrap);
@@ -169,6 +170,7 @@ public:
 	virtual void reSizeTo(RECT & rc); // should NEVER be const !!!
 	virtual void redraw() const;
     virtual UINT getClassStyle() const;
+    virtual void loopMessage();
 	void         getClientRect(RECT & rc)const;
     void         getWndRect(RECT & rc) const;
 	int          getWidth() const;
@@ -223,9 +225,9 @@ public:
 	virtual BOOL OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
 	// The return value is ignored except for notification messages that specify otherwise. 
 	virtual BOOL OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
-//	virtual LRESULT OnCreate();       // WM_CREATE
-//	virtual LRESULT OnClose();        // WM_CLOSE
-//	virtual LRESULT OnDestroy();      // WM_DESTROY
+	virtual void OnCreate();       // WM_CREATE
+	virtual void OnClose();        // WM_CLOSE
+	virtual void OnDestroy();      // WM_DESTROY
 private:
 	
 };
@@ -242,24 +244,21 @@ public:
 	virtual void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual BOOL isControl()const;
-	virtual void destroy();
 	/*@retrn: if id invalid return 0, or nozero*/
 	UINT    getCtrlID()const;
 	void    setCtrlID(UINT iCtrlID);
 	LPCTSTR getCtrlName()const;
 	void    setCtrlName(LPCTSTR strName);
-	/*@retrn: if return true 是通过显示调用CreateWindow 创建, or 是通过MAKEINTRESOURCE(id) 创建*/
-	bool    isCreated()const;	
 protected:
 	virtual HWND create(DWORD dwStyle = 0, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
 	virtual LRESULT runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	
+	virtual void OnClose();        // WM_CLOSE
+	virtual void OnDestroy();      // WM_DESTROY
 private:
 	static UINT m_nCtrlCount; // 控件总数量
 	UINT m_iCtrlID;
 	CNppString m_sCtrlName;  //  控件名字
-	bool m_bIsCreated;
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -272,7 +271,6 @@ class CNppDlg: public CNppBaseWnd
 public:
 	CNppDlg();
 	virtual ~CNppDlg();
-	virtual void destroy();
 	virtual BOOL isControl()const;
 	virtual LPCTSTR getWndClassName()const;
 	virtual void init(HINSTANCE hInst, HWND hParent);
@@ -285,7 +283,9 @@ public:
 	virtual BOOL OnCommand(UINT iCtrlID, UINT uCode, HWND hwndFrom);
 	// The return value is ignored except for notification messages that specify otherwise. 
 	virtual BOOL OnNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr);
-	
+	virtual void OnCreate();       // WM_INITDIALOG
+	virtual void OnClose();        // WM_CLOSE
+	virtual void OnDestroy();      // WM_DESTROY
 	UINT    doModal();
 	int     doModal(UINT iDlgID);
 protected:

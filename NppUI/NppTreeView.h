@@ -16,7 +16,6 @@ public:
 public :
 	CNppTreeView(): _hImglst(NULL){};
 	virtual ~CNppTreeView(){};
-	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
 	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	HWND create(DWORD dwStyle =  TVS_HASLINES, DWORD dwExStyle = 0);

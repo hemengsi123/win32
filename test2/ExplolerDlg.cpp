@@ -6,10 +6,10 @@ HANDLE g_hThread			= NULL;
 
 NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
 //NPP_ON_CTRL_MSGMAP(WM_KEYUP, OnClick) WM_LBUTTONDOWN  BN_CLICKED IDC_BTN_DEL
-//NPP_ON_CTRL_MSGMAP_ID(IDC_BTN_ADDALL, WM_LBUTTONDOWN, OnBtnAddAll) 
+NPP_ON_CTRL_MSGMAP_ID(IDC_CBO_FILTER, WM_KEYUP, OnComboxEdit) 
 //NPP_ON_CTRL_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
 NPP_ON_MSGMAP_CMD(-1, BN_CLICKED, OnBtnAddAll)
-NPP_ON_MSGMAP_CMD(IDC_CBO_FILTER, -1, OnComboxList)
+//NPP_ON_MSGMAP_CMD(IDC_CBO_FILTER, -1, OnComboxList)
 
 NPP_END_MESSAGE_MAP()
 
@@ -137,14 +137,15 @@ LRESULT CExplorerDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	// 关闭窗口
 	case WM_CLOSE:
 	{
-		destroy();
+		OnClose();
 		// dbg_log(_T("wm_close"));
 		return TRUE;
 	}
 	// 关闭应用程序
 	case WM_DESTROY:
 	{
-		::PostQuitMessage(0);
+		//::PostQuitMessage(0);
+		OnDestroy();
 		return TRUE;
 	}
 	default:
@@ -182,6 +183,10 @@ BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 	}
 	
 	return TRUE;
+}
+void CExplorerDlg::OnDestroy()
+{
+	::PostQuitMessage(0);
 }
 BOOL CExplorerDlg::OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 {
@@ -383,14 +388,14 @@ BOOL CALLBACK CExplorerDlg::run_dlgProc(HWND hwnd, UINT message, WPARAM wParam, 
 		// 关闭窗口
 		case WM_CLOSE:
 		{
-			destroy();
+			OnClose();
 			// dbg_log(_T("wm_close"));
 			return TRUE;
 		}
 		// 关闭应用程序
 		case WM_DESTROY:
 		{
-			::PostQuitMessage(0);
+			OnDestroy();
 			return TRUE;
 		}
 		default:
@@ -529,8 +534,6 @@ BOOL CExplorerDlg::ExploreVolumeInformation(LPCTSTR pszDrivePathName, LPTSTR psz
 
 void CExplorerDlg::NotifyEvent(DWORD event)
 {
-	POINT	pt;
-
     // LONG oldCur = ::SetClassLong(m_hSelf, GCL_HCURSOR, (LONG)_hCurWait);
     // ::EnableWindow(m_hSelf, FALSE);
 	// ::GetCursorPos(&pt);
@@ -913,6 +916,25 @@ BOOL CExplorerDlg::OnComboxList(NppMsgParams & msg)
 {
 	dbg_log("combox");
 	dbg_log("uMsg = %04X, ctrlName = %s, id = %d", msg.uMsg, msg.sCtrlName.getData(), msg.iCtrlID);
+	
+	msg.lResult = TRUE;
+	return msg.lResult;
+}
+
+BOOL CExplorerDlg::OnComboxEdit(NppMsgParams & msg)
+{
+	dbg_log(_T("OnComboxEdit uMsg = 0x%04X"), msg.uMsg);
+	// 13 ENTER
+	if (msg.wParam == 13)
+	{
+		CNppCombox * combox = (CNppCombox * )msg.pSender;
+		LPTSTR	pszText	= (LPTSTR)new TCHAR[MAX_PATH];
+
+		combox->getText(pszText);
+		combox->addText(pszText);
+		::SendMessage(combox->getParent(), EXM_CHANGECOMBO, 0, 0);
+		delete [] pszText;
+	}
 	
 	msg.lResult = TRUE;
 	return msg.lResult;

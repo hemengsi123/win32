@@ -2,13 +2,13 @@
 #include "NppLib.h"
 #include "NppImageList.h"
 
-bool CNppImageList::create(int nWidth, int nHight, UINT flags, int cInitial, int cGrow)
+BOOL CNppImageList::create(int nWidth, int nHight, UINT flags, int cInitial, int cGrow)
 {
 	m_hImglst = ::ImageList_Create(nWidth, nHight, flags, cInitial, cGrow);
 	if (!m_hImglst)
-		return false;
+		return FALSE;
 	else
-		return true;
+		return TRUE;
 }
 
 int CNppImageList::addIcon(HINSTANCE hInst, int iconID)
@@ -22,9 +22,9 @@ int CNppImageList::addIcon(HINSTANCE hInst, int iconID)
 	}
 	return index;
 }
-bool CNppImageList::delIcon(int iconID)
+BOOL CNppImageList::delIcon(int iconID)
 {
-	bool bSuccuss = true;
+	BOOL bSuccuss = true;
 	if(m_hImglst)
 	{
 		bSuccuss = ::ImageList_Remove(m_hImglst, iconID);
@@ -63,9 +63,9 @@ HIMAGELIST CNppImageList::getSysImgLst(UINT uFlags)
 	return himl;
 }
 
-bool CNppImageList::destroy() 
+BOOL CNppImageList::destroy() 
 {
-	bool bSuccess = true;
+	BOOL bSuccess = true;
 	if(m_hImglst )
 	{
 		bSuccess = ::ImageList_Destroy(m_hImglst);

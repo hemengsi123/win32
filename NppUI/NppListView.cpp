@@ -296,14 +296,6 @@ void CNppListView::setValues(int codepage)
 	}
 }
 */
-void CNppListView::destroy()
-{
-	if( isCreated() && m_hSelf )
-	{
-		::DestroyWindow(m_hSelf);
-		m_hSelf = NULL;
-	}
-}
 
 LRESULT CNppListView::runListProc(UINT Message, WPARAM wParam, LPARAM lParam, BOOL & bDone)
 {

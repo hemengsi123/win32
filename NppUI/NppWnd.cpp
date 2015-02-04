@@ -59,10 +59,10 @@ const NppMsgMapEntry * CNppBaseWnd::findMessageEntry(const NppMsgMapEntry * lpMs
 	}
 	return NULL;
 }
-BOOL CNppBaseWnd::loopDispath(NppMsgParams & msgParams)
+BOOL CNppBaseWnd::dispathMessage(NppMsgParams & msgParams)
 {
 	const NppMsgMapEntry * lpMsgMapEntry = findMessageEntry(m_messageEntries, msgParams);
-	union NppMsgMapFunctions msgMapFunc;
+//	union NppMsgMapFunctions msgMapFunc;
 	if( lpMsgMapEntry != NULL)
 	{
 		//msgMapFunc.stdMsgPfn = lpMsgMapEntry->pfn;
@@ -168,6 +168,22 @@ LRESULT CALLBACK CNppBaseWnd::WndProcWrap(HWND hwnd, UINT uMsg, WPARAM wParam, L
         return ::DefWindowProc(hwnd, uMsg, wParam, lParam);
  
 }
+void CNppBaseWnd::loopMessage()
+{
+	if( isWnd() && !isControl() )
+	{
+		MSG msg;
+		while( ::GetMessage(&msg, NULL, NULL, NULL) )  
+		{  
+			::TranslateMessage(&msg);  
+			::DispatchMessage(&msg);
+		}
+	}
+	else
+	{
+		throw "the obj isn't a window";
+	}
+}
 WNDPROC CNppBaseWnd::setWndProc(HWND hWnd, WNDPROC userWndProc)
 {
 	if( !hWnd )
@@ -231,7 +247,7 @@ LRESULT CNppBaseWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	m_msgParams.lParam   = lParam;
 	m_msgParams.lResult  = 0;
 
-	loopDispath(m_msgParams);
+	dispathMessage(m_msgParams);
 	
 	switch(uMsg)
 	{
@@ -271,11 +287,25 @@ LRESULT CNppBaseWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 LRESULT CNppBaseWnd::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	BOOL bDone = FALSE;
-	LRESULT lRes = 0;
-
-	if( bDone )
-		return lRes;
+//	BOOL bDone = FALSE;
+//	LRESULT lRes = 0;
+	switch(uMsg)
+	{
+		case WM_CLOSE:
+		{
+			OnClose();
+			break;
+		}
+		case WM_DESTROY:
+		{
+			OnDestroy();
+			break;
+		}
+		default:
+			break;
+	}
+//	if( bDone )
+//		return lRes;
 	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
 
@@ -553,6 +583,7 @@ void CNppBaseWnd::alignTo(HWND hTag, AlignDirect alignFlags1, AlignDirect alignF
 	}
 	::MoveWindow(m_hSelf, ptTo.x, ptTo.y, rcSelf.right - rcSelf.left, rcSelf.bottom - rcSelf.top, TRUE);
 }
+
 ///////////////////////////////////////////////////////////////////
 //
 // CNppBaseWnd 窗口基类
@@ -571,7 +602,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	m_msgParams.iCtrlID  = 0;
 	m_msgParams.lResult  = 0;
 	m_msgParams.sCtrlName = _T('\0');
-	BOOL bDone = loopDispath(m_msgParams);
+	BOOL bDone = dispathMessage(m_msgParams);
 	switch(uMsg)
 	{
 		case WM_COMMAND:
@@ -595,7 +626,11 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		default:
+		{
+			if( bDone )
+				return m_msgParams.lResult;
 			break;
+		}
 	}
 	/******************** 下面这样很容易产生冲突(相同的控件ID 触发的uMsg 和消息
 	 WM_COMMAND 的通知码 很容易相同)
@@ -614,7 +649,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			m_msgParams.wParam   = wParam;
 			m_msgParams.lParam   = lParam;
 			m_msgParams.lResult  = 0;
-			BOOL bDone = loopDispath(m_msgParams);
+			BOOL bDone = dispathMessage(m_msgParams);
 			//If an application processes this message, it should return zero. 
 			if( OnCommand(m_msgParams.iCtrlID, m_msgParams.uMsg, m_msgParams.hwndFrom) || bDone)
 				return 0;
@@ -630,7 +665,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			m_msgParams.wParam   = wParam;
 			m_msgParams.lParam   = lParam;
 			m_msgParams.lResult  = 0;
-			BOOL bDone = loopDispath(m_msgParams);
+			BOOL bDone = dispathMessage(m_msgParams);
 			// The return value is ignored except for notification messages that specify otherwise. 
 			BOOL lres = OnNotify(m_msgParams.iCtrlID, m_msgParams.uMsg, lpnmhdr);
 			if( lres || bDone)
@@ -647,7 +682,7 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			m_msgParams.wParam   = wParam;
 			m_msgParams.lParam   = lParam;
 			m_msgParams.lResult  = 0;
-			BOOL bDone = loopDispath(m_msgParams);
+			BOOL bDone = dispathMessage(m_msgParams);
 			if( bDone )
 				return m_msgParams.lResult;
 			break;
@@ -659,11 +694,26 @@ LRESULT CNppWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 LRESULT CNppWnd::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	BOOL bDone = FALSE;
-	LRESULT lRes = 0;
-
-	if( bDone )
-		return lRes;
+	switch(uMsg)
+	{
+		case WM_CREATE:
+		{
+			OnCreate();
+			break;
+		}
+		case WM_CLOSE:
+		{
+			OnClose();
+			break;
+		}
+		case WM_DESTROY:
+		{
+			OnDestroy();
+			break;
+		}
+		default:
+			break;
+	}
 	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
 
@@ -679,13 +729,22 @@ BOOL CNppWnd::OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 	
 	return bRet;
 }
+void CNppWnd::OnClose()
+{
+
+}
+
+void CNppWnd::OnDestroy()
+{
+
+}
 ////////////////////////////////////////////////////////////////////////////////
 // 
 // CNppCtrlWnd
 //
 UINT CNppCtrlWnd::m_nCtrlCount = 0;
 
-CNppCtrlWnd::CNppCtrlWnd(): m_bIsCreated(false), m_iCtrlID(0)
+CNppCtrlWnd::CNppCtrlWnd(): m_iCtrlID(0)
 {
 	++m_nCtrlCount;
 }
@@ -711,6 +770,7 @@ HWND CNppCtrlWnd::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 	{
 //		setHSelf(hWnd);
 //		CNppBaseWnd::setWndProc();
+
 		m_hSelf = hWnd;
 		if(lpszCaption )
 		{
@@ -735,7 +795,6 @@ HWND CNppCtrlWnd::create(DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszCaption)
 
 HWND CNppCtrlWnd::create(LPCTSTR lpszCaption, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
 {
-	m_bIsCreated = true;
 	dwStyle |= (WS_CHILD | WS_VISIBLE);
 	return CNppBaseWnd::create(lpszCaption, dwStyle, (HMENU)m_iCtrlID, x, y, cx, cy, dwExStyle);
 }
@@ -750,24 +809,34 @@ LRESULT CNppCtrlWnd::runWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	m_msgParams.lResult   = 0;
 	m_msgParams.sCtrlName = m_sCtrlName;
 	
-	loopDispath(m_msgParams);
+	dispathMessage(m_msgParams);
 	
 	return handleMessage(hwnd, uMsg, wParam, lParam);
 }
 LRESULT CNppCtrlWnd::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	BOOL bDone = FALSE;
-	LRESULT lRes = 0;
-
-	if( bDone )
-		return lRes;
+//	BOOL bDone = FALSE;
+//	LRESULT lRes = 0;
+	switch(uMsg)
+	{
+		case WM_CLOSE:
+		{
+			OnClose();
+			break;
+		}
+		case WM_DESTROY:
+		{
+			OnDestroy();
+			break;
+		}
+		default:
+			break;
+	}
+//	if( bDone )
+//		return lRes;
 	return ::CallWindowProc(m_sysWndProc, hwnd, uMsg, wParam, lParam);
 }
-BOOL CNppCtrlWnd::isControl()const
-{
-	return TRUE;
-}
-void CNppCtrlWnd::destroy()
+void CNppCtrlWnd::OnClose()
 {
 	if(m_hSelf)
 	{
@@ -775,6 +844,16 @@ void CNppCtrlWnd::destroy()
 		m_hSelf = NULL;
 	}
 }
+
+void CNppCtrlWnd::OnDestroy()
+{
+	
+}
+BOOL CNppCtrlWnd::isControl()const
+{
+	return TRUE;
+}
+
 UINT CNppCtrlWnd::getCtrlID()const
 {
 	return m_iCtrlID;
@@ -791,10 +870,7 @@ void CNppCtrlWnd::setCtrlName(LPCTSTR lpszName)
 {
 	m_sCtrlName = lpszName;
 }
-bool CNppCtrlWnd::isCreated()const
-{
-	return m_bIsCreated;
-}
+
 ////////////////////////////////////////////////////////////////////////////////
 // 
 // CNppDlg
@@ -807,14 +883,7 @@ CNppDlg::~CNppDlg()
 {
 	
 }
-void CNppDlg::destroy()
-{
-	if(m_hSelf)
-	{
-		::DestroyWindow(m_hSelf);
-		m_hSelf = NULL;
-	}
-}
+
 BOOL CNppDlg::isControl()const
 {
 	return FALSE;
@@ -864,7 +933,7 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	m_msgParams.iCtrlID  = m_iDlgID;
 	m_msgParams.lResult  = 0;
 	m_msgParams.sCtrlName = _T('\0');
-	BOOL bDone = loopDispath(m_msgParams);
+	BOOL bDone = dispathMessage(m_msgParams);
 	switch(uMsg)
 	{
 		case WM_COMMAND:
@@ -888,7 +957,11 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		default:
+		{
+			if( bDone )
+				return m_msgParams.lResult;
 			break;
+		}
 	}
 	return handleMessage(hDlg, uMsg, wParam, lParam);
 	// 不可以用默认DefDlgProc 进程，对话框进程会陷入死循环(why?)
@@ -897,18 +970,23 @@ BOOL CNppDlg::runDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 LRESULT CNppDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	LRESULT lRes = 0;
+//	LRESULT lRes = 0;
 	BOOL bDone = TRUE;
 	switch(uMsg)
 	{
+		case WM_INITDIALOG:
+		{
+			OnCreate();
+			break;
+		}
 		case WM_CLOSE:
 		{
-			destroy();
+			OnClose();
 			break;
 		}
 		case WM_DESTROY:
 		{
-			//::PostQuitMessage(0);
+			OnDestroy();
 			break;
 		}
 		default:
@@ -931,6 +1009,23 @@ BOOL CNppDlg::OnNotify(UINT iCtrlID, UINT uCode, LPNMHDR lpNmhdr)
 	
 	return bRet;
 }
+void CNppDlg::OnCreate()
+{
+
+}
+void CNppDlg::OnClose()
+{
+	if(m_hSelf)
+	{
+		::DestroyWindow(m_hSelf);
+		m_hSelf = NULL;
+	}
+}
+void CNppDlg::OnDestroy()
+{
+	//::PostMessage(0);
+}
+
 void CNppDlg::init(HINSTANCE hInst, HWND hParent)
 {
 	CNppBaseWnd::init(hInst, hParent);
@@ -1039,10 +1134,11 @@ UINT CNppDlg::doModal()
             ::EnableWindow(m_hParent, TRUE);
             ::SetFocus(m_hParent);
         }
-        if( !::TranslateMessage(&msg) ) {
+       // 有下面这个条件判断，WM_KEYUP消息捕获不到
+       // if( !::TranslateMessage(&msg) ) {
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
-        }
+      //  }
         if( msg.message == WM_QUIT ) break;
     }
     ::EnableWindow(m_hParent, TRUE);

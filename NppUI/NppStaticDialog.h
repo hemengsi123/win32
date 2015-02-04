@@ -24,9 +24,8 @@ class CNppStaticDialog : public CNppBaseWnd
 {
 public :
 	CNppStaticDialog() : CNppBaseWnd() {};
-	~CNppStaticDialog(){
-		if (isCreated())
-			destroy();
+	~CNppStaticDialog()
+	{
 	};
 	virtual void create(int dialogID, bool isRTL = false);
 	virtual LPCTSTR getWndClassName() const {return _T("StaticDailog");};
@@ -35,7 +34,7 @@ public :
 	};
 
 	void goToCenter();
-    void destroy() {
+    void OnClose() {
 		// ::SendMessage(m_hParent, WM_MODELESSDIALOG, MODELESSDIALOGREMOVE, (WPARAM)m_hSelf);
 		::DestroyWindow(m_hSelf);
 	};

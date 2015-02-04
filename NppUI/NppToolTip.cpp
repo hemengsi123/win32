@@ -10,7 +10,7 @@ CNppToolTip::~CNppToolTip()
 {
 
 }
-void CNppToolTip::destroy()
+void CNppToolTip::OnClose()
 {
 	if(m_hSelf)
 	{
@@ -37,7 +37,7 @@ HWND CNppToolTip::create(int x, int y, int cx, int cy)
 void CNppToolTip::show(RECT rectTitle, LPTSTR pszTitle, int iXOff, int iWidthOff)
 {
 	if (isVisible())
-		destroy();
+		OnClose();
 
 	if (_tcslen(pszTitle) == 0)
 		return;
@@ -121,13 +121,13 @@ LRESULT CNppToolTip::runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool &
 		}
  		case WM_MOUSEHOVER:
 		{
-			destroy();
+			OnClose();
 			return TRUE;
 		}
 		case WM_MOUSELEAVE:
 		{
 			if (m_bLeftBtnDown == FALSE) {
-				destroy();
+				OnClose();
 			} else {
 				m_bLeftBtnDown = FALSE;
 			}

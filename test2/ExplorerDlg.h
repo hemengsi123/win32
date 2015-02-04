@@ -53,6 +53,7 @@ public:
 	virtual BOOL OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom);
 	// The return value is ignored except for notification messages that specify otherwise. 
 	virtual BOOL OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr);
+	virtual void OnDestroy();
 	void initCtrl();
 	void UpdateDevices();
 	void UpdateFolders(void);
@@ -70,6 +71,7 @@ public:
 	BOOL OnClick(NppMsgParams & msg);
 	BOOL OnBtnAddAll(NppMsgParams & msg);
 	BOOL OnComboxList(NppMsgParams & msg);
+	BOOL OnComboxEdit(NppMsgParams & msg);
 protected:
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;

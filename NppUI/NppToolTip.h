@@ -6,7 +6,7 @@ class CNppToolTip: public CNppCtrlWnd
 public:
 	CNppToolTip();
 	~CNppToolTip();
-	void destroy();
+	void OnClose();
 	LPCTSTR getWndClassName()const;
 	LRESULT runCtrlProc(UINT uMsg, WPARAM wParam, LPARAM lParam, bool & bDone);
 	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID = 0, LPCTSTR sCtrlName = NULL);

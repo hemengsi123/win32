@@ -312,9 +312,3 @@ int CNppTreeView::getItemPath(HTREEITEM hItem, LPTSTR lpszItemPath)
     
     return nPathLen;
 }
-
-void CNppTreeView::destroy() 
-{
-	if(isCreated() && m_hSelf)
-		::DestroyWindow(m_hSelf);
-}

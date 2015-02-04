@@ -13,7 +13,6 @@ public:
 public:
 	CNppListView() : m_iColumnCount(0){};
 	virtual ~CNppListView() {};
-	virtual void destroy();
 	virtual LPCTSTR getWndClassName()const;
 	void    init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	HWND     create(DWORD dwStyle = 0, DWORD dwExStyle = 0);
