@@ -36,6 +36,8 @@ public:
 	BOOL  addSubItem(LPCTSTR lpszText, int iCol, int iItem = -1);
 	BOOL  getItemText(int iItem, int iCol, LPTSTR lpszText, int cMaxLen);
 	BOOL  setItemText(LPTSTR lpszText, int iItem, int iCol);
+	int   getHotItem();
+	int   getMarkItem();
 	BOOL  clearItem();
 	BOOL  delItem(int iItem);
 	BOOL  delColumn(int iCol);

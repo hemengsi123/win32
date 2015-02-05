@@ -10,7 +10,7 @@ NPP_ON_CTRL_MSGMAP_ID(IDC_CBO_FILTER, WM_KEYUP, OnComboxEdit)
 //NPP_ON_CTRL_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
 NPP_ON_MSGMAP_CMD(-1, BN_CLICKED, OnBtnAddAll)
 //NPP_ON_MSGMAP_CMD(IDC_CBO_FILTER, -1, OnComboxList)
-
+//NPP_ON_MSGMAP_NOTIFY(IDC_LIST_ALL, -1, );
 NPP_END_MESSAGE_MAP()
 
 DWORD WINAPI UpdateThread(LPVOID lpParam)
@@ -160,7 +160,13 @@ BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 	{
 		if(uMsg == BN_CLICKED)
 		{
-			dbg_log(_T("BN_DBLCLK"));
+			int hotItem = this->m_listViewAll.getMarkItem();
+			TCHAR lpszText[MAX_PATH] = {0};
+			m_listViewAll.getItemText(hotItem, 0, lpszText, MAX_PATH);
+			ListViewItem lstItem = m_vListViewAll.at(hotItem);
+			dbg_log(_T("BN_DBLCLK %d, txt = %s"), hotItem, lpszText);
+			dbg_log("fullpath = %s", lstItem.m_fullPath.c_str());
+			m_vListViewFiles.push_back(lstItem);
 			/*
 			static CNppDlg nppDlg;
 			nppDlg.init(m_hInst, m_hSelf);
@@ -181,6 +187,10 @@ BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 		}
 	
 	}
+	else if(iCtrlID == IDC_LIST_ALL)
+	{
+		dbg_log("IDC_LIST_ALL => uMsg: %04X", uMsg);
+	}
 	
 	return TRUE;
 }
@@ -191,7 +201,24 @@ void CExplorerDlg::OnDestroy()
 BOOL CExplorerDlg::OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 {
 	BOOL bDone = FALSE;
-	if (lpNmhdr->hwndFrom == m_treeView2.getHSelf())
+	if(iCtrlID == IDC_LIST_ALL)
+	{
+		if(uMsg == NM_CLICK)
+		{
+			LPNMCLICK lpNmclick = (LPNMCLICK)lpNmhdr;
+			int hotItem = this->m_listViewAll.getMarkItem();
+			dbg_log("IDC_LIST_ALL => hotItem: %d", hotItem);
+		}
+		else if(uMsg == LVN_KEYDOWN)
+		{
+			dbg_log("LVN_KEYDOWN");
+		}
+		else if(uMsg == LVN_COLUMNCLICK)
+		{
+			dbg_log("LVN_COLUMNCLICK");
+		}
+	}
+	else if (lpNmhdr->hwndFrom == m_treeView2.getHSelf())
 	{
 		bDone = TRUE;
 		switch (lpNmhdr->code)

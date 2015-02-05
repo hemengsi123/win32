@@ -162,6 +162,14 @@ BOOL CNppListView::setItemText(LPTSTR lpszText, int iItem, int iCol)
 //	ListView_SetItemText(m_hSelf, iItem, iCol, lpszText);
 	return (BOOL)::SendMessage(m_hSelf, LVM_SETITEMTEXT, (WPARAM)iItem, (LPARAM)&item);
 }
+int CNppListView::getHotItem()
+{
+	return ListView_GetHotItem(m_hSelf);
+}
+int CNppListView::getMarkItem()
+{
+	return ListView_GetSelectionMark(m_hSelf);
+}
 BOOL CNppListView::clearItem()
 {
 	return ListView_DeleteAllItems(m_hSelf);
