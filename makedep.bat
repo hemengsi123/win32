@@ -1,20 +1,20 @@
 @echo off
-@rem By simon 2014.12.31 æ–‡ä»¶æ ¼å¼ä¸å¯ä»¥ä¸ºUTF8
+@rem By simon 2014.12.31 ÎÄ¼ş¸ñÊ½²»¿ÉÒÔÎªUTF8
 @rem to make Makefile depend list
 :main
-REM æºæ–‡ä»¶ç›®å½•
+REM Ô´ÎÄ¼şÄ¿Â¼
 REM set SRCDIRS=. Control Utils CORE Layout
 set SRCDIRS=
 set DepDir=
 set EXTS=.H .CPP .C
 set OBJS=
-REM æ’é™¤é¡¹
+REM ÅÅ³ıÏî
 set EXCLUDE=%~4
 
-REM å¦‚æœä½ è¦ä½¿ç”¨å¼•å·æ‹¬èµ·å‘½ä»¤ï¼Œå¿…é¡»è¦åœ¨å‰é¢å†åŠ ä¸€å¯¹ç©ºæ‹¬å·ï¼Œå¦åˆ™ä¼šæŠŠè·¯å¾„å½“æ ‡é¢˜çš„ makedep.bat "" . ". Control Utils CORE Layout"
-REM %~1 - åˆ é™¤ä»»ä½•å¼•å·("); æ‰“å°å½“å‰è·¯å¾„ chdir
+REM Èç¹ûÄãÒªÊ¹ÓÃÒıºÅÀ¨ÆğÃüÁî£¬±ØĞëÒªÔÚÇ°ÃæÔÙ¼ÓÒ»¶Ô¿ÕÀ¨ºÅ£¬·ñÔò»á°ÑÂ·¾¶µ±±êÌâµÄ makedep.bat "" . ". Control Utils CORE Layout"
+REM %~1 - É¾³ıÈÎºÎÒıºÅ("); ´òÓ¡µ±Ç°Â·¾¶ chdir
 if "%~3" neq "" (
-	REM è®¾ç½®ä¾èµ–æ–‡ä»¶ç”Ÿæˆç›®å½•
+	REM ÉèÖÃÒÀÀµÎÄ¼şÉú³ÉÄ¿Â¼
 	if "%~2" neq "" (
 	if not exist "%~2" (
 		echo %~2 isn't exist
@@ -22,17 +22,17 @@ if "%~3" neq "" (
 		echo Usage[2]: makedep.bat
 		exit /b 1
 	) else ( set DepDir=%~2)
-	REM è®¾ç½®ä¾èµ–æ–‡ä»¶ç”Ÿæˆåœ¨å½“å‰ç›®å½•
+	REM ÉèÖÃÒÀÀµÎÄ¼şÉú³ÉÔÚµ±Ç°Ä¿Â¼
 	) else ( if "%DepDir%" equ "" set DepDir=.)
-	REM è®¾ç½®æºç ç›®å½•
+	REM ÉèÖÃÔ´ÂëÄ¿Â¼
 	if "%~3" equ "" (
 		if "%SRCDIRS%" equ "" (
-			REM è®¾ç½®é»˜è®¤æºç åœ¨å½“å‰ç›®å½•
+			REM ÉèÖÃÄ¬ÈÏÔ´ÂëÔÚµ±Ç°Ä¿Â¼
 			set SRCDIRS=.
 		)
 	) else ( set SRCDIRS=%~3)
 ) else (
-REM ======= ä½¿ç”¨é»˜è®¤è®¾ç½® ========
+REM ======= Ê¹ÓÃÄ¬ÈÏÉèÖÃ ========
 	if "%~1" neq "" (
 		if not exist "%~1" (
 			echo %~1 isn't exist
@@ -40,11 +40,11 @@ REM ======= ä½¿ç”¨é»˜è®¤è®¾ç½® ========
 			echo Usage[2]: makedep.bat
 			exit /b 1
 		) else ( set DepDir=%~1)
-		REM è®¾ç½®ä¾èµ–æ–‡ä»¶ç”Ÿæˆåœ¨å½“å‰ç›®å½•
+		REM ÉèÖÃÒÀÀµÎÄ¼şÉú³ÉÔÚµ±Ç°Ä¿Â¼
 	) else ( if "%DepDir%" equ "" set DepDir=.)
 	if "%~2" equ "" (
 		if "%SRCDIRS%" equ "" (
-			REM è®¾ç½®é»˜è®¤æºç åœ¨å½“å‰ç›®å½•
+			REM ÉèÖÃÄ¬ÈÏÔ´ÂëÔÚµ±Ç°Ä¿Â¼
 			set SRCDIRS=.
 		)
 	) else ( set SRCDIRS=%~2)
@@ -53,7 +53,7 @@ REM ======= ä½¿ç”¨é»˜è®¤è®¾ç½® ========
 if "%DepDir%" neq ""  (
 	echo depDir  = %DepDir%
 )
-REM %SRCDIRS:~1,-1% å»æ‰ç¬¬ä¸€ä¸ªå’Œæœ€åä¸€ä¸ªå­—ç¬¦
+REM %SRCDIRS:~1,-1% È¥µôµÚÒ»¸öºÍ×îºóÒ»¸ö×Ö·û
 if "%SRCDIRS%" neq "" (
 	echo srcDirs = %SRCDIRS%
 )
@@ -64,9 +64,9 @@ if "%EXCLUDE%" neq "" (
 REM goto:eof
 REM set OUTDIR=.\bin
 set curdate=%date:~0,4%-%date:~5,2%-%date:~8,2%[%time:~0,2%:%time:~3,2%]
-REM ç”Ÿæˆä¾èµ–
+REM Éú³ÉÒÀÀµ
 
-REM ============== å‡½æ•°è°ƒç”¨ ====================
+REM ============== º¯Êıµ÷ÓÃ ====================
 set srcfile=%DepDir%\msrcfile.lst
 set depfile=%DepDir%\mdepfile.lst
 
@@ -79,27 +79,28 @@ REM ) else (
 	REM if exist "%srcfile%" del /f %srcfile%
 	REM if exist "%depfile%" del /f %depfile%
 	REM echo OBJS is null
-	REM å‡ºé”™è¿”å›
+	REM ³ö´í·µ»Ø
 	REM exit /b 1
 REM )
-REM ç¼–è¯‘
+REM ±àÒë
 REM set TAG=%1
 
 REM nmake.exe /nologo /f Makefile.mak %TAG%
 rem ============= main end ===================
 goto:eof 
 
-REM ========= æ–¹æ³•ä¸€ =============
+REM ========= ·½·¨Ò» =============
 :makeDeplist
 set CPPSRCS=
 set CSRCS=
 set HSRCS=
 REM set EXTS=.H .CPP .C
-REM set OBJS=
+set OBJS2=
+set depcmd=
 REM set srcfile=%DepDir%\msrcfile.lst
 REM set depfile=%DepDir%\mdepfile.lst
 
-REM H%SUFFIX% åç¼€
+REM H%SUFFIX% ºó×º
 set SUFFIX=SRCS
 echo # >%srcfile%
 echo # By Simon %curdate% >>%srcfile%
@@ -109,15 +110,15 @@ echo # >%depfile%
 echo # By Simon %curdate% >>%depfile%
 echo # >>%depfile%
 SETLOCAL enabledelayedexpansion
-rem æ”¯æŒçš„ æ‰©å±•åæ–‡ä»¶
+rem Ö§³ÖµÄ À©Õ¹ÃûÎÄ¼ş
 for %%x in (%EXTS%) do (
-	REM æºæ–‡ä»¶ç›®å½•
+	REM Ô´ÎÄ¼şÄ¿Â¼
 	for %%i in (%SRCDIRS%) do (
 		if exist %%i (
 			REM echo %%i\*%%x
 			if exist "%%i\*%%x" (
 				set /a oneTime=1
-				rem åˆ—ä¸¾ /s å­ç›®å½•
+				rem ÁĞ¾Ù /s ×ÓÄ¿Â¼
 				for /f "delims=" %%j in ('dir /b %%i\*%%x') do (
 					set /a isExist=0
 					for %%e in (%EXCLUDE%) do (
@@ -129,7 +130,7 @@ for %%x in (%EXTS%) do (
 					if "!isExist!" neq "1" (
 						if "!oneTime!" == "1" (
 							rem =============== make srcfile =============
-							rem å»æ‰'.'
+							rem È¥µô'.'
 							set ddot=%%x
 							REM echo !ddot:~1!
 							echo.>>%srcfile%
@@ -137,9 +138,10 @@ for %%x in (%EXTS%) do (
 						)
 						REM echo %%i\%%j \
 						echo.			%%i\%%j \>>%srcfile%
-						rem *.obj æ’é™¤ *.h æ–‡ä»¶
+						rem *.obj ÅÅ³ı *.h ÎÄ¼ş
 						if "%%x" neq ".H" (
 							set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
+							set OBJS2=!OBJS2! %%~nj.obj
 							rem == make depfile ==
 							if "!oneTime!" == "1" (
 								echo.>>%depfile%
@@ -198,11 +200,41 @@ REM if "%OBJS%" neq "" (
 	echo.			%OBJS%>>%srcfile%
 REM )
 echo.>>%srcfile%
-
+REM === ¼òµ¥ÒÀÀµ¹ØÏµ: Ìí¼ÓÓëobjÎÄ¼şÃûÏàÍ¬µÄÍ·ÎÄ¼ş*.h ÒÀÀµ ===================
+REM ¼òµ¥ÒÀÀµ¹ØÏµ
+REM add 2015.02.06
+if "%HSRCS%" neq "" (
+	echo.>>%depfile%
+	echo ############# Ìí¼ÓÓëobjÎÄ¼şÃûÏàÍ¬µÄÍ·ÎÄ¼ş*.h ÒÀÀµ ###############>>%depfile%
+	for %%o in (%OBJS2%) do (
+		set depcmd=^$^(OUTDIR^)\%%o:
+		REM *.cpp
+		for %%s in (%CPPSRCS%) do (
+			if "%%~no" equ "%%~ns" (
+				set depcmd=!depcmd! %%s
+			)
+		)
+		REM *.c
+		for %%s in (%CSRCS%) do (
+			if "%%~no" equ "%%~ns" (
+				set depcmd=!depcmd! %%s
+			)
+		)
+		REM *.h
+		for %%h in (%HSRCS%) do (
+			if "%%~no" equ "%%~nh" (
+				set depcmd=!depcmd! %%h
+				echo.>>%depfile%
+				echo !depcmd!>>%depfile%
+			)
+		)
+	)
+)
+REM ====================== END ============================
 ENDLOCAL
 goto:eof
 
-rem ======== æ–¹æ³•äºŒ é€ä¸ªç±»å‹ç”Ÿæˆ ===========
+rem ======== ·½·¨¶ş Öğ¸öÀàĞÍÉú³É ===========
 :makeDeplistByOne
 rem to make *.cpp
 set CPPSRCS=

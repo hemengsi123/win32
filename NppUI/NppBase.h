@@ -10,9 +10,11 @@
 #include <shlobj.h>
 #include <atlbase.h>
 #include <commctrl.h>
+
+// skip: warning C4996: 'strcpy': This function or variable may be unsafe
+#pragma warning(disable:4996)
 /////////////////////////////
 // syserror
-
 #define SYSERRm_hSelf_NULL	56	
 #define SYSERR_HWND_NULL  -1
 

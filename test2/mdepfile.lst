@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-02-05[21:34] 
+# By Simon 2015-02-06[13:56] 
 # 
 
 {.}.CPP{$(OUTDIR)}.obj::
@@ -10,3 +10,39 @@
 
 {..\utils}.CPP{$(OUTDIR)}.obj::
 	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $< 
+
+############# 添加与obj文件名相同的头文件*.h 依赖 ###############
+
+$(OUTDIR)\ExplorerDlg.obj: .\ExplorerDlg.cpp .\ExplorerDlg.h
+
+$(OUTDIR)\NppBase.obj: ..\nppUI\NppBase.cpp ..\nppUI\NppBase.h
+
+$(OUTDIR)\NppButton.obj: ..\nppUI\NppButton.cpp ..\nppUI\NppButton.h
+
+$(OUTDIR)\NppCombox.obj: ..\nppUI\NppCombox.cpp ..\nppUI\NppCombox.h
+
+$(OUTDIR)\NppFile.obj: ..\nppUI\NppFile.cpp ..\nppUI\NppFile.h
+
+$(OUTDIR)\NppFont.obj: ..\nppUI\NppFont.cpp ..\nppUI\NppFont.h
+
+$(OUTDIR)\NppImageList.obj: ..\nppUI\NppImageList.cpp ..\nppUI\NppImageList.h
+
+$(OUTDIR)\NppListView.obj: ..\nppUI\NppListView.cpp ..\nppUI\NppListView.h
+
+$(OUTDIR)\NppMenu.obj: ..\nppUI\NppMenu.cpp ..\nppUI\NppMenu.h
+
+$(OUTDIR)\NppStatic.obj: ..\nppUI\NppStatic.cpp ..\nppUI\NppStatic.h
+
+$(OUTDIR)\NppStaticDialog.obj: ..\nppUI\NppStaticDialog.cpp ..\nppUI\NppStaticDialog.h
+
+$(OUTDIR)\NppString.obj: ..\nppUI\NppString.cpp ..\nppUI\NppString.h
+
+$(OUTDIR)\NppToolTip.obj: ..\nppUI\NppToolTip.cpp ..\nppUI\NppToolTip.h
+
+$(OUTDIR)\NppTreeView.obj: ..\nppUI\NppTreeView.cpp ..\nppUI\NppTreeView.h
+
+$(OUTDIR)\NppWnd.obj: ..\nppUI\NppWnd.cpp ..\nppUI\NppWnd.h
+
+$(OUTDIR)\SysMsg.obj: ..\nppUI\SysMsg.cpp ..\nppUI\SysMsg.h
+
+$(OUTDIR)\winVersion.obj: ..\utils\winVersion.cpp ..\utils\winVersion.h

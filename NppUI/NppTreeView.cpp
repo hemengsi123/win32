@@ -105,7 +105,7 @@ BOOL CNppTreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveCh
 	}
 
 	/* mark as cut if the icon is hidden */
-	if (bHidden == true)
+	if (bHidden == TRUE)
 	{
 	    item.mask		|= LVIF_STATE;
 		item.state		|= LVIS_CUT;
@@ -113,7 +113,7 @@ BOOL CNppTreeView::updateItem(HTREEITEM hUpdateItem, LPTSTR lpszItem, int haveCh
 	}
 
 	/* delete children items when available but not needed */
-	if ((haveChildren == true) && bDelChildren && TreeView_GetChild(m_hSelf, hUpdateItem))	
+	if ((haveChildren == TRUE) && bDelChildren && TreeView_GetChild(m_hSelf, hUpdateItem))	
 	{
 		delChildren(hUpdateItem);
 	}

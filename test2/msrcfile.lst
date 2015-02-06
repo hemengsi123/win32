@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-02-05[21:34] 
+# By Simon 2015-02-06[13:56] 
 # 
 
 HSRCS = $(HSRCS) \
@@ -29,7 +29,7 @@ HSRCS = $(HSRCS) \
 			..\utils\winVersion.h \
 
 CPPSRCS = $(CPPSRCS) \
-			.\ExplolerDlg.cpp \
+			.\ExplorerDlg.cpp \
 			.\main.cpp \
 
 CPPSRCS = $(CPPSRCS) \
@@ -53,5 +53,5 @@ CPPSRCS = $(CPPSRCS) \
 			..\utils\winVersion.cpp \
 
 OBJS = $(OBJS) \
-			 $(OUTDIR)\ExplolerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\NppBase.obj $(OUTDIR)\NppButton.obj $(OUTDIR)\NppCombox.obj $(OUTDIR)\NppFile.obj $(OUTDIR)\NppFont.obj $(OUTDIR)\NppImageList.obj $(OUTDIR)\NppListView.obj $(OUTDIR)\NppMenu.obj $(OUTDIR)\NppStatic.obj $(OUTDIR)\NppStaticDialog.obj $(OUTDIR)\NppString.obj $(OUTDIR)\NppToolTip.obj $(OUTDIR)\NppTreeView.obj $(OUTDIR)\NppWnd.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\winVersion.obj
+			 $(OUTDIR)\ExplorerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\NppBase.obj $(OUTDIR)\NppButton.obj $(OUTDIR)\NppCombox.obj $(OUTDIR)\NppFile.obj $(OUTDIR)\NppFont.obj $(OUTDIR)\NppImageList.obj $(OUTDIR)\NppListView.obj $(OUTDIR)\NppMenu.obj $(OUTDIR)\NppStatic.obj $(OUTDIR)\NppStaticDialog.obj $(OUTDIR)\NppString.obj $(OUTDIR)\NppToolTip.obj $(OUTDIR)\NppTreeView.obj $(OUTDIR)\NppWnd.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\winVersion.obj
 
