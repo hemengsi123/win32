@@ -67,6 +67,7 @@ typedef enum {
 	SFMT_MAX
 } eSizeFmt;
 tstring GetFileSizeFmtStr(unsigned __int64 size, eSizeFmt sizeFmt = SFMT_KBYTE);
+void UnicodeToUTF8(const wchar_t* str, char *result, int bufLen);
 //============================== shell function ===============================
 /*
     CSIDL_BITBUCKET, CSIDL_CONTROLS, CSIDL_DESKTOP, CSIDL_DESKTOPDIRECTORY,   

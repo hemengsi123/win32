@@ -1,5 +1,19 @@
 #ifndef EXPLOERDLG_ONE_H
 #define EXPLOERDLG_ONE_H
+#include <map>
+/* Explorer messages */
+enum eExpMessage
+{
+	EXX_MESSAGES		= WM_USER + 20,
+	EXM_CHANGECOMBO,
+	EXM_LISTVIEW_UPDATE,
+	EXM_OPENDIR,
+	EXM_OPENFILE,
+	EXM_RIGHTCLICK,
+	EXM_TOOLTIP,
+	EXM_UPDATE_PATH,
+
+};
 
 typedef enum {
 	EID_INIT = 0,
@@ -21,11 +35,17 @@ typedef struct {
 	LPBOOL		pIsValidDrive;
 } tGetVolumeInfo;
 
-// typedef enum {
-	// DEVT_DRIVE,
-	// DEVT_DIRECTORY,
-	// DEVT_FILE
-// } eDevType;
+struct FunctoriString
+{
+    bool operator()(const tstring& lhs, const tstring& rhs)const
+    {
+		if(_tcsicmp(lhs.c_str(), rhs.c_str()) < 0)
+			return true;
+		else
+			return false;
+    }
+};
+
 typedef struct{
 		tstring	strName;
 		DWORD	dwAttributes;
@@ -72,6 +92,8 @@ public:
 	BOOL OnBtnAddAll(NppMsgParams & msg);
 	BOOL OnComboxList(NppMsgParams & msg);
 	BOOL OnComboxEdit(NppMsgParams & msg);
+	void UpdateListViews();
+	UINT AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse = FALSE);
 protected:
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;
@@ -87,12 +109,16 @@ protected:
 	CNppButton    m_btnAddAll;
 	CNppButton    m_btnDel;
 	CNppButton    m_btnDelAll;
+	CNppCheckbox  m_chkRecurse;
+	CNppRadioButton m_rd_test;
+	CNppStatic      m_stCount;
 	int           m_nlvAllFolders;
 	int           m_nlvAllItems;
-	HIMAGELIST	m_hImageListSmall;
-	HANDLE	m_hExploreVolumeThread;
+	HIMAGELIST	  m_hImageListSmall;
+	HANDLE	      m_hExploreVolumeThread;
 	std::vector<ListViewItem> m_vListViewAll;
 	std::vector<ListViewItem> m_vListViewFiles;
+	std::map<tstring, bool/*, FunctoriString*/>   m_mFileLists; // 1-œ‘ æ£¨0-≤ªœ‘ æ
 };
 
 #endif

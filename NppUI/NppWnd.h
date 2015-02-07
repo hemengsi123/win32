@@ -177,8 +177,10 @@ public:
 	int          getHeight() const;
     BOOL         isVisible() const;
     BOOL         isFocus()const;
+    HWND         setFocus();
     BOOL         isWnd()const;
     BOOL         isEnabled()const;
+    BOOL         setEnable(BOOL bEnable=TRUE);
 	HWND         getHSelf() const;
 	void         setHSelf(HWND hSelf);
 	void         getFocus() const;
@@ -239,7 +241,7 @@ class CNppCtrlWnd: public CNppBaseWnd
 {
 public:
 	CNppCtrlWnd();
-	~CNppCtrlWnd();
+	virtual ~CNppCtrlWnd();
 	static  UINT getCtrlCount();
 	virtual void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

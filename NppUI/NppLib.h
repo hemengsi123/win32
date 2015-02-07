@@ -22,7 +22,7 @@
 #include "NppCombox.h"
 #include "NppButton.h"
 #include "NppFont.h"
-
+#include "NppStatic.h"
 
 //typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > tstring;
 

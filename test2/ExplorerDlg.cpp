@@ -8,7 +8,7 @@ NPP_BEGIN_MESSAGE_MAP(CExplorerDlg)
 //NPP_ON_CTRL_MSGMAP(WM_KEYUP, OnClick) WM_LBUTTONDOWN  BN_CLICKED IDC_BTN_DEL
 NPP_ON_CTRL_MSGMAP_ID(IDC_CBO_FILTER, WM_KEYUP, OnComboxEdit) 
 //NPP_ON_CTRL_MSGMAP_NAME(_T("btnAddAll"), WM_LBUTTONDOWN, OnBtnAddAll)
-NPP_ON_MSGMAP_CMD(-1, BN_CLICKED, OnBtnAddAll)
+ NPP_ON_MSGMAP_CMD(-1, BN_CLICKED, OnBtnAddAll)
 //NPP_ON_MSGMAP_CMD(IDC_CBO_FILTER, -1, OnComboxList)
 //NPP_ON_MSGMAP_NOTIFY(IDC_LIST_ALL, -1, );
 NPP_END_MESSAGE_MAP()
@@ -81,15 +81,27 @@ void CExplorerDlg::initCtrl()
 	m_btnAdd.create();
 	m_btnAddAll.init(m_hInst, m_hSelf, IDC_BTN_ADDALL, _T("btnAddAll"));
 	m_btnAddAll.create();
+	if( !m_listViewAll.isFocus() )
+		m_btnAddAll.setEnable(FALSE);
 	m_btnDel.init(m_hInst, m_hSelf, IDC_BTN_DEL);
 	m_btnDel.create();
 	m_btnDelAll.init(m_hInst, m_hSelf, IDC_BTN_DELALL);
 	m_btnDelAll.create();
+	if( !m_listViewFiles.isFocus() )
+		m_btnDel.setEnable(FALSE);
 	//m_btnAdd.alignTo(m_hSelf, TOPALIGN, RIGHTALIGN, 10, 10);
+	// checkbox
+	m_chkRecurse.init(m_hInst, m_hSelf, IDC_CHK_RECURCE);
+	m_chkRecurse.create(_T("Recursive"), 0, 0, 0, 70, 20);
+	m_chkRecurse.alignTo(m_btnAdd.getHSelf(), TOPALIGN, LEFTALIGN, 0, 20);
+	
+	m_rd_test.init(m_hInst, m_hSelf, IDC_RDI_TEST);
+	m_rd_test.create(_T("Recursive"), 0, 0, 0, 70, 20);
+	m_rd_test.alignTo(m_comBoFilter2.getHSelf(), RIGHTALIGN, DEFALIGN, 0, 0);
 	
 	CNppFont nppFont;
 	nppFont.setFont(m_btnAdd.getHSelf(), m_btnAddAll.getHSelf());
-	
+	nppFont.setFont(m_chkRecurse.getHSelf(), m_btnAddAll.getHSelf());
 	//m_treeView2.setImageList(true);
 	m_treeView2.setImageList(m_imgLst.getSysImgLst());
 
@@ -105,13 +117,19 @@ void CExplorerDlg::initCtrl()
 	
 	m_listViewFiles.hiddenHeader();
 	//ListView_SetItemCountEx(m_listViewFiles.getHSelf(), 2, LVSICF_NOSCROLL);
-	m_listViewFiles.addColumn(_T("File"), 355);
-	m_listViewFiles.addItem(_T("test1.txt"), 0);
-	m_listViewFiles.addItem(_T("test2.txt"), 1);
+	m_listViewFiles.addColumn(_T("File"), 535);
+//	m_listViewFiles.addItem(_T("test1.txt"), 0);
+//	m_listViewFiles.addItem(_T("test2.txt"), 1);
+//	static ctrl
+	m_stCount.init(m_hInst, m_hSelf, 0);
+	m_stCount.create("No: 0", 0, 0, 0, 50, 20);
+	nppFont.setFont(m_stCount.getHSelf(), m_btnAddAll.getHSelf());
+	m_stCount.alignTo(m_listViewFiles.getHSelf(), TOPALIGN, LEFTALIGN, 0, 2);
 	
 }
 LRESULT CExplorerDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	BOOL bDone = TRUE;
 	switch(uMsg)
 	{
 	// OnInitDlg
@@ -148,34 +166,108 @@ LRESULT CExplorerDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		OnDestroy();
 		return TRUE;
 	}
-	default:
+	case EXM_LISTVIEW_UPDATE:
+	{
+		printf(_T("EXM_LISTVIEW_UPDATE recv\n"));
+		UpdateListViews();
 		break;
 	}
+	default:
+		bDone = FALSE;
+		break;
+	}
+	if(bDone)
+		return TRUE;
+		
 	return CNppDlg::handleMessage(hwnd, uMsg, wParam, lParam);
 }
 
 BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 {
-	if( iCtrlID== IDC_BTN_ADD )
+	if(uMsg == BN_CLICKED)
 	{
-		if(uMsg == BN_CLICKED)
+		HTREEITEM hSelTreeItem = NULL;
+		if( iCtrlID== IDC_BTN_ADD )
 		{
-			int hotItem = this->m_listViewAll.getMarkItem();
-			TCHAR lpszText[MAX_PATH] = {0};
-			m_listViewAll.getItemText(hotItem, 0, lpszText, MAX_PATH);
-			ListViewItem lstItem = m_vListViewAll.at(hotItem);
-			dbg_log(_T("BN_DBLCLK %d, txt = %s"), hotItem, lpszText);
-			dbg_log("fullpath = %s", lstItem.m_fullPath.c_str());
-			m_vListViewFiles.push_back(lstItem);
-			/*
-			static CNppDlg nppDlg;
-			nppDlg.init(m_hInst, m_hSelf);
-			nppDlg.create(_T("Hello"), (WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_BORDER), 0, 0, 40, 32);
-			nppDlg.gotoCenter();
-			nppDlg.doModal();*/
+			UINT hotItem = this->m_listViewAll.getMarkItem();
+			if( hotItem >= 0 && hotItem < m_vListViewAll.size() )
+			{
+				TCHAR lpszText[MAX_PATH] = {0};
+				m_listViewAll.getItemText(hotItem, 0, lpszText, MAX_PATH);
+				printf(_T("hotItem = %d, size = %d\n"), hotItem, m_vListViewAll.size());
+				ListViewItem lstItem = m_vListViewAll.at(hotItem);
+				printf(_T("BN_DBLCLK %d, txt = %s, "), hotItem, lpszText);
+				printf(_T("fullpath = %s\n"), lstItem.m_fullPath.c_str());
+				//m_vListViewFiles.push_back(lstItem);
+				AddFiles2FileList(&lstItem, m_chkRecurse.isCheck());
+				m_vListViewAll.erase(m_vListViewAll.begin()+hotItem);
+				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+			}
+			else if( hotItem == -1 && (hSelTreeItem = m_treeView2.getSelect() ) != NULL)
+			{
+				TCHAR szItemPath[MAX_PATH] = {0};
+				m_treeView2.getItemPath(hSelTreeItem, szItemPath);
+				GetFolderFullPath(hSelTreeItem, szItemPath, _T(""));
+				ListViewItem lvItem;
+				int iIconNormal   = 0;
+				int iIconSelected = 0;
+				int iIconOverlayed = 0;
+				lvItem.m_bIsDir     = true;
+				lvItem.m_fileExt.clear();
+				lvItem.m_fileExt    = _T("<DIR>");
+				lvItem.m_currentDir = szItemPath;
+				lvItem.m_fileName   = _T("");
+				lvItem.m_filesize   = 0;//searchFile.findGetSize(lpfindData);
+				lvItem.m_szfilesize = _T("");
+				lvItem.m_fullPath   = szItemPath;
+				AddFiles2FileList(&lvItem, m_chkRecurse.isCheck());
+				m_vListViewAll.clear();
+				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+			}
 		}
+		else if( iCtrlID== IDC_BTN_ADDALL)
+		{
+			if(m_vListViewAll.size() > 0 )
+			{
+				std::vector<ListViewItem>::iterator iter = m_vListViewAll.begin();
+				for(; iter != m_vListViewAll.end(); ++iter)
+				{
+					//m_vListViewFiles.push_back(*iter);
+					AddFiles2FileList(&(*iter), m_chkRecurse.isCheck());
+				}
+				m_vListViewAll.clear();
+				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+			}
+		}
+		else if( iCtrlID == IDC_BTN_DEL )
+		{
+			UINT hotItem = this->m_listViewFiles.getMarkItem();
+			if( hotItem >= 0 && hotItem < m_vListViewFiles.size() )
+			{
+				TCHAR lpszText[MAX_PATH] = {0};
+				m_listViewFiles.getItemText(hotItem, 0, lpszText, MAX_PATH);
+				printf(_T("BN_DBLCLK %d, txt = %s\n"), hotItem, lpszText);
+				m_mFileLists.erase(tstring(lpszText));
+				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+			}
+		}
+		else if(iCtrlID == IDC_BTN_DELALL)
+		{
+			if(m_vListViewFiles.size() > 0 )
+			{
+//				std::vector<ListViewItem>::iterator iter = m_vListViewFiles.begin();
+//				for(; iter != m_vListViewFiles.end(); ++iter)
+//				{
+//					m_vListViewAll.push_back(*iter);
+//				}
+//				m_vListViewFiles.clear();
+				m_mFileLists.clear();
+				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+			}
+		}
+
 	}
-	else if(iCtrlID == IDC_CBO_FILTER)
+	if(iCtrlID == IDC_CBO_FILTER)
 	{
 		if( uMsg == CBN_EDITUPDATE)
 		{
@@ -187,11 +279,7 @@ BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 		}
 	
 	}
-	else if(iCtrlID == IDC_LIST_ALL)
-	{
-		dbg_log("IDC_LIST_ALL => uMsg: %04X", uMsg);
-	}
-	
+
 	return TRUE;
 }
 void CExplorerDlg::OnDestroy()
@@ -203,6 +291,11 @@ BOOL CExplorerDlg::OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 	BOOL bDone = FALSE;
 	if(iCtrlID == IDC_LIST_ALL)
 	{
+		if( m_listViewAll.isFocus() )
+		{
+			m_btnAddAll.setEnable();
+			m_btnDel.setEnable(FALSE);
+		}
 		if(uMsg == NM_CLICK)
 		{
 			LPNMCLICK lpNmclick = (LPNMCLICK)lpNmhdr;
@@ -216,6 +309,14 @@ BOOL CExplorerDlg::OnNotify(UINT iCtrlID, UINT uMsg, LPNMHDR lpNmhdr)
 		else if(uMsg == LVN_COLUMNCLICK)
 		{
 			dbg_log("LVN_COLUMNCLICK");
+		}
+	}
+	else if(iCtrlID == IDC_LIST_FILES)
+	{
+		if( m_listViewFiles.isFocus() )
+		{
+			m_btnDel.setEnable();
+			m_btnAddAll.setEnable(FALSE);
 		}
 	}
 	else if (lpNmhdr->hwndFrom == m_treeView2.getHSelf())
@@ -561,36 +662,12 @@ BOOL CExplorerDlg::ExploreVolumeInformation(LPCTSTR pszDrivePathName, LPTSTR psz
 
 void CExplorerDlg::NotifyEvent(DWORD event)
 {
-    // LONG oldCur = ::SetClassLong(m_hSelf, GCL_HCURSOR, (LONG)_hCurWait);
-    // ::EnableWindow(m_hSelf, FALSE);
-	// ::GetCursorPos(&pt);
-	// ::SetCursorPos(pt.x, pt.y);
-
 	switch(event)	
 	{
 		case EID_INIT :
 		{
-			
 			/* initial tree */
 			UpdateDevices();
-
-			// /* initilize file list */
-			// _FileList.SetToolBarInfo(&_ToolBar , IDM_EX_UNDO, IDM_EX_REDO);
-
-			// /* set data */
-			// SelectItem(_pExProp->szCurrentPath);
-
-			// /* initilize combo */
-			// _ComboFilter.setComboList(_pExProp->vStrFilterHistory);
-			// _ComboFilter.addText("*.*");
-			// _ComboFilter.setText((LPTSTR)_pExProp->strLastFilter.c_str());
-			// _FileList.filterFiles((LPTSTR)_pExProp->strLastFilter.c_str());
-
-			// /* Update "Go to Folder" icon */
-			// NotifyNewFile();
-
-			// /* resize to remove splitter problems */
-			// ::SendMessage(m_hSelf, WM_SIZE, 0, 0);
 			break;
 		}
 		case EID_UPDATE_DEVICE :
@@ -608,23 +685,8 @@ void CExplorerDlg::NotifyEvent(DWORD event)
 		default:
 			break;
 	}
-
-    // ::SetClassLong(m_hSelf, GCL_HCURSOR, oldCur);
-	// ::EnableWindow(m_hSelf, TRUE);
-	// ::GetCursorPos(&pt);
-	// ::SetCursorPos(pt.x, pt.y);
 }
 
-struct FunctoriString
-{
-    bool operator()(const tstring& lhs, const tstring& rhs)const
-    {
-		if(_tcsicmp(lhs.c_str(), rhs.c_str()) < 0)
-			return true;
-		else
-			return false;
-    }
-};
 struct FunctorLVItem
 {
 	bool operator()(const ListViewItem& lhs, const ListViewItem& rhs )
@@ -697,18 +759,6 @@ void CExplorerDlg::UpDateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, B
     	int iOverloadIcon   = 0;
         if(m_treeView2.getText(hCurrItem, lpszItem, MAX_PATH))
         {
-//        	while(_tcscmp(lpszItem, vFolderList[i].c_str()) != 0 && hCurrItem != NULL)
-//        	{
-//				// if not exist then add it
-//	            if(IsExistAfter(vFolderList[i].c_str(), hCurrItem))
-//	            {
-//					hCurrItem = m_treeView2.delItem(hCurrItem);
-//	            }
-//	            else
-//	            {
-//	                
-//	            }
-//        	}
         	// if exist to update or add 
             if(_tcscmp(lpszItem, vFolderList[i].c_str()) == 0)
             {
@@ -852,25 +902,31 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			int iIconSelected  = 0;
 			int iIconOverlayed = 0;
 			TCHAR szTmpFile[MAX_PATH] = {0};
-			lvItem.m_bIsDir     = false;
-			lvItem.m_currentDir = tstring(lpszSelDir);
-			lvItem.m_fileName  = searchFile.rmExtension(searchFile.findGetName());
 			_stprintf(szTmpFile, _T("%s%s"), lpszSelDir, searchFile.findGetName());
 			lvItem.m_fullPath  = szTmpFile;
-			lpszExt = searchFile.getExtension(searchFile.findGetName());
-			if( lpszExt != NULL)
+
+			std::map<tstring, bool/*, FunctoriString*/>::iterator iter2 = m_mFileLists.find(lvItem.m_fullPath);
+			if( iter2 == m_mFileLists.end() )
 			{
-				lvItem.m_fileExt = ++lpszExt;
+				lvItem.m_bIsDir     = false;
+				lvItem.m_currentDir = tstring(lpszSelDir);
+				lvItem.m_fileName  = searchFile.rmExtension(searchFile.findGetName());
+				lpszExt = searchFile.getExtension(searchFile.findGetName());
+				if( lpszExt != NULL)
+				{
+					lvItem.m_fileExt = ++lpszExt;
+				}
+				else
+					lvItem.m_fileExt = _T("");
+				
+				lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
+				m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
+				lvItem.m_iIcon      = iIconNormal;
+				lvItem.m_iIconOverlay = iIconOverlayed;
+				lvItem.m_szfilesize = GetFileSizeFmtStr(lvItem.m_filesize, SFMT_DYNAMIC);
+				vTmpFiles.push_back(lvItem);
 			}
-			else
-				lvItem.m_fileExt = _T("");
 			
-			lvItem.m_filesize   = searchFile.findGetSize(lpfindData);
-			m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
-			lvItem.m_iIcon      = iIconNormal;
-			lvItem.m_iIconOverlay = iIconOverlayed;
-			lvItem.m_szfilesize = GetFileSizeFmtStr(lvItem.m_filesize, SFMT_DYNAMIC);
-			vTmpFiles.push_back(lvItem);
 		}
 		else if( IsValidFolder(lpfindData) )
 		{
@@ -878,20 +934,26 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 			int iIconNormal   = 0;
 			int iIconSelected = 0;
 			int iIconOverlayed = 0;
-			lvItem.m_bIsDir     = true;
-			lvItem.m_fileExt.clear();
-			lvItem.m_fileExt    = _T("<DIR>");
-			lvItem.m_currentDir = tstring(lpszSelDir);
 			lvItem.m_fileName   = tstring(searchFile.findGetName());
-			lvItem.m_filesize   = 0;//searchFile.findGetSize(lpfindData);
-			lvItem.m_szfilesize = _T("");
 			_stprintf(szTmpFile, _T("%s%s\\"), lpszSelDir, lvItem.m_fileName.c_str());
 			lvItem.m_fullPath   = szTmpFile;
-			m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
-			lvItem.m_iIcon      = iIconNormal;
-			lvItem.m_iIconOverlay = iIconOverlayed;
 			
-			vTmpFolders.push_back(lvItem);
+			std::map<tstring, bool/*, FunctoriString*/>::iterator iter2 = m_mFileLists.find(lvItem.m_fullPath);
+			if( iter2 == m_mFileLists.end() )
+			{
+				lvItem.m_bIsDir     = true;
+				lvItem.m_fileExt.clear();
+				lvItem.m_fileExt    = _T("<DIR>");
+				lvItem.m_currentDir = tstring(lpszSelDir);
+				lvItem.m_filesize   = 0;//searchFile.findGetSize(lpfindData);
+				lvItem.m_szfilesize = _T("");
+				m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
+				lvItem.m_iIcon      = iIconNormal;
+				lvItem.m_iIconOverlay = iIconOverlayed;
+				
+				vTmpFolders.push_back(lvItem);
+			}
+			
 		}
 		
 		lpfindData = searchFile.findNextFile();
@@ -921,8 +983,6 @@ void CExplorerDlg::UpdateFileListAll(LPCTSTR lpszSelDir, LPCTSTR lpszWildcard)
 }
 BOOL CExplorerDlg::OnClick(NppMsgParams & msg)
 {
-	//bg_log("m_com = %p, sender = %p, this= %p", &m_comBoFilter, msg.pSender, this);
-	//dbg_log("msg.hwnd = %p, m_self = %p", msg.hWnd, m_comBoFilter.getHSelf());
 	if(msg.iCtrlID == IDC_CBO_FILTER)
 	{
 		
@@ -965,4 +1025,141 @@ BOOL CExplorerDlg::OnComboxEdit(NppMsgParams & msg)
 	
 	msg.lResult = TRUE;
 	return msg.lResult;
+}
+
+void CExplorerDlg::UpdateListViews()
+{
+	m_listViewAll.clearItem();
+	//std::sort(m_vListViewAll.begin(), m_vListViewAll.end(), FunctorLVItem());
+	std::vector<ListViewItem>::iterator iter = m_vListViewAll.begin();
+	for(int i=0; iter != m_vListViewAll.end(); ++iter,++i)
+	{
+		m_listViewAll.addItem(iter->m_fileName.c_str(), i, iter->m_iIcon);
+		m_listViewAll.addSubItem(iter->m_fileExt.c_str(), 1);
+		m_listViewAll.addSubItem(iter->m_szfilesize.c_str(), 2);
+	}
+	m_listViewFiles.clearItem();
+	int iCount = 0;
+	std::map<tstring, bool/*, FunctoriString*/>::iterator iter2 = m_mFileLists.begin();
+	for(int i=0; iter2 != m_mFileLists.end(); ++iter2, ++i)
+	{
+//		printf("%s\n", iter2->first.c_str());
+		if( iter2->second == true)
+		{
+			m_listViewFiles.addItem(iter2->first.c_str(), i);
+			++iCount;
+		}
+	}
+	TCHAR szBuff[32] = {0};
+	_sntprintf(szBuff, sizeof(szBuff), _T("No: %d"), iCount);
+	m_stCount.setWndText(szBuff);
+}
+UINT CExplorerDlg::AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse)
+{
+	CNppFile fileOp(plvItem->m_fullPath.c_str());
+	BOOL bIsDir = fileOp.isDir();
+	if( bIsDir && bRecurse)
+	{
+		m_mFileLists[plvItem->m_fullPath] = false;
+		LPWIN32_FIND_DATA lpFindData = fileOp.findFirstFile();
+		while(lpFindData != NULL)
+		{
+			ListViewItem lvItem;
+			
+			if(IsValidFile(lpFindData) )
+			{
+				LPCTSTR lpszExt = NULL;
+				int iIconNormal    = 0;
+				int iIconSelected  = 0;
+				int iIconOverlayed = 0;
+				TCHAR szTmpFile[MAX_PATH] = {0};
+				lvItem.m_bIsDir     = false;
+				lvItem.m_currentDir = tstring(fileOp.getFullPath());
+				lvItem.m_fileName  = fileOp.rmExtension(fileOp.findGetName());
+				_stprintf(szTmpFile, _T("%s%s"), fileOp.getFullPath(), fileOp.findGetName());
+				lvItem.m_fullPath  = szTmpFile;
+				lpszExt = fileOp.getExtension(fileOp.findGetName());
+				if( lpszExt != NULL)
+				{
+					lvItem.m_fileExt = ++lpszExt;
+				}
+				else
+					lvItem.m_fileExt = _T("");
+				
+				lvItem.m_filesize   = fileOp.findGetSize(lpFindData);
+				m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
+				lvItem.m_iIcon      = iIconNormal;
+				lvItem.m_iIconOverlay = iIconOverlayed;
+				lvItem.m_szfilesize = GetFileSizeFmtStr(lvItem.m_filesize, SFMT_DYNAMIC);
+				m_vListViewFiles.push_back(lvItem);
+				m_mFileLists[lvItem.m_fullPath] = true;
+			}
+			else if( IsValidFolder(lpFindData) )
+			{
+				TCHAR szTmpFile[MAX_PATH] = {0};
+				int iIconNormal   = 0;
+				int iIconSelected = 0;
+				int iIconOverlayed = 0;
+				lvItem.m_bIsDir     = true;
+				lvItem.m_fileExt.clear();
+				lvItem.m_fileExt    = _T("<DIR>");
+				lvItem.m_currentDir = fileOp.getFullPath();
+				lvItem.m_fileName   = tstring(fileOp.findGetName());
+				lvItem.m_filesize   = 0;//searchFile.findGetSize(lpfindData);
+				lvItem.m_szfilesize = _T("");
+				_stprintf(szTmpFile, _T("%s%s\\"), fileOp.getFullPath(), lvItem.m_fileName.c_str());
+				lvItem.m_fullPath   = szTmpFile;
+				m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
+				lvItem.m_iIcon      = iIconNormal;
+				lvItem.m_iIconOverlay = iIconOverlayed;
+				AddFiles2FileList(&lvItem, bRecurse);
+			}
+			lpFindData = fileOp.findNextFile();
+			
+		}
+	}
+	else if( bIsDir )
+	{
+		LPWIN32_FIND_DATA lpFindData = fileOp.findFirstFile();
+		while(lpFindData != NULL)
+		{
+			printf("good jobs: %s\n", fileOp.findGetName());
+			if( IsValidFile(lpFindData) )
+			{
+				ListViewItem lvItem;
+				LPCTSTR lpszExt = NULL;
+				int iIconNormal    = 0;
+				int iIconSelected  = 0;
+				int iIconOverlayed = 0;
+				TCHAR szTmpFile[MAX_PATH] = {0};
+				lvItem.m_bIsDir     = false;
+				lvItem.m_currentDir = tstring(fileOp.getFullPath());
+				lvItem.m_fileName  = fileOp.rmExtension(fileOp.findGetName());
+				_stprintf(szTmpFile, _T("%s%s"), fileOp.getFullPath(), fileOp.findGetName());
+				lvItem.m_fullPath  = szTmpFile;
+				lpszExt = fileOp.getExtension(fileOp.findGetName());
+				if( lpszExt != NULL)
+				{
+					lvItem.m_fileExt = ++lpszExt;
+				}
+				else
+					lvItem.m_fileExt = _T("");
+				
+				lvItem.m_filesize   = fileOp.findGetSize(lpFindData);
+				m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
+				lvItem.m_iIcon      = iIconNormal;
+				lvItem.m_iIconOverlay = iIconOverlayed;
+				lvItem.m_szfilesize = GetFileSizeFmtStr(lvItem.m_filesize, SFMT_DYNAMIC);
+				m_vListViewFiles.push_back(lvItem);
+				m_mFileLists[lvItem.m_fullPath] = true;
+			}
+			lpFindData = fileOp.findNextFile();
+		}
+	}
+	else
+	{
+		m_vListViewFiles.push_back(*plvItem);
+		m_mFileLists[plvItem->m_fullPath] = true;
+	}
+	return 0;
 }

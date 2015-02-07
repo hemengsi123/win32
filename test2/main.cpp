@@ -15,6 +15,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE hPreInstance, _In_ L
 
 	try
 	{
+		printf("subsystem\n");
 		expDlg.init(hInstance, NULL);
 		//expDlg.create(hInstance, IDD_EXPLORER_DLG);
 		expDlg.create(IDD_EXPLORER_DLG);

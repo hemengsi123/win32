@@ -399,7 +399,14 @@ BOOL CNppBaseWnd::isFocus()const
 {
 	return (::GetFocus() == m_hSelf);
 }
-
+HWND CNppBaseWnd::setFocus()
+{
+	return ::SetFocus(m_hSelf);
+}
+BOOL CNppBaseWnd::setEnable(BOOL bEnable)
+{
+	return ::EnableWindow(m_hSelf, bEnable);
+}
 HWND CNppBaseWnd::getHSelf() const 
 {
 	return m_hSelf;

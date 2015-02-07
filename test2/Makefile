@@ -9,6 +9,7 @@ SRCDIRS = . ..\nppUI ..\utils
 # 排除
 EXCLUDE = TreeHelperClass
 DEBUG   = Debug
+# UNICODE = true
 MAKEDEP = true
 # OBJS    = $(OUTDIR)\main.obj
 RESRCS  = $(OUTDIR)\ExplorerDlg.res
@@ -32,8 +33,10 @@ CFLAGS    = /c /nologo /Zi /W3 /Od /FD /Gm /EHsc /MTd /GS /fp:precise /Zc:wchar_
 # AFLAGS    = /Fa"$*.asm"
 
 DEFINE    = /D WIN32 /D _WIN32
+!IF "$(UNICODE)" =="true"
 # ENCODE    = /D UNICODE /D _UNICODE
-# DEFINE    = $(DEFINE) /D UNICODE /D _UNICODE
+DEFINE    = $(DEFINE) /D UNICODE /D _UNICODE
+!ENDIF
 LOGFILE   = >> $(OUTDIR)\make.log 2>&1
 
 # 编译资源 0x804 中国,0x409 美国
@@ -50,6 +53,8 @@ LDFLAGS   = $(LDFLAGS) /OUT:"$(OUTDIR)\\$@.exe"
 !IF "$(DEBUG)" == "Debug"
 CDBGFLAGS = /D _DEBUG /Fd"$(OUTDIR)\\vc100.pdb" /FD
 LDBGFLAGS = /debug  /pdb:"$(OUTDIR)\\$(TARGET).pdb"
+# 子系统 打印调试信息 WinMainCRTStartup or wWinMainCRTStartup
+LDFLAGS   = $(LDFLAGS) /subsystem:"console" /entry:"WinMainCRTStartup"
 !ELSE
 DEBUG     = Release
 !ENDIF

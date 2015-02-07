@@ -329,3 +329,15 @@ HRESULT ResolveShortCut(LPCTSTR lpszShortcutPath, LPTSTR lpszFilePath, int maxBu
 
     return hRes;
 }
+
+void UnicodeToUTF8(const wchar_t* str, char *result, int bufLen)
+{
+	if(str == NULL || result == NULL)
+		return;
+	int textlen = ::WideCharToMultiByte(CP_UTF8, 0, str, -1, NULL, 0, NULL, NULL );
+	memset(result, 0, bufLen);
+	if(textlen<=bufLen)
+		::WideCharToMultiByte( CP_UTF8, 0, str, -1, result, textlen, NULL, NULL );
+	else
+		::WideCharToMultiByte( CP_UTF8, 0, str, -1, result, bufLen, NULL, NULL );
+}
