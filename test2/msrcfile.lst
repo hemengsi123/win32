@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-02-07[22:48] 
+# By Simon 2015-02-08[15:42] 
 # 
 
 HSRCS = $(HSRCS) \
@@ -52,6 +52,13 @@ CPPSRCS = $(CPPSRCS) \
 CPPSRCS = $(CPPSRCS) \
 			..\utils\winVersion.cpp \
 
+RCSRCS = $(RCSRCS) \
+			.\ExplorerDlg.rc \
+
+########### 目标文件 #############
 OBJS = $(OBJS) \
 			 $(OUTDIR)\ExplorerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\NppBase.obj $(OUTDIR)\NppButton.obj $(OUTDIR)\NppCombox.obj $(OUTDIR)\NppFile.obj $(OUTDIR)\NppFont.obj $(OUTDIR)\NppImageList.obj $(OUTDIR)\NppListView.obj $(OUTDIR)\NppMenu.obj $(OUTDIR)\NppStatic.obj $(OUTDIR)\NppStaticDialog.obj $(OUTDIR)\NppString.obj $(OUTDIR)\NppToolTip.obj $(OUTDIR)\NppTreeView.obj $(OUTDIR)\NppWnd.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\winVersion.obj
 
+########### 资源文件 #############
+RESS = $(RESS) \
+			 $(OUTDIR)\ExplorerDlg.res

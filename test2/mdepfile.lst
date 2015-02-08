@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-02-07[22:48] 
+# By Simon 2015-02-08[15:42] 
 # 
 
 {.}.CPP{$(OUTDIR)}.obj::
@@ -10,6 +10,9 @@
 
 {..\utils}.CPP{$(OUTDIR)}.obj::
 	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $< 
+
+{.}.RC{$(OUTDIR)}.res:
+	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $< 
 
 ############# 添加与obj文件名相同的头文件*.h 依赖 ###############
 
@@ -46,3 +49,7 @@ $(OUTDIR)\NppWnd.obj: ..\nppUI\NppWnd.cpp ..\nppUI\NppWnd.h
 $(OUTDIR)\SysMsg.obj: ..\nppUI\SysMsg.cpp ..\nppUI\SysMsg.h
 
 $(OUTDIR)\winVersion.obj: ..\utils\winVersion.cpp ..\utils\winVersion.h
+
+############# 添加*.rc资源依赖 ###############
+
+$(OUTDIR)\ExplorerDlg.res: .\ExplorerDlg.rc .\resource.h

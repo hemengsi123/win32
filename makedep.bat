@@ -73,8 +73,8 @@ set depfile=%DepDir%\mdepfile.lst
 call:makeDeplist
 
 REM if "%OBJS%" neq "" (
-	if exist "%srcfile%" echo %srcfile% was generated
-	if exist "%depfile%" echo %depfile% was generated	
+	REM if exist "%srcfile%" echo %srcfile% was generated
+	REM if exist "%depfile%" echo %depfile% was generated	
 REM ) else ( 
 	REM if exist "%srcfile%" del /f %srcfile%
 	REM if exist "%depfile%" del /f %depfile%
@@ -94,9 +94,11 @@ REM ========= 方法一 =============
 set CPPSRCS=
 set CSRCS=
 set HSRCS=
+set RCSRCS=
 REM set EXTS=.H .CPP .C
 set OBJS2=
 set depcmd=
+set RESS=
 REM set srcfile=%DepDir%\msrcfile.lst
 REM set depfile=%DepDir%\mdepfile.lst
 
@@ -138,20 +140,35 @@ for %%x in (%EXTS%) do (
 						)
 						REM echo %%i\%%j \
 						echo.			%%i\%%j \>>%srcfile%
-						rem *.obj 排除 *.h 文件
+						rem *.obj 排除 *.h, *.rc 文件
 						if "%%x" neq ".H" (
-							set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
-							set OBJS2=!OBJS2! %%~nj.obj
-							rem == make depfile ==
-							if "!oneTime!" == "1" (
-								echo.>>%depfile%
-								echo {%%i}%%x{^$^(OUTDIR^)}.obj::>>%depfile%
-								echo.	^$^(CC^) ^$^(CFLAGS^) ^$^(DEFINE^) ^$^(ENCODE^) ^$^(INCDIRS^) /Fo"$(OUTDIR)\\" ^$^(CDBGFLAGS^) ^$^< >>%depfile%
+							if "%%x" neq ".RC" (
+								set OBJS=!OBJS! ^$^(OUTDIR^)\%%~nj.obj
+								set OBJS2=!OBJS2! %%~nj.obj
+								rem == make depfile ==
+								if "!oneTime!" == "1" (
+									echo.>>%depfile%
+									echo {%%i}%%x{^$^(OUTDIR^)}.obj::>>%depfile%
+									echo.	^$^(CC^) ^$^(CFLAGS^) ^$^(DEFINE^) ^$^(ENCODE^) ^$^(INCDIRS^) /Fo"$(OUTDIR)\\" ^$^(CDBGFLAGS^) ^$^< >>%depfile%
+								)
+							REM *.rc 资源文件依赖 add 2015.02.08
+							) else (
+								set RESS=!RESS! ^$^(OUTDIR^)\%%~nj.res
+								if "!oneTime!" == "1" (
+									echo.>>%depfile%
+									REM $(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $<
+									echo {%%i}%%x{^$^(OUTDIR^)}.res:>>%depfile%
+									echo.	^$^(RC^) ^$^(RCFLAGS^) ^$^(DEFINE^) ^$^(ENCODE^) ^$^(INCDIRS^) /Fo"$@" ^$^< >>%depfile%
+								)
 							)
 						)
 						rem *.h
 						if "%%x" equ ".H" (
 							set HSRCS=!HSRCS! %%i\%%j
+						)
+						rem *.rc
+						if "%%x" equ ".RC" (
+							set RCSRCS=!RCSRCS! %%i\%%j
 						)
 						rem *.c *.obj
 						if "%%x" equ ".C" (
@@ -196,6 +213,7 @@ REM *.obj
 REM if "%OBJS%" neq "" (
 	REM echo %OBJS%
 	echo.>>%srcfile%
+	echo ########### 目标文件 #############>>%srcfile%
 	echo OBJS = ^$^(OBJS^) \>>%srcfile%
 	echo.			%OBJS%>>%srcfile%
 REM )
@@ -229,7 +247,31 @@ if "%HSRCS%" neq "" (
 			)
 		)
 	)
+	REM add 2015.02.08
+	if "%RCSRCS%" neq "" (
+		REM src file
+		echo ########### 资源文件 #############>>%srcfile%
+		echo RESS = ^$^(RESS^) \>>%srcfile%
+		echo.			!RESS!>>%srcfile%
+		REM dep file
+		echo.>>%depfile%
+		echo ############# 添加*.rc资源依赖 ###############>>%depfile%
+		REM *rc资源
+		for %%r in (%RCSRCS%) do (
+			REM echo %%~nr.res
+			set depcmd=^$^(OUTDIR^)\%%~nr.res: %%r
+			REM resource.h
+			for %%h in (%HSRCS%) do (
+				if "%%~nh" equ "resource" (
+					set depcmd=!depcmd! %%h
+					echo.>>%depfile%
+					echo !depcmd!>>%depfile%
+				)
+			)
+		)
+	)
 )
+
 REM ====================== END ============================
 ENDLOCAL
 goto:eof

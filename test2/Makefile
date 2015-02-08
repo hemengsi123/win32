@@ -12,7 +12,8 @@ DEBUG   = Debug
 # UNICODE = true
 MAKEDEP = true
 # OBJS    = $(OUTDIR)\main.obj
-RESRCS  = $(OUTDIR)\ExplorerDlg.res
+# 资源文件
+# RESS  = $(OUTDIR)\ExplorerDlg.res
 
 LIBS    = user32.lib kernel32.lib Shlwapi.lib Shell32.lib comctl32.lib ole32.lib Gdi32.lib
 
@@ -79,20 +80,20 @@ ALL: pre_handle $(TARGET)
 # $@ 目标名(包括扩展名), $* 目标名(不包括扩展名), $** 所有依赖文件(包括扩展名)
 # $? 时间戳大于目标文件的依赖文件, $< 同样( $< 只能用在隐式推导中)
 # target: objs res $(OUTDIR)\
-$(TARGET): $(OBJS) $(RESRCS)
-	$(LD) $(LDFLAGS) $(LDBGFLAGS) $(LIBDIRS) $(LIBS) $(DLLFLAGS) $(OBJS) $(RESRCS)
+$(TARGET): $(OBJS) $(RESS)
+	$(LD) $(LDFLAGS) $(LDBGFLAGS) $(LIBDIRS) $(LIBS) $(DLLFLAGS) $(OBJS) $(RESS)
 
 !IF "$(MAKEDEP)" == "true"
 !INCLUDE "mdepfile.lst"
 !ENDIF
 # ============= 编译 *.rc 资源文件 ============
-# "$(OUTDIR)\\$(RESRCS).res" $(RESRCS).rc
-# $(OUTDIR)\test1.res: test1.rc resource.h
-.rc{$(OUTDIR)}.res:
-	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $<
 
-$(OUTDIR)\ExplorerDlg.res: ExplorerDlg.rc resource.h
-# ========== 编译 *.obj ===========
+# .rc{$(OUTDIR)}.res:
+#	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $<
+
+# $(OUTDIR)\ExplorerDlg.res: ExplorerDlg.rc resource.h
+
+# ============= 编译 *.obj ===========
 # 方法一
 # .cpp{$(OUTDIR)}.obj::
 #	$(CC) @<<
@@ -102,9 +103,7 @@ $(OUTDIR)\ExplorerDlg.res: ExplorerDlg.rc resource.h
 .cpp{$(OUTDIR)}.obj::
 	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 
-# 
 # $(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
-
 
 # {Control}.cpp{$(OUTDIR)}.obj:
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
@@ -112,11 +111,6 @@ $(OUTDIR)\ExplorerDlg.res: ExplorerDlg.rc resource.h
 # {Core}.cpp{$(OUTDIR)}.obj:
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 # $(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
-
-
-
-# .rc{$(OUTDIR)}.res:
-#	$(RC) $(RCFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$@" $<
 
 # ============ 预处理 ==========
 # @echo $(CSRCS)
@@ -128,7 +122,7 @@ pre_handle:
 lib:
 	lib.exe $(OBJS) /OUT:$(OUTDIR)\\$(TARGET).lib
 .PHONY: lib
-# ============ 清理 ==============
+# ============ 清理 ============== -@erase .\\mdepfile.lst
 clean:
 	@if exist ".\\mdepfile.lst"  del /f .\\mdepfile.lst
 	@if exist ".\\msrcfile.lst"  del /f .\\msrcfile.lst
@@ -144,8 +138,6 @@ clean:
 #error:
 #	@type $(OUTDIR)\\make.log
 #.PHONY: error
-
-# !INCLUDE "mdepfile.lst"
 
 # ----------------------------------- Makefile ---------------------
 # #pragma warning(disable:4005) 忽略4005警告

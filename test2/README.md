@@ -5,4 +5,8 @@
 #else
 #define gettid() ::GetCurrentThreadId()
 #endif
+
+#if defined( _MSC_VER ) & defined( _MT )
+# include <windows.h>
+#endif
 ```
