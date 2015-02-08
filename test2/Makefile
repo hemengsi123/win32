@@ -103,7 +103,7 @@ $(OUTDIR)\ExplorerDlg.res: ExplorerDlg.rc resource.h
 	$(CC) $(CFLAGS) $(DEFINE) $(ENCODE) $(INCDIRS) /Fo"$(OUTDIR)\\" $(CDBGFLAGS) $<
 
 # 
-$(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
+# $(OUTDIR)\main.obj: main.cpp ../common/wcommon.h
 
 
 # {Control}.cpp{$(OUTDIR)}.obj:

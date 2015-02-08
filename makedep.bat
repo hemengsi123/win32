@@ -6,7 +6,7 @@ REM 源文件目录
 REM set SRCDIRS=. Control Utils CORE Layout
 set SRCDIRS=
 set DepDir=
-set EXTS=.H .CPP .C
+set EXTS=.H .CPP .C .RC
 set OBJS=
 REM 排除项
 set EXCLUDE=%~4
