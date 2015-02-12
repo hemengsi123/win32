@@ -251,6 +251,8 @@ public:
 	void    setCtrlID(UINT iCtrlID);
 	LPCTSTR getCtrlName()const;
 	void    setCtrlName(LPCTSTR strName);
+	// @brief: 根据文本大小，设置空间大小
+	void    autoSize(LPCTSTR lpszStr = NULL, HFONT hFont = NULL, int extraX = 0, int extraY = 0);
 protected:
 	virtual HWND create(DWORD dwStyle = 0, DWORD dwExStyle = 0, LPCTSTR lpszCaption = NULL);
 	virtual HWND create(LPCTSTR lpszCaption, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);

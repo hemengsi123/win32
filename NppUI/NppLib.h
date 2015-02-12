@@ -11,6 +11,7 @@
 #define NPPLIB_API 
 #endif
 
+#include "../common/Defines.h"
 #include "NppBase.h"
 #include "NppString.h"
 #include "NppFile.h"
@@ -24,7 +25,10 @@
 #include "NppFont.h"
 #include "NppStatic.h"
 
+#include "../utils/CLog.h"
+
 //typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > tstring;
 
+extern int g_log_level;
 
 #endif

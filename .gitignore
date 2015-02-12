@@ -12,6 +12,7 @@
 *.res
 
 # directory
+/源码
 
 # Precompiled Headers
 *.gch

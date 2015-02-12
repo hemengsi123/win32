@@ -8,7 +8,7 @@ public:
 	virtual LPCTSTR getWndClassName()const;
 	void init(HINSTANCE hInst, HWND hParent, UINT iCtrlID, LPCTSTR sCtrlName = NULL);
 	HWND create(LPCTSTR lpszText = NULL, DWORD dwStyle = 0, DWORD dwExStyle = 0);
-	HWND create(LPCTSTR lpszText, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
+	HWND create(LPCTSTR lpszText, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwStyle = 0, DWORD dwExStyle = 0);
 private:
 
 };
@@ -23,7 +23,7 @@ public:
 	CNppCheckbox();
 	~CNppCheckbox();
 	HWND create(LPCTSTR lpszText = NULL, DWORD dwStyle = 0, DWORD dwExStyle = 0);
-	HWND create(LPCTSTR lpszText, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
+	HWND create(LPCTSTR lpszText, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwStyle = 0, DWORD dwExStyle = 0);
 	virtual LRESULT handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	// @param: bSel => BST_CHECKED, BST_UNCHECKED, BST_INDETERMINATE
 	void setCheck(int uState);
@@ -37,6 +37,6 @@ class CNppRadioButton: public CNppCheckbox
 {
 public:
 	HWND create(LPCTSTR lpszText = NULL, DWORD dwStyle = 0, DWORD dwExStyle = 0);
-	HWND create(LPCTSTR lpszText, DWORD dwStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwExStyle = 0);
+	HWND create(LPCTSTR lpszText, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int cx = CW_USEDEFAULT, int cy = CW_USEDEFAULT, DWORD dwStyle = 0, DWORD dwExStyle = 0);
 };
 #endif

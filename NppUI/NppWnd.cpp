@@ -877,7 +877,40 @@ void CNppCtrlWnd::setCtrlName(LPCTSTR lpszName)
 {
 	m_sCtrlName = lpszName;
 }
+void CNppCtrlWnd::autoSize(LPCTSTR lpszStr, HFONT hFont, int extraX, int extraY)
+{
+	HFONT hOldFont = NULL;
+	TCHAR szText[MAX_PATH] = {0};
+	if( !lpszStr )
+	{
+		getWndText(szText, sizeof(szText));
+		lpszStr = szText;
+	}
+	
+	HDC	 hDc   = ::GetDC(m_hSelf);
+	SIZE size  = {0};
+	if( hFont )
+		hOldFont = (HFONT)::SelectObject(hDc, hFont); // get font length
+		
+	if( ::GetTextExtentPoint32(hDc, lpszStr, _tcslen(lpszStr), &size) )
+	{
+		RECT rtOld = {0};
+		::GetWindowRect(m_hSelf, &rtOld);
+		POINT ptOld;
+		ptOld.x = rtOld.left;
+		ptOld.y = rtOld.top;
 
+//		log_debug("1 x = %d, y = %d, cx = %d, cy = %d\n", ptOld.x, ptOld.y, size.cx, size.cy);
+		::ScreenToClient(m_hSelf, &ptOld);
+		
+		::MoveWindow(m_hSelf, ptOld.x, ptOld.y, size.cx + extraX, size.cy + extraY, FALSE /* no repaint now */);
+	}
+	// restore
+	if( hFont )
+		::SelectObject(hDc, hOldFont);
+	::ReleaseDC(m_hSelf, hDc);
+	
+}
 ////////////////////////////////////////////////////////////////////////////////
 // 
 // CNppDlg

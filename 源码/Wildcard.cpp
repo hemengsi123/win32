@@ -12,7 +12,6 @@
 // Web Site: http://www.artpol-software.com
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
 #include "Wildcard.h"
 
 namespace ZipArchiveLib

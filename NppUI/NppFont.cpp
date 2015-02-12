@@ -22,12 +22,12 @@ void CNppFont::destroy()
 		m_lpLogFont = NULL;
 	}
 }
-HFONT CNppFont::getFont(HWND hwnd)const
+HFONT CNppFont::getFont(HWND hwnd)
 {
 	return reinterpret_cast<HFONT>(::SendMessage(hwnd, WM_GETFONT, 0, 0));
 }
 
-void  CNppFont::setFont(HWND hctrl, HFONT hfont, BOOL redraw)const
+void  CNppFont::setFont(HWND hctrl, HFONT hfont, BOOL redraw)
 {
 	::SendMessage(hctrl, WM_SETFONT, reinterpret_cast<WPARAM>(hfont), MAKELPARAM(redraw, 0));
 }
@@ -38,15 +38,15 @@ void CNppFont::setFont(HWND hTo, HWND hFrom)
 }
 void CNppFont::setFont(HWND hctrl, LPLOGFONT lpLogFont, BOOL redraw)
 {
-	if( m_hFont )
-	{
-		::DeleteObject(m_hFont);
-		m_hFont = NULL;
-	}
-	m_hFont = ::CreateFontIndirect(lpLogFont);
-	::SendMessage(hctrl, WM_SETFONT, reinterpret_cast<WPARAM>(m_hFont), MAKELPARAM(redraw, 0));
+//	if( m_hFont )
+//	{
+//		::DeleteObject(m_hFont);
+//		m_hFont = NULL;
+//	}
+	HFONT hFont = ::CreateFontIndirect(lpLogFont);
+	::SendMessage(hctrl, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), MAKELPARAM(redraw, 0));
 }
-LOGFONT& CNppFont::getLogFont(HWND hctrl)const
+LOGFONT& CNppFont::getLogFont(HWND hctrl)
 {
 	HFONT hFont = reinterpret_cast<HFONT>(::SendMessage(hctrl, WM_GETFONT, 0, 0));
 	static LOGFONT	logFont  = {0};

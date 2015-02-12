@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-02-08[15:42] 
+# By Simon 2015-02-12[17:27] 
 # 
 
 {.}.CPP{$(OUTDIR)}.obj::
@@ -47,6 +47,10 @@ $(OUTDIR)\NppTreeView.obj: ..\nppUI\NppTreeView.cpp ..\nppUI\NppTreeView.h
 $(OUTDIR)\NppWnd.obj: ..\nppUI\NppWnd.cpp ..\nppUI\NppWnd.h
 
 $(OUTDIR)\SysMsg.obj: ..\nppUI\SysMsg.cpp ..\nppUI\SysMsg.h
+
+$(OUTDIR)\CLog.obj: ..\utils\CLog.cpp ..\utils\CLog.h
+
+$(OUTDIR)\rc4.obj: ..\utils\rc4.cpp ..\utils\rc4.h
 
 $(OUTDIR)\winVersion.obj: ..\utils\winVersion.cpp ..\utils\winVersion.h
 

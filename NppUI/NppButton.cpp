@@ -20,7 +20,7 @@ HWND CNppButton::create(LPCTSTR lpszText, DWORD dwStyle, DWORD dwExStyle)
 	setWndProc();
 	return m_hSelf;
 }
-HWND CNppButton::create(LPCTSTR lpszText, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
+HWND CNppButton::create(LPCTSTR lpszText, int x, int y, int cx, int cy, DWORD dwStyle, DWORD dwExStyle)
 {
 	dwStyle |= (WS_CHILDWINDOW|WS_TABSTOP);
 	CNppCtrlWnd::create(lpszText, dwStyle, x, y, cx, cy, dwExStyle);
@@ -46,11 +46,12 @@ HWND CNppCheckbox::create(LPCTSTR lpszText, DWORD dwStyle, DWORD dwExStyle)
 	setWndProc();
 	return m_hSelf;
 }
-HWND CNppCheckbox::create(LPCTSTR lpszText, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
+HWND CNppCheckbox::create(LPCTSTR lpszText, int x, int y, int cx, int cy, DWORD dwStyle, DWORD dwExStyle)
 {
 	dwStyle |= (WS_CHILD | WS_TABSTOP | WS_VISIBLE | BS_CHECKBOX);
 	CNppCtrlWnd::create(lpszText, dwStyle, x, y, cx, cy, dwExStyle);
 	setWndProc();
+	autoSize(lpszText, NULL, 16, 0);
 	return m_hSelf;
 }
 LRESULT CNppCheckbox::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -93,10 +94,11 @@ HWND CNppRadioButton::create(LPCTSTR lpszText, DWORD dwStyle, DWORD dwExStyle)
 	setWndProc();
 	return m_hSelf;
 }
-HWND CNppRadioButton::create(LPCTSTR lpszText, DWORD dwStyle, int x, int y, int cx, int cy, DWORD dwExStyle)
+HWND CNppRadioButton::create(LPCTSTR lpszText, int x, int y, int cx, int cy, DWORD dwStyle, DWORD dwExStyle)
 {
 	dwStyle |= (WS_CHILD | WS_VISIBLE | BS_RADIOBUTTON);
 	CNppCtrlWnd::create(lpszText, dwStyle, x, y, cx, cy, dwExStyle);
 	setWndProc();
+//	autoSize(lpszText, NULL, 16, 0);
 	return m_hSelf;
 }

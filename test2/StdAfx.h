@@ -14,8 +14,13 @@
 #include "../utils/winVersion.h"
 #include "../nppUI/NppLib.h"
 
+#include "../utils/CLog.h"
+#include "../utils/Lock.h"
+#include "../utils/rc4.h"
 #include "ExplorerDlg.h"
 // #pragma warning(disable:4006)
+
+const char * const g_szDefRc4Key = "how to open file";
 
 typedef enum {
 	DEVT_DRIVE,

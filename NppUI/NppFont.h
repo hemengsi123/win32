@@ -7,12 +7,12 @@ public:
 	CNppFont();
 	~CNppFont();
 	void destroy();
-	HFONT getFont(HWND hctrl)const;
+	static HFONT getFont(HWND hctrl);
 	// @brief: dialog ²»Ö§³Ö
-	void setFont(HWND hctrl, HFONT hfont, BOOL redraw = TRUE)const;
-	void setFont(HWND hTo, HWND hFrom);
-	void setFont(HWND hctrl, LPLOGFONT lpLogFont, BOOL redraw = TRUE);
-	LOGFONT& getLogFont(HWND hctrl)const;
+	static void setFont(HWND hctrl, HFONT hfont, BOOL redraw = TRUE);
+	static void setFont(HWND hTo, HWND hFrom);
+	static void setFont(HWND hctrl, LPLOGFONT lpLogFont, BOOL redraw = TRUE);
+	static LOGFONT& getLogFont(HWND hctrl);
 private:
 	LPLOGFONT m_lpLogFont;
 	HFONT     m_hFont;

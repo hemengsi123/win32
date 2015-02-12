@@ -53,6 +53,7 @@ typedef struct{
 
 struct ListViewItem
 {
+	int     m_markIndex;
 	tstring m_fullPath;
 	tstring m_currentDir;
 	tstring m_fileName;
@@ -61,7 +62,6 @@ struct ListViewItem
 	bool    m_bIsDir;
 	int     m_iIcon;
 	int     m_iIconOverlay;
-	
 	unsigned __int64 m_filesize;
 };
 class CExplorerDlg: public CNppDlg//public CNppStaticDialog
@@ -93,7 +93,13 @@ public:
 	BOOL OnComboxList(NppMsgParams & msg);
 	BOOL OnComboxEdit(NppMsgParams & msg);
 	void UpdateListViews();
-	UINT AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse = FALSE);
+	UINT __stdcall AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse = FALSE);
+	static unsigned int __stdcall UpdateFileListThread(void *param);
+	static unsigned int __stdcall CyptoDataThread(void *param);
+	void EncyptoData(uint8 *data, const uint64 data_len, rc4_key * rc4Key);
+	void DecyptoData(uint8 *data, const uint64 data_len, rc4_key * rc4Key);
+	void ReadFileList();
+	INT CmdFileList(LPCTSTR lpszList);
 protected:
 	HWND m_filterCtrl;
 	HWND m_splitterCtrl;
@@ -109,6 +115,7 @@ protected:
 	CNppButton    m_btnAddAll;
 	CNppButton    m_btnDel;
 	CNppButton    m_btnDelAll;
+	CNppButton    m_btnCypto;
 	CNppCheckbox  m_chkRecurse;
 	CNppRadioButton m_rd_test;
 	CNppStatic      m_stCount;
@@ -119,6 +126,9 @@ protected:
 	std::vector<ListViewItem> m_vListViewAll;
 	std::vector<ListViewItem> m_vListViewFiles;
 	std::map<tstring, bool/*, FunctoriString*/>   m_mFileLists; // 1-œ‘ æ£¨0-≤ªœ‘ æ
+	ListViewItem  m_selLVItem;
+	CWaitEvent    m_event_selLVItem;
+	CWaitEvent    m_event_encypt;
 };
 
 #endif

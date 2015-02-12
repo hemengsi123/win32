@@ -1,5 +1,6 @@
 
 #include "StdAfx.h"
+#include <process.h>
 
 HANDLE g_hEvent[EID_MAX]	= {NULL};
 HANDLE g_hThread			= NULL;
@@ -55,6 +56,8 @@ DWORD WINAPI GetVolumeInformationTimeoutThread(LPVOID lpParam)
 
 void CExplorerDlg::initCtrl()
 {
+	m_event_selLVItem.Init();
+	
 	m_treeView2.init(m_hInst, m_hSelf, IDC_TREE_FOLDER);
 	m_treeView2.create();
 	m_listViewAll.init(m_hInst, m_hSelf, IDC_LIST_ALL);
@@ -89,19 +92,25 @@ void CExplorerDlg::initCtrl()
 	m_btnDelAll.create();
 	if( !m_listViewFiles.isFocus() )
 		m_btnDel.setEnable(FALSE);
+	m_btnCypto.init(m_hInst, m_hSelf, IDC_BTN_CRYPTO);
+	m_btnCypto.create();
 	//m_btnAdd.alignTo(m_hSelf, TOPALIGN, RIGHTALIGN, 10, 10);
 	// checkbox
 	m_chkRecurse.init(m_hInst, m_hSelf, IDC_CHK_RECURCE);
-	m_chkRecurse.create(_T("Recursive"), 0, 0, 0, 70, 20);
+	m_chkRecurse.create(_T("Recursive"), 0, 0, 10, 20);
+//	m_chkRecurse.autoSize();
 	m_chkRecurse.alignTo(m_btnAdd.getHSelf(), TOPALIGN, LEFTALIGN, 0, 20);
 	
 	m_rd_test.init(m_hInst, m_hSelf, IDC_RDI_TEST);
-	m_rd_test.create(_T("Recursive"), 0, 0, 0, 70, 20);
+	m_rd_test.create(_T("Recursive"),  0, 0, 70, 20);
+	m_rd_test.autoSize(NULL, NULL, 20);
 	m_rd_test.alignTo(m_comBoFilter2.getHSelf(), RIGHTALIGN, DEFALIGN, 0, 0);
-	
+
 	CNppFont nppFont;
 	nppFont.setFont(m_btnAdd.getHSelf(), m_btnAddAll.getHSelf());
 	nppFont.setFont(m_chkRecurse.getHSelf(), m_btnAddAll.getHSelf());
+	
+	
 	//m_treeView2.setImageList(true);
 	m_treeView2.setImageList(m_imgLst.getSysImgLst());
 
@@ -122,9 +131,11 @@ void CExplorerDlg::initCtrl()
 //	m_listViewFiles.addItem(_T("test2.txt"), 1);
 //	static ctrl
 	m_stCount.init(m_hInst, m_hSelf, 0);
-	m_stCount.create("No: 0", 0, 0, 0, 50, 20);
+	m_stCount.create("No: 0", 0, 0, 0, 200, 20);
 	nppFont.setFont(m_stCount.getHSelf(), m_btnAddAll.getHSelf());
 	m_stCount.alignTo(m_listViewFiles.getHSelf(), TOPALIGN, LEFTALIGN, 0, 2);
+
+	
 	
 }
 LRESULT CExplorerDlg::handleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -194,14 +205,16 @@ BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 			{
 				TCHAR lpszText[MAX_PATH] = {0};
 				m_listViewAll.getItemText(hotItem, 0, lpszText, MAX_PATH);
-				printf(_T("hotItem = %d, size = %d\n"), hotItem, m_vListViewAll.size());
-				ListViewItem lstItem = m_vListViewAll.at(hotItem);
-				printf(_T("BN_DBLCLK %d, txt = %s, "), hotItem, lpszText);
-				printf(_T("fullpath = %s\n"), lstItem.m_fullPath.c_str());
-				//m_vListViewFiles.push_back(lstItem);
-				AddFiles2FileList(&lstItem, m_chkRecurse.isCheck());
-				m_vListViewAll.erase(m_vListViewAll.begin()+hotItem);
-				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+
+				m_selLVItem = m_vListViewAll.at(hotItem);
+				m_selLVItem.m_markIndex = hotItem;
+				
+				unsigned int  thrdid = 0;
+				CloseHandle( (HANDLE)_beginthreadex(NULL, 0, CExplorerDlg::UpdateFileListThread, (void*)this, 0, &thrdid) );
+				
+//				AddFiles2FileList(&m_selLVItem, m_chkRecurse.isCheck());
+//				m_vListViewAll.erase(m_vListViewAll.begin()+hotItem);
+//				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
 			}
 			else if( hotItem == -1 && (hSelTreeItem = m_treeView2.getSelect() ) != NULL)
 			{
@@ -212,31 +225,40 @@ BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 				int iIconNormal   = 0;
 				int iIconSelected = 0;
 				int iIconOverlayed = 0;
-				lvItem.m_bIsDir     = true;
-				lvItem.m_fileExt.clear();
-				lvItem.m_fileExt    = _T("<DIR>");
-				lvItem.m_currentDir = szItemPath;
-				lvItem.m_fileName   = _T("");
-				lvItem.m_filesize   = 0;//searchFile.findGetSize(lpfindData);
-				lvItem.m_szfilesize = _T("");
-				lvItem.m_fullPath   = szItemPath;
-				AddFiles2FileList(&lvItem, m_chkRecurse.isCheck());
-				m_vListViewAll.clear();
-				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+				m_selLVItem.m_bIsDir     = true;
+				m_selLVItem.m_fileExt.clear();
+				m_selLVItem.m_fileExt    = _T("<DIR>");
+				m_selLVItem.m_currentDir = szItemPath;
+				m_selLVItem.m_fileName   = _T("");
+				m_selLVItem.m_filesize   = 0;//searchFile.findGetSize(lpfindData);
+				m_selLVItem.m_szfilesize = _T("");
+				m_selLVItem.m_fullPath   = szItemPath;
+				m_selLVItem.m_markIndex  = -1;
+
+				unsigned int  thrdid = 0;
+				CloseHandle( (HANDLE)_beginthreadex(NULL, 0, CExplorerDlg::UpdateFileListThread, (void*)this, 0, &thrdid) );
+				
+//				AddFiles2FileList(&lvItem, m_chkRecurse.isCheck());
+//				m_vListViewAll.clear();
+//				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
 			}
 		}
 		else if( iCtrlID== IDC_BTN_ADDALL)
 		{
 			if(m_vListViewAll.size() > 0 )
 			{
-				std::vector<ListViewItem>::iterator iter = m_vListViewAll.begin();
-				for(; iter != m_vListViewAll.end(); ++iter)
-				{
-					//m_vListViewFiles.push_back(*iter);
-					AddFiles2FileList(&(*iter), m_chkRecurse.isCheck());
-				}
-				m_vListViewAll.clear();
-				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+				m_selLVItem.m_markIndex  = -2;
+				
+				unsigned int  thrdid = 0;
+				CloseHandle( (HANDLE)_beginthreadex(NULL, 0, CExplorerDlg::UpdateFileListThread, (void*)this, 0, &thrdid) );
+//				std::vector<ListViewItem>::iterator iter = m_vListViewAll.begin();
+//				for(; iter != m_vListViewAll.end(); ++iter)
+//				{
+//					//m_vListViewFiles.push_back(*iter);
+//					AddFiles2FileList(&(*iter), m_chkRecurse.isCheck());
+//				}
+//				m_vListViewAll.clear();
+//				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
 			}
 		}
 		else if( iCtrlID == IDC_BTN_DEL )
@@ -264,6 +286,13 @@ BOOL CExplorerDlg::OnCommand(UINT iCtrlID, UINT uMsg, HWND hwndFrom)
 				m_mFileLists.clear();
 				::SendMessage(m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
 			}
+		}
+		else if(iCtrlID == IDC_BTN_CRYPTO)
+		{
+//			ReadFileList();
+			
+			unsigned int  thrdid = 0;
+			CloseHandle( (HANDLE)_beginthreadex(NULL, 0, CExplorerDlg::CyptoDataThread, (void*)this, 0, &thrdid) );
 		}
 
 	}
@@ -1050,13 +1079,14 @@ void CExplorerDlg::UpdateListViews()
 			++iCount;
 		}
 	}
-	TCHAR szBuff[32] = {0};
+	TCHAR szBuff[256] = {0};
 	_sntprintf(szBuff, sizeof(szBuff), _T("No: %d"), iCount);
 	m_stCount.setWndText(szBuff);
 }
-UINT CExplorerDlg::AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse)
+UINT __stdcall CExplorerDlg::AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse)
 {
 	CNppFile fileOp(plvItem->m_fullPath.c_str());
+
 	BOOL bIsDir = fileOp.isDir();
 	if( bIsDir && bRecurse)
 	{
@@ -1109,6 +1139,7 @@ UINT CExplorerDlg::AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse)
 				lvItem.m_szfilesize = _T("");
 				_stprintf(szTmpFile, _T("%s%s\\"), fileOp.getFullPath(), lvItem.m_fileName.c_str());
 				lvItem.m_fullPath   = szTmpFile;
+			
 				m_imgLst.getFileIcon(szTmpFile, &iIconNormal, &iIconSelected, &iIconOverlayed);
 				lvItem.m_iIcon      = iIconNormal;
 				lvItem.m_iIconOverlay = iIconOverlayed;
@@ -1123,7 +1154,6 @@ UINT CExplorerDlg::AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse)
 		LPWIN32_FIND_DATA lpFindData = fileOp.findFirstFile();
 		while(lpFindData != NULL)
 		{
-			printf("good jobs: %s\n", fileOp.findGetName());
 			if( IsValidFile(lpFindData) )
 			{
 				ListViewItem lvItem;
@@ -1161,5 +1191,113 @@ UINT CExplorerDlg::AddFiles2FileList(ListViewItem * plvItem, BOOL bRecurse)
 		m_vListViewFiles.push_back(*plvItem);
 		m_mFileLists[plvItem->m_fullPath] = true;
 	}
+	return 0;
+}
+
+void CExplorerDlg::EncyptoData(uint8 *data, const uint64 data_len, rc4_key * rc4Key)
+{
+	rc4(data, data_len, rc4Key);
+}
+
+void CExplorerDlg::DecyptoData(uint8 *data, const uint64 data_len, rc4_key * rc4Key)
+{
+	rc4(data, data_len, rc4Key);
+}
+void CExplorerDlg::ReadFileList()
+{
+	if( !m_mFileLists.empty() )
+	{
+		std::map<tstring, bool>::iterator iter = m_mFileLists.begin();
+		for(; iter != m_mFileLists.end(); ++iter)
+		{
+			if( iter->second )
+				CmdFileList(iter->first.c_str());
+		}
+	}
+}
+INT CExplorerDlg::CmdFileList(LPCTSTR lpszList)
+{
+	HANDLE hInFile = ::CreateFile(lpszList, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if( hInFile != INVALID_HANDLE_VALUE)
+	{
+		TCHAR tmpFile[266] = {0};
+		wnsprintf(tmpFile, 266, _T("%s.tmp"), lpszList);
+		log_debug("%s\n", tmpFile);
+		// 创建临时文件
+		HANDLE hTmpFile = ::CreateFile(tmpFile, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS,0,NULL);
+		if( hTmpFile == INVALID_HANDLE_VALUE)
+		{
+			log_debug("create tmpfile failed: %X\n", ::GetLastError());
+			::CloseHandle(hInFile);
+			return -1;
+		}
+		
+		uint8 buff[4096] = {0};
+		DWORD rdLen = 0;
+
+		rc4_key rc4Key;
+		prepare_key(g_szDefRc4Key, strlen(g_szDefRc4Key), &rc4Key);
+
+		CLog alog;
+		char strTime[32] = {0};
+		alog.get_time_string(strTime);
+		log_debug("1 %s\n", strTime);
+		while(::ReadFile(hInFile, buff, lengthof(buff), &rdLen, NULL) && rdLen > 0)
+		{
+			DWORD wtLen = 0;
+			EncyptoData(buff, rdLen, &rc4Key);
+			::WriteFile(hTmpFile, buff, rdLen, &wtLen, NULL);
+			if( rdLen != wtLen)
+			{
+				log_debug("fatal write error: %x\n", GetLastError());
+				return -1;
+			}
+//			log_debug("write len: %d\n", wtLen);
+		}
+		alog.get_time_string(strTime);
+		log_debug("2 %s\n", strTime);
+		
+		::CloseHandle(hTmpFile);
+		::CloseHandle(hInFile);
+	}
+	
+}
+unsigned int __stdcall CExplorerDlg::UpdateFileListThread(void *param)
+{
+	CExplorerDlg * hSelf = reinterpret_cast<CExplorerDlg *>(param);
+	
+	hSelf->m_event_selLVItem.Lock();
+
+	if(hSelf->m_selLVItem.m_markIndex >= 0)
+	{
+		hSelf->AddFiles2FileList(&hSelf->m_selLVItem, hSelf->m_chkRecurse.isCheck());
+		hSelf->m_vListViewAll.erase(hSelf->m_vListViewAll.begin()+hSelf->m_selLVItem.m_markIndex);
+	}
+	else if( hSelf->m_selLVItem.m_markIndex == -1)
+	{
+		hSelf->AddFiles2FileList(&hSelf->m_selLVItem, hSelf->m_chkRecurse.isCheck());
+		hSelf->m_vListViewAll.clear();
+	}
+	else if(hSelf->m_selLVItem.m_markIndex == -2)
+	{
+		std::vector<ListViewItem>::iterator iter = hSelf->m_vListViewAll.begin();
+		for(; iter != hSelf->m_vListViewAll.end(); ++iter)
+		{
+			//m_vListViewFiles.push_back(*iter);
+			hSelf->AddFiles2FileList(&(*iter), hSelf->m_chkRecurse.isCheck());
+		}
+		hSelf->m_vListViewAll.clear();
+	}
+	hSelf->m_event_selLVItem.Unlock();
+	::SendMessage(hSelf->m_hSelf, EXM_LISTVIEW_UPDATE, 0, 0);
+	return 0;
+}
+
+unsigned int __stdcall CExplorerDlg::CyptoDataThread(void *param)
+{
+	CExplorerDlg * hSelf = reinterpret_cast<CExplorerDlg *>(param);
+	hSelf->ReadFileList();
+
+	
 	return 0;
 }
