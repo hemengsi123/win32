@@ -1,5 +1,5 @@
 # 
-# By Simon 2015-02-12[17:27] 
+# By Simon 2015-02-10[15:13] 
 # 
 
 HSRCS = $(HSRCS) \
@@ -27,8 +27,6 @@ HSRCS = $(HSRCS) \
 
 HSRCS = $(HSRCS) \
 			..\utils\CLog.h \
-			..\utils\Lock.h \
-			..\utils\rc4.h \
 			..\utils\winVersion.h \
 
 CPPSRCS = $(CPPSRCS) \
@@ -54,7 +52,6 @@ CPPSRCS = $(CPPSRCS) \
 
 CPPSRCS = $(CPPSRCS) \
 			..\utils\CLog.cpp \
-			..\utils\rc4.cpp \
 			..\utils\winVersion.cpp \
 
 RCSRCS = $(RCSRCS) \
@@ -62,7 +59,7 @@ RCSRCS = $(RCSRCS) \
 
 ########### 目标文件 #############
 OBJS = $(OBJS) \
-			 $(OUTDIR)\ExplorerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\NppBase.obj $(OUTDIR)\NppButton.obj $(OUTDIR)\NppCombox.obj $(OUTDIR)\NppFile.obj $(OUTDIR)\NppFont.obj $(OUTDIR)\NppImageList.obj $(OUTDIR)\NppListView.obj $(OUTDIR)\NppMenu.obj $(OUTDIR)\NppStatic.obj $(OUTDIR)\NppStaticDialog.obj $(OUTDIR)\NppString.obj $(OUTDIR)\NppToolTip.obj $(OUTDIR)\NppTreeView.obj $(OUTDIR)\NppWnd.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\CLog.obj $(OUTDIR)\rc4.obj $(OUTDIR)\winVersion.obj
+			 $(OUTDIR)\ExplorerDlg.obj $(OUTDIR)\main.obj $(OUTDIR)\NppBase.obj $(OUTDIR)\NppButton.obj $(OUTDIR)\NppCombox.obj $(OUTDIR)\NppFile.obj $(OUTDIR)\NppFont.obj $(OUTDIR)\NppImageList.obj $(OUTDIR)\NppListView.obj $(OUTDIR)\NppMenu.obj $(OUTDIR)\NppStatic.obj $(OUTDIR)\NppStaticDialog.obj $(OUTDIR)\NppString.obj $(OUTDIR)\NppToolTip.obj $(OUTDIR)\NppTreeView.obj $(OUTDIR)\NppWnd.obj $(OUTDIR)\SysMsg.obj $(OUTDIR)\CLog.obj $(OUTDIR)\winVersion.obj
 
 ########### 资源文件 #############
 RESS = $(RESS) \
